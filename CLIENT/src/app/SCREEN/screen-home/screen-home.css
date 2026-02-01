@@ -1,0 +1,5 @@
+.card-left, .card-right {
+    min-width: 300px;
+    z-index:1;
+    overflow: hidden;
+}
