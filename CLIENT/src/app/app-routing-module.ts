@@ -1,13 +1,34 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ScreenHome } from './SCREEN/screen-home/screen-home';
+import { ScreenMobileMain } from './SCREEN/MOBILE/screen-mobile-main/screen-mobile-main';
+import { ScreenInbox } from './SCREEN/INBOX/screen-inbox/screen-inbox';
+import { ScreenUserProfile } from './SCREEN/USER/screen-user-profile/screen-user-profile';
+import { ScreenSearch } from './SCREEN/SEARCH/screen-search/screen-search';
+import { ScreenPlayer } from './SCREEN/PLAYER/screen-player/screen-player';
+import { ScreenDebates } from './SCREEN/DEBATES/screen-debates/screen-debates';
+import { ScreenAuthors } from './SCREEN/AUTHOR/screen-authors/screen-authors';
+import { ScreenPartners } from './SCREEN/PARTNERS/screen-partners/screen-partners';
 
 const routes: Routes = [
-    { path: '', component: ScreenHome}
+    { path: '', component: ScreenHome },
+    { path: 'app', component: ScreenMobileMain },
+    { path: 'app/inbox', component: ScreenInbox },
+    { path: 'app/user-profile', component: ScreenUserProfile },
+    { path: 'app/search', component: ScreenSearch },
+    { path: 'app/player', component: ScreenPlayer },
+    { path: 'app/debate', component: ScreenDebates },
+    { path: 'app/authors', component: ScreenAuthors },
+    { path: 'app/partners', component: ScreenPartners },
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
+    imports: [RouterModule.forRoot(routes, {
+        useHash: true,
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+        onSameUrlNavigation: 'reload'
+    })],
     exports: [RouterModule]
 })
 export class AppRoutingModule { }

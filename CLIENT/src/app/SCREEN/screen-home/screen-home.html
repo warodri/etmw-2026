@@ -1,207 +1,182 @@
-<div class="etmw-bg-main" style="height: 100vh">
+<div class="etmw-bg-main">
 
-    <div class="position-fixed" style="right:2rem; top:0.5rem;">
-        <app-dot-pattern></app-dot-pattern>
-    </div>
-    <div class="position-fixed" style="bottom:2rem; left:2rem;">
-        <app-dot-pattern></app-dot-pattern>
-    </div>
-
-    <div class="text-center mt-5">
-        <h1 class="fw-bold">Enter To My World</h1>
-        <div class="p-3 text-secondary">
-            Listen to hundreds of audiobooks from independent authors only <br>
-            Authors can upload their work. We convert it into audio and distribute
-        </div>
-    </div>
-
-    <div class="p-md-5 p-4 row justify-content-center gap-5">
-
-        <!--
-            CARD LEFT
-        -->
-        <div class="position-relative card-left etmw-bg-secondary rounded-5 shadow col-12 col-md-4">
-            <img src="pattern.png" style="width: 70%; right:0; z-index:0" class="position-absolute" />
-            <div class="p-5">
-
-                <!-- Top -->
-                 <div>
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-                        <div class="text-secondary">
-                            <i class="bi bi-search"></i>
-                        </div>
-                        <div class="text-secondary">
-                            Discover
-                        </div>
-                        <div>
-                            <i class="bi bi-sliders"></i>
-                        </div>
+    <!-- Header -->
+    <div class="sticky-top">
+        <div class="bg-dark p-3 text-white">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center gap-2 gap-md-3">
+                    <div class="fw-bold fs-5 fs-md-4">
+                        Enter To My World
                     </div>
-                 </div>
-                 
-                 <!-- This week's compilations -->
-                <div class="mt-4">
-                    <div class="fw-bold">
-                        This Week's Compilations
-                    </div>
-                    <div class="mt-3">
-                        <div class="d-flex justify-content-between align-items-center gap-3 etmw-bg-main rounded-4 px-4 pt-3 pb-3">
-                            <div>
-                                How to stop feeling like sh**t
-                            </div>
-                            <button class="btn btn-dark btn-sm rounded-pill">
-                                Listen
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Recommended -->
-                <div class="mt-4">
-                    <div class="fw-bold">                        
-                        <button class="btn btn-dark rounded-pill">
-                            <i class="bi bi-hand-thumbs-up"></i> 
-                        </button>&nbsp;                        
-                        Recommended for You
-                    </div>
-                    <div class="mt-4">
-                        <div class="d-flex justify-content-start align-items-center gap-3 pb-4 overflow-auto">
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Latest -->
-                <div class="mt-4">
-                    <div class="fw-bold">                        
-                        <button class="btn btn-dark rounded-pill">
-                            <i class="bi bi-play-circle"></i>
-                        </button>&nbsp;                        
-                        Latest
-                    </div>
-                    <div class="mt-4">
-                        <div class="d-flex justify-content-start align-items-center gap-3 pb-4 overflow-auto">
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                            <img src="https://www.entertomyworld.com/images/never-delete/away.cover.front.png" class="rounded-4 overflow-hidden shadow" style="min-width:100px" />
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Categories -->
-                <div class="mt-4">
-                    @for (item of categories(); track item ) {
-                        <div class="d-flex justify-content-center align-items-center gap-3 etmw-bg-main rounded-4 p-3 mb-3">
-                            <div>
-                                {{ item.label }}
-                            </div>
-                            <h2 class="rounded-pill m-0">
-                                {{ item.emoji }}
-                            </h2>
-                        </div>
-                    }
-                </div>
-
-                <div class="py-5"></div>
-
-                <div class="position-absolute p-3 etmw-bg-secondary rounded-4 w-100" style="left:0px; bottom:0px;">
-                    <div class="d-flex justify-content-around align-items-center gap-5">
-                        <button class="btn btn-lg btn-light rounded-4">
-                            <h3 class="m-0"><i class="bi bi-book"></i></h3>
-                        </button>
-                        <button class="btn btn-lg btn-dark rounded-4">
-                            <h3 class="m-0"><i class="bi bi-heart"></i></h3>
-                        </button>
-                        <button class="btn btn-lg btn-dark rounded-4">
-                            <h3 class="m-0"><i class="bi bi-bag"></i></h3>
-                        </button>
-                        <button class="btn btn-lg btn-dark rounded-4">
-                            <h3 class="m-0"><i class="bi bi-three-dots"></i></h3>
+                    <div class="d-none d-lg-flex align-items-center gap-3">
+                        <button class="btn btn-dark rounded-pill">Features</button>
+                        <button class="btn btn-dark rounded-pill">Pricing</button>
+                        <button class="btn btn-dark rounded-pill">Debates</button>
+                        <button class="btn btn-dark rounded-pill">Contact</button>
+                        <button class="btn btn-primary rounded-pill" (click)="gotoApp()">
+                            Get Started
                         </button>
                     </div>
+                    <button class="btn btn-secondary d-lg-none">Menu</button>
                 </div>
             </div>
         </div>
-        
-        <div class="position-relative card-right etmw-bg-secondary rounded-5 shadow col-12 col-md-4">
-            <img src="pattern.png" style="width: 70%; right:0; z-index:0" class="position-absolute" />
-            <div class="p-5">
+    </div>
 
-                <!-- User Profile -->
-                <div class="d-flex justify-content-between align-items-center gap-3 border-bottom border-secondary pb-3">
-                    <div class="d-flex justify-content-start align-items-center gap-3">
-                        <h2>
-                            👤
-                        </h2>
-                        <div>
-                            <b>Walter</b>
-                            <div class="text-secondary small">
-                                Finish your profile
-                            </div>
+    <!-- Hero -->
+    <div class="hero-section px-4">
+        <div class="container py-md-5">
+            
+            <div class="text-center py-4 py-md-5">
+                <h1 class="hero-title">
+                    We Give Voice to Your Work
+                </h1>
+                <h4 class=" mt-3">
+                    The first platform exclusively for <span class="text-primary">independent authors</span>
+                </h4>
+            </div>
+
+            <div class="row justify-content-center align-items-center g-5">
+
+                <!-- Left Content -->
+                <div class="col-12 col-lg-6">
+                    
+                    <h2 class="section-heading text-center text-lg-start mb-4">
+                        Where <span class="text-primary">Authors Meet Listeners</span>
+                    </h2>
+            
+                    <div class="content-card">
+                        <p class="content-text">
+                            We empower independent authors who haven't been picked up by traditional 
+                            publishers. Transform your written work into professional audiobooks and 
+                            reach listeners of today
+                        </p>
+                    </div>
+
+                    <div class="feature-grid mt-4">
+                        <div class="feature-item">
+                            <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>No setup required</span>
+                        </div>
+                        <div class="feature-item">
+                            <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Professional quality</span>
+                        </div>
+                        <div class="feature-item">
+                            <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Voice comments</span>
                         </div>
                     </div>
-                    <button class="btn btn-light rounded-pill">
-                        Your Profile
-                    </button>
-                </div>       
-                
-                
-                <!-- Upload your work -->
-                <div class="mt-4 etmw-bg-main rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-                        <h5 class="m-0">
-                            <b>Upoad your Work</b>
-                        </h5>
-                        <button class="btn btn-sm btn-dark rounded-pill">
-                            <i class="bi bi-arrow-right"></i>
+
+                    <div class="cta-buttons justify-content-between mt-4">
+                        <button class="btn btn-primary btn-lg rounded-3 w-100 pt-3 pb-3">
+                            <i class="bi bi-book text-2xl"></i>&nbsp;&nbsp;
+                            I'm an Author
+                        </button>
+                        <button class="btn btn-secondary btn-lg w-100  mt-3 mt-md-0 pt-3 pb-3">
+                            <i class="bi bi-play-circle text-2xl"></i>&nbsp;&nbsp;
+                            I'm a Listener
                         </button>
                     </div>
-                    <div class="mt-2 small text-secondary">
-                        Upload your book or essay. We turn them into audiobooks at no cost and distribute them directly on our platform.
-                    </div>
+
                 </div>
                 
-                <!-- Debate -->
-                <div class="mt-4 etmw-bg-main rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-                        <h5 class="m-0">
-                            <b>Debate</b>
-                        </h5>
-                        <button class="btn btn-sm btn-dark rounded-pill">
-                            <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </div>
-                    <div class="mt-2 small text-secondary">
-                        Choose an audiobook and join the conversation with the author and the community.
+                <!-- Right Image -->
+                <div class="col-12 col-lg-6 order-first order-lg-last">
+                    <img class="hero-image" src="https://cdn.ailandingpage.ai/ai-landingpage/user-generate/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/hero/hero-main-6fa8603c66e6476883feaed7178ac9cb.png" alt="Independent authors platform" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-it-works-section px-4">
+        <div class="container py-5">
+            
+            <div class="text-center mb-5">
+                <h2 class="section-title">How It Works</h2>
+                <h5 class="mt-3 text-gray-400">
+                    We bridge the gap between independent authors and modern listeners
+                </h5>
+                <h5 class="text-primary fw-bold mt-3">
+                    Exclusively for independent authors
+                </h5>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <img src="https://cdn.ailandingpage.ai/ai-landingpage/user-generate/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/features/features-upload-5a96e5aa57a94acba0406868f50c743b.png" alt="Submit your work" class="step-image" />
+                        <div class="step-header">
+                            <div class="step-number">1</div>
+                            <h3 class="step-title">Submit Your Work</h3>
+                        </div>
+                        <p class="step-description">
+                            Upload your PDF or send us your physical book for scanning. 
+                            We handle books, essays, papers, and any written content from independent authors.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Users -->
-                <div class="mt-4 etmw-bg-main rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-                        <h5 class="m-0">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <img src="https://cdn.ailandingpage.ai/ai-landingpage/user-generate/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/features/features-voice-de9f344705a945868490a9a4f1af2b42.png" alt="AI conversion" class="step-image" />
+                        <div class="step-header">
+                            <div class="step-number">2</div>
+                            <h3 class="step-title">AI Conversion</h3>
+                        </div>
+                        <p class="step-description">
+                            We convert your work into professional audiobooks using cutting-edge AI. 
+                            Choose from our basic plan (all languages) or upgrade for premium voices and features.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="step-card">
+                        <img src="https://cdn.ailandingpage.ai/ai-landingpage/user-generate/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/features/features-audio-51bd53db919348b98b53cb2fec3938c3.png" alt="Reach your audience" class="step-image" />
+                        <div class="step-header">
+                            <div class="step-number">3</div>
+                            <h3 class="step-title">Reach Your Audience</h3>
+                        </div>
+                        <p class="step-description">
+                            Listeners receive chapters on their schedule. Engage with your audience 
+                            through debate spaces where all comments can be read or listened to.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Latest Authors -->
+            <div class="mt-5">
+
+                <div class="mt-4 rounded-4 p-4">
+                    <div class="d-flex justify-content-center align-items-center gap-4">
+                        <h2 class="m-0">
                             <b>Latest Authors</b>
-                        </h5>
-                        <button class="btn btn-sm btn-dark rounded-pill">
-                            <i class="bi bi-arrow-right"></i>
+                        </h2>
+                        <button class="btn btn-secondary rounded-pill">
+                            See all
                         </button>
                     </div>
-                    <div class="mt-2 small">
+                    <div class="mt-3 d-flex flex-wrap justify-content-center align-items-center gap-3">
                         @for (item of latestAuthors(); track item ) {
-                            <div class="mt-4 d-flex justify-content-start align-items-center gap-3">
+                            <div class="mt-4 d-flex justify-content-start align-items-center gap-3" style="width: 280px;">
                                 <div>
-                                    <img [src]="item.userPhoto" style="width:50px; height:50px; object-fit:cover" class="rounded-circle shadow overflow-hidden" />
+                                    <img [src]="item.userPhoto" style="width:70px; height:70px; object-fit:cover" class="rounded-circle shadow overflow-hidden" />
                                 </div>
                                 <div>
-                                    <b>{{ item.name }}</b>
-                                    <div class="mt-1 text-secondary">
+                                    <h5><b>{{ item.name }}</b></h5>
+                                    <div class="mt-1 text-gray-400">
                                         {{ item.lastUpload }}
                                     </div>
                                 </div>
@@ -210,65 +185,639 @@
                     </div>
                 </div>
 
+            </div>
 
-                <!-- Pricing -->
-                <div class="mt-4 rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-                        <h5 class="m-0">
-                            <b>Our Pricing</b>
-                        </h5>
-                        <button class="btn btn-sm btn-dark rounded-pill">
-                            <i class="bi bi-arrow-right"></i>
-                        </button>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="features-section px-4">
+        <div class="container py-5">
+            
+            <div class="text-center mb-5">
+                <h2 class="section-title">Built for the New Era</h2>
+                <h5 class="mt-3 text-gray-400">
+                    Listening is the new reading. We help you adapt to modern content consumption
+                </h5>
+            </div>
+
+            <div class="row g-4">
+                
+                <div class="col-12 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-card-icon">📚</div>
+                        <h3 class="feature-card-title fw-bold">Flexible Listening Schedule</h3>
+                        <p class="feature-card-text text-lg">
+                            Listeners choose their pace: receive one chapter every X days. 
+                            Perfect for those who want to consume books gradually and thoughtfully.
+                        </p>
                     </div>
-                    <div class="mt-2 small text-secondary">
-                        Pick a plan that works for you. 
-                        Enjoy unlimited access to all audiobooks on our platform.
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-card-icon">💬</div>
+                        <h3 class="feature-card-title">Interactive Debate Spaces</h3>
+                        <p class="feature-card-text text-lg">
+                            Connect authors with readers. Discuss ideas, debate concepts, 
+                            and build a community around your work.
+                        </p>
                     </div>
-                    <div class="mt-3">
-                        <div class="d-flex justify-content-start align-items-start gap-3">
-                            <button class="btn btn-lg btn-dark rounded-pill">
-                                <span class="small">$</span><b>5</b>
-                            </button>
-                            <div class="mt-2">
-                                <b>Starter</b>
-                                <div class="text-secondary small">
-                                    Pick up to 2 audiobook per month. 
-                                    Debate with authors and community.
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-card-icon">🎙️</div>
+                        <h3 class="feature-card-title">Voice-Powered Comments</h3>
+                        <p class="feature-card-text text-lg">
+                            Leave comments by typing or speaking. All comments are available 
+                            as both text and audio for maximum accessibility.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-card-icon">🌍</div>
+                        <h3 class="feature-card-title">Multi-Language Support</h3>
+                        <p class="feature-card-text text-lg">
+                            Our basic plan covers all major languages. Reach a global audience 
+                            without limitations. Premium options available for enhanced quality.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Latest Work Published -->
+    <div class="latest-works-section px-4">
+        <div class="container py-5">
+            
+            <div class="text-center mb-5">
+                <h2 class="section-title">Latest Work Published</h2>
+                <h5 class="mt-3 text-gray-400">
+                    Discover fresh audiobooks from independent authors around the world
+                </h5>
+            </div>
+
+            <div class="row g-4">
+                @for (work of latestWorks(); track work.title) {
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="work-card">
+                            <div class="work-cover-container">
+                                <img [src]="work.cover" [alt]="work.title" class="work-cover">
+                                <div class="work-overlay">
+                                    <button class="btn btn-primary rounded-pill px-4">
+                                        <i class="bi bi-play-fill"></i> Listen Now
+                                    </button>
                                 </div>
                             </div>
-                            
+                            <div class="work-content">
+                                <div class="work-category">{{ work.category }}</div>
+                                <h4 class="work-title">{{ work.title }}</h4>
+                                <div class="work-author">by {{ work.author }}</div>
+                                <div class="work-meta">
+                                    <div class="work-meta-item">
+                                        <i class="bi bi-clock"></i>
+                                        <span>{{ work.duration }}</span>
+                                    </div>
+                                    <div class="work-meta-item">
+                                        <i class="bi bi-book"></i>
+                                        <span>{{ work.chapters }} chapters</span>
+                                    </div>
+                                    <div class="work-meta-item">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <span>{{ work.rating }}</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary w-100 mt-3 rounded-pill">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-5">
+                <button class="btn btn-primary btn-lg rounded-pill px-5">
+                    Explore All Audiobooks
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Debate the Book -->
+    <div class="debate-section px-4">
+        <div class="container py-5">
+            
+            <div class="text-center mb-5">
+                <h2 class="section-title">💬 Debate the Book</h2>
+                <h4 class="mt-4 text-gray-300 lh-175">
+                    Books don't end at the last chapter.
+                </h4>
+                <h5 class="mt-3 text-gray-400 lh-175">
+                    After listening, join the debate: talk with the author and other listeners using voice or text.<br>
+                    Every comment can be heard or read. Your ideas become part of the book's journey.
+                </h5>
+            </div>
+
+            <div class="row g-5 align-items-center">
+                
+                <!-- Left Side - Conversation Timeline -->
+                <div class="col-12 col-lg-6">
+                    <div class="debate-timeline">
+                        
+                        <div class="debate-item">
+                            <div class="debate-header">
+                                <div class="debate-avatar">
+                                    <img src="https://i.pravatar.cc/150?img=5" alt="Listener">
+                                </div>
+                                <div class="debate-info">
+                                    <div class="debate-name">Sarah M.</div>
+                                    <div class="debate-meta">
+                                        <i class="bi bi-headphones"></i>
+                                        <span>Chapter 3 – 12:40</span>
+                                    </div>
+                                </div>
+                                <div class="debate-voice-badge">
+                                    <i class="bi bi-mic-fill"></i>
+                                </div>
+                            </div>
+                            <div class="debate-content">
+                                "This part made me rethink freedom… The way the protagonist chooses silence over escape is profound."
+                            </div>
+                            <div class="debate-actions">
+                                <button class="debate-action-btn">
+                                    <i class="bi bi-play-circle"></i> Listen
+                                </button>
+                                <button class="debate-action-btn">
+                                    <i class="bi bi-reply"></i> Reply
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="debate-item debate-item-author">
+                            <div class="debate-header">
+                                <div class="debate-avatar">
+                                    <img src="https://i.pravatar.cc/150?img=12" alt="Author">
+                                </div>
+                                <div class="debate-info">
+                                    <div class="debate-name">
+                                        Emma Rodriguez
+                                        <span class="author-badge">Author</span>
+                                    </div>
+                                    <div class="debate-meta">
+                                        <span>2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="debate-text-badge">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </div>
+                            </div>
+                            <div class="debate-content">
+                                "That's exactly the tension I wanted here. Freedom isn't always about movement—sometimes it's about acceptance."
+                            </div>
+                            <div class="debate-actions">
+                                <button class="debate-action-btn">
+                                    <i class="bi bi-reply"></i> Reply with voice
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="debate-item">
+                            <div class="debate-header">
+                                <div class="debate-avatar">
+                                    <img src="https://i.pravatar.cc/150?img=33" alt="Listener">
+                                </div>
+                                <div class="debate-info">
+                                    <div class="debate-name">Marcus J.</div>
+                                    <div class="debate-meta">
+                                        <span>1 hour ago</span>
+                                    </div>
+                                </div>
+                                <div class="debate-voice-badge">
+                                    <i class="bi bi-mic-fill"></i>
+                                </div>
+                            </div>
+                            <div class="debate-content">
+                                "I disagree. I think he had no choice. The circumstances forced him into that position, it wasn't really freedom at all."
+                            </div>
+                            <div class="debate-actions">
+                                <button class="debate-action-btn">
+                                    <i class="bi bi-play-circle"></i> Listen
+                                </button>
+                                <button class="debate-action-btn">
+                                    <i class="bi bi-reply"></i> Reply
+                                </button>
+                                <span class="debate-replies">3 more replies</span>
+                            </div>
+                        </div>
+
+                        <div class="debate-item debate-item-highlight">
+                            <div class="text-center py-3">
+                                <i class="bi bi-chat-dots fs-3 text-primary"></i>
+                                <div class="mt-2 fw-bold">This debate continues after the chapter</div>
+                                <div class="text-gray-400 mt-1">Listen to what others think</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right Side - Features -->
+                <div class="col-12 col-lg-6">
+                    <div class="debate-features">
+                        
+                        <div class="debate-feature-item">
+                            <div class="debate-feature-icon">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="debate-feature-content">
+                                <h4 class="debate-feature-title">Talk with the author and listeners</h4>
+                                <p class="debate-feature-text">
+                                    Engage directly with the minds behind the work. Authors join the discussion, 
+                                    and every voice matters.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="debate-feature-item">
+                            <div class="debate-feature-icon">
+                                <i class="bi bi-mic-fill"></i>
+                            </div>
+                            <div class="debate-feature-content">
+                                <h4 class="debate-feature-title">Leave voice or text comments</h4>
+                                <p class="debate-feature-text">
+                                    Reply with your voice or type your thoughts. Choose what feels natural. 
+                                    Your comment can be heard or read.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="debate-feature-item">
+                            <div class="debate-feature-icon">
+                                <i class="bi bi-headphones"></i>
+                            </div>
+                            <div class="debate-feature-content">
+                                <h4 class="debate-feature-title">Listen to debates like mini-podcasts</h4>
+                                <p class="debate-feature-text">
+                                    Every conversation becomes listenable content. Discover perspectives 
+                                    while you drive, walk, or relax.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-center">
+                            <button class="btn btn-primary btn-lg rounded-pill">
+                                <i class="bi bi-chat-dots-fill"></i>&nbsp;&nbsp;
+                                Start a Debate
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Pricing Section -->
+    <div class="pricing-section px-4">
+        <div class="container py-5">
+            
+            <div class="text-center mb-5">
+                <h2 class="section-title">Choose Your Plan</h2>
+                <h5 class="mt-3 text-gray-400">
+                    No credits. No hidden catalogue. If a book exists on the platform, you can listen to it.
+                </h5>
+                <div class="mt-3 pricing-region-badge">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    Prices adjusted to local purchasing power
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                
+                <!-- Explorer Plan -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="pricing-plan-name">Explorer</h3>
+                            <div class="pricing-plan-subtitle">Perfect to start</div>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="pricing-currency">{{ currency() }}</span>
+                            <span class="pricing-amount">{{ prices().explorer }}</span>
+                            <span class="pricing-period">/month</span>
+                        </div>
+                        <div class="pricing-feature-main">
+                            <strong>2 books</strong> per month
+                        </div>
+                        <ul class="pricing-features">
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Full catalogue</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>New releases</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Debate area</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Offline listening</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Re-listen anytime</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4">
+                            Start listening
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reader Plan (Most Popular) -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="pricing-card pricing-card-popular">
+                        <div class="pricing-badge">
+                            ⭐ Most Popular
+                        </div>
+                        <div class="pricing-header">
+                            <h3 class="pricing-plan-name">Reader</h3>
+                            <div class="pricing-plan-subtitle">Best value</div>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="pricing-currency">{{ currency() }}</span>
+                            <span class="pricing-amount">{{ prices().reader }}</span>
+                            <span class="pricing-period">/month</span>
+                        </div>
+                        <div class="pricing-feature-main">
+                            <strong>5 books</strong> per month
+                        </div>
+                        <ul class="pricing-features">
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Full catalogue</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>New releases</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Debate area</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Offline listening</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Re-listen anytime</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4">
+                            Start listening
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Unlimited Plan -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3 class="pricing-plan-name">Unlimited</h3>
+                            <div class="pricing-plan-subtitle">For passionate readers</div>
+                        </div>
+                        <div class="pricing-price">
+                            <span class="pricing-currency">{{ currency() }}</span>
+                            <span class="pricing-amount">{{ prices().unlimited }}</span>
+                            <span class="pricing-period">/month</span>
+                        </div>
+                        <div class="pricing-feature-main">
+                            <strong>Unlimited books</strong>
+                            <span class="pricing-unlimited-badge">Truly unlimited</span>
+                        </div>
+                        <ul class="pricing-features">
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Full catalogue</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>New releases</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Debate area</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Offline listening</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Re-listen anytime</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4">
+                            Go unlimited
+                        </button>
+                        <div class="pricing-footnote">
+                            No exclusions. New books included from day one.
                         </div>
                     </div>
                 </div>
+
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="text-gray-400">
+                    All plans billed monthly. Cancel anytime with no penalties.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Contact Section -->
+    <div class="contact-section px-4">
+        <div class="container py-5">
+            
+            <div class="row g-5 align-items-center">
                 
-                
+                <!-- Left Side - Info -->
+                <div class="col-12 col-lg-5">
+                    <h2 class="section-title mb-4">Get in Touch</h2>
+                    <p class="text-gray-300 text-lg lh-175 mb-4">
+                        Have questions about how Enter To My World works? Want to discuss author partnerships 
+                        or integration opportunities? We'd love to hear from you.
+                    </p>
+                    
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+                            <div>
+                                <div class="contact-info-label">Email us</div>
+                                <div class="contact-info-value">hello@entertomyworld.com</div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <i class="bi bi-clock-fill"></i>
+                            </div>
+                            <div>
+                                <div class="contact-info-label">Response time</div>
+                                <div class="contact-info-value">Within 24 hours</div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-item">
+                            <div class="contact-info-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <div>
+                                <div class="contact-info-label">We speak</div>
+                                <div class="contact-info-value">English, Spanish, Italian</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-social mt-5">
+                        <div class="mb-3 text-gray-400">Follow us</div>
+                        <div class="d-flex gap-3">
+                            <a href="#" class="contact-social-link">
+                                <i class="bi bi-twitter"></i>
+                            </a>
+                            <a href="#" class="contact-social-link">
+                                <i class="bi bi-instagram"></i>
+                            </a>
+                            <a href="#" class="contact-social-link">
+                                <i class="bi bi-linkedin"></i>
+                            </a>
+                            <a href="#" class="contact-social-link">
+                                <i class="bi bi-facebook"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Form -->
+                <div class="col-12 col-lg-7">
+                    <div class="contact-form-card">
+                        <form>
+                            <div class="row g-4">
+                                
+                                <div class="col-12 col-md-6">
+                                    <label class="contact-label">Your Name</label>
+                                    <input 
+                                        type="text" 
+                                        class="contact-input" 
+                                        placeholder="John Doe"
+                                        [(ngModel)]="contactForm().name"
+                                        name="name">
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="contact-label">Email Address</label>
+                                    <input 
+                                        type="email" 
+                                        class="contact-input" 
+                                        placeholder="john@example.com"
+                                        [(ngModel)]="contactForm().email"
+                                        name="email">
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="contact-label">I am a...</label>
+                                    <select 
+                                        class="contact-input"
+                                        [(ngModel)]="contactForm().userType"
+                                        name="userType">
+                                        <option value="">Select an option</option>
+                                        <option value="author">Independent Author</option>
+                                        <option value="listener">Listener</option>
+                                        <option value="publisher">Publisher</option>
+                                        <option value="press">Press / Media</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="contact-label">Subject</label>
+                                    <input 
+                                        type="text" 
+                                        class="contact-input" 
+                                        placeholder="How can we help you?"
+                                        [(ngModel)]="contactForm().subject"
+                                        name="subject">
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="contact-label">Message</label>
+                                    <textarea 
+                                        class="contact-input contact-textarea" 
+                                        rows="5" 
+                                        placeholder="Tell us more about your inquiry..."
+                                        [(ngModel)]="contactForm().message"
+                                        name="message"></textarea>
+                                </div>
+
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">
+                                        <i class="bi bi-send-fill"></i>&nbsp;&nbsp;
+                                        Send Message
+                                    </button>
+                                    <div class="contact-form-note">
+                                        We'll get back to you within 24 hours
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h4 class="fw-bold">Enter To My World</h4>
+                    <p class="text-gray-400 mt-2">
+                        Where authors meet listeners
+                    </p>
+                </div>
+                <div class="footer-copyright">
+                    © 2026 Enter To My World. All rights reserved.
+                </div>
+                <button class="btn btn-primary rounded-pill">
+                    Invest in the Project
+                </button>
             </div>
         </div>
-
     </div>
 
 
-    <!--
-        Landing - footer
-    -->
-    <div class="d-flex justify-content-center align-items-center gap-3 pt-5">
-        <button class="btn btn-dark text-secondary small">
-            About
-        </button>
-        <button class="btn btn-dark text-secondary small">
-            Privacy Policy
-        </button>
-        <button class="btn btn-dark text-secondary small">
-            Terms of Service
-        </button>
-        <button class="btn btn-dark text-secondary small">
-            Contact
-        </button>
-    </div>
-    <div class="mt-2 text-center px-3 pt-3 pb-5 text-secondary small">
-        &copy; 2024 Enter To My World. All rights reserved.
-    </div>
-
-    
 </div>

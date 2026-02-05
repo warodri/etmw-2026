@@ -1,4 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-screen-home',
@@ -6,8 +8,16 @@ import { Component, signal } from '@angular/core';
     templateUrl: './screen-home.html',
     styleUrl: './screen-home.css',
 })
-export class ScreenHome {
+export class ScreenHome implements OnInit {
 
+    contactForm = signal({
+        name: '',
+        email: '',
+        userType: '',
+        subject: '',
+        message: ''
+    });
+    
     categories = signal([{
         label: 'Psychology',
         emoji: '🧠'
@@ -39,4 +49,109 @@ export class ScreenHome {
         lastUpload: '1 poem uploaded 2 days ago'
     }])
 
+    latestWorks = signal([{
+        cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&h=600&fit=crop',
+        title: 'The Silent Echo',
+        author: 'Emma Rodriguez',
+        category: 'Mystery',
+        duration: '8h 42m',
+        chapters: 24,
+        rating: 4.8
+    }, {
+        cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=600&fit=crop',
+        title: 'Digital Horizons',
+        author: 'James Chen',
+        category: 'Science Fiction',
+        duration: '12h 15m',
+        chapters: 31,
+        rating: 4.9
+    }, {
+        cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
+        title: 'Echoes of Tomorrow',
+        author: 'Sarah Williams',
+        category: 'Fantasy',
+        duration: '15h 30m',
+        chapters: 42,
+        rating: 4.7
+    }, {
+        cover: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=600&fit=crop',
+        title: 'The Last Algorithm',
+        author: 'David Park',
+        category: 'Thriller',
+        duration: '10h 20m',
+        chapters: 28,
+        rating: 4.6
+    }])
+
+    selectedRegion = signal<'latam' | 'us' | 'uk' | 'global'>('global');
+    currency = signal<string>('€');
+    prices = signal({
+        explorer: '6.49',
+        reader: '9.99',
+        unlimited: '14.99'
+    });
+
+    constructor(
+        private router: Router
+    ) {}
+
+    ngOnInit() {
+        this.detectRegion();
+    }
+
+    private detectRegion() {
+        const browserLanguage = navigator.language || (navigator as any).userLanguage;
+        
+        const latamCountries = [
+            'es-AR', 'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-CU', 'es-DO', 
+            'es-EC', 'es-SV', 'es-GT', 'es-HN', 'es-MX', 'es-NI', 'es-PA', 
+            'es-PY', 'es-PE', 'es-PR', 'es-UY', 'es-VE'
+        ];
+        
+        if (latamCountries.includes(browserLanguage)) {
+            this.selectedRegion.set('latam');
+            this.currency.set('$');
+            this.prices.set({
+                explorer: '3.49',
+                reader: '4.99',
+                unlimited: '8.49'
+            });
+        } else if (browserLanguage.startsWith('es-') && browserLanguage !== 'es-US' && browserLanguage !== 'es-ES') {
+            this.selectedRegion.set('latam');
+            this.currency.set('$');
+            this.prices.set({
+                explorer: '3.49',
+                reader: '4.99',
+                unlimited: '8.49'
+            });
+        } else if (browserLanguage === 'en-US') {
+            this.selectedRegion.set('us');
+            this.currency.set('$');
+            this.prices.set({
+                explorer: '6.49',
+                reader: '9.99',
+                unlimited: '14.99'
+            });
+        } else if (browserLanguage.startsWith('en-GB')) {
+            this.selectedRegion.set('uk');
+            this.currency.set('£');
+            this.prices.set({
+                explorer: '6.49',
+                reader: '9.99',
+                unlimited: '14.99'
+            });
+        } else {
+            this.selectedRegion.set('global');
+            this.currency.set('€');
+            this.prices.set({
+                explorer: '6.49',
+                reader: '9.99',
+                unlimited: '14.99'
+            });
+        }
+    }
+
+    gotoApp() {
+        this.router.navigate(['app'])
+    }
 }

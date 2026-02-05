@@ -1,0 +1,12 @@
+.col-6:hover .bg-secondary,
+.col-md-4:hover .bg-secondary,
+.col-lg-3:hover .bg-secondary {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.col-6:hover .bg-secondary > div:last-child,
+.col-md-4:hover .bg-secondary > div:last-child,
+.col-lg-3:hover .bg-secondary > div:last-child {
+    transform: translateY(0) !important;
+}

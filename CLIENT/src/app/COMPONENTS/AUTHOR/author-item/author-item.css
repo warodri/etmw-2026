@@ -1,0 +1,110 @@
+/* Author Item Hover Effects */
+.bg-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth transitions */
+.bg-secondary {
+    transition: all 0.3s ease;
+}
+
+/* Author card gradient overlays */
+.author-card-gradient {
+    position: relative;
+    overflow: hidden;
+}
+
+.author-card-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.author-card-gradient:hover::before {
+    opacity: 1;
+}
+
+/* Featured author cards */
+.featured-author-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-author-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.featured-author-card:hover::after {
+    opacity: 1;
+}
+
+/* Profile picture border animation */
+.author-avatar-verified {
+    position: relative;
+}
+
+.author-avatar-verified::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--color-primary), #1d4ed8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.author-avatar-verified:hover::before {
+    opacity: 1;
+}
+
+/* Category card animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Scrollbar styling for horizontal scrolls */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.5);
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.7);
+}

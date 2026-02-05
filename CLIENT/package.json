@@ -4,7 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "prebuild": "./update_config.sh set-prod",
+    "build": "ng build --configuration production",
+    "postbuild": "./update_config.sh set-dev && sshpass -p '197503&LaraCar0lina' rsync -av /Users/warodriguez/Downloads/WALTER/ETMW-2026/CLIENT/dist/CLIENT/browser/* root@entertomyworld.com:/var/www/entertomyworld.com/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -23,12 +25,14 @@
   "private": true,
   "packageManager": "npm@10.8.2",
   "dependencies": {
+    "@angular/animations": "^21.1.2",
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
     "@angular/router": "^21.0.0",
+    "crypto-js": "^4.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -36,6 +40,7 @@
     "@angular/build": "^21.0.3",
     "@angular/cli": "^21.0.3",
     "@angular/compiler-cli": "^21.0.0",
+    "@types/crypto-js": "^4.2.2",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"

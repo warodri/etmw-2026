@@ -1,0 +1,113 @@
+<div class="container-fluid p-0 min-vh-100 d-flex flex-column" style="background: linear-gradient(180deg, #1a1f2e 0%, #0e131c 100%);">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center p-4">
+        <button class="btn btn-link text-white p-0" (click)="goBack()">
+            <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
+        </button>
+        <h5 class="m-0 fw-bold">Now Playing</h5>
+        <button class="btn btn-link text-white p-0" (click)="toggleBookmark()">
+            <i class="bi" [class.bi-bookmark]="!isBookmarked" [class.bi-bookmark-fill]="isBookmarked" style="font-size: 1.5rem;"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column justify-content-center px-4">
+        
+        <!-- Album Art with Circular Progress -->
+        <div class="position-relative mx-auto mb-4" style="width: 280px; height: 280px;">
+            <!-- Circular progress ring -->
+            <svg class="position-absolute top-0 start-0" width="280" height="280" style="transform: rotate(-90deg);">
+                <circle cx="140" cy="140" r="130" 
+                        fill="none" 
+                        stroke="rgba(255, 255, 255, 0.1)" 
+                        stroke-width="8"
+                        stroke-dasharray="816.8"
+                        stroke-linecap="round"/>
+                <circle cx="140" cy="140" r="130" 
+                        fill="none" 
+                        stroke="var(--color-primary)" 
+                        stroke-width="8"
+                        [attr.stroke-dasharray]="816.8"
+                        [attr.stroke-dashoffset]="calculateProgress()"
+                        stroke-linecap="round"
+                        style="transition: stroke-dashoffset 0.3s ease;"/>
+            </svg>
+            
+            <!-- Album cover with glow -->
+            <div class="position-absolute top-50 start-50 translate-middle rounded-4 overflow-hidden shadow-lg" 
+                 style="width: 200px; height: 280px; box-shadow: 0 20px 60px rgba(37, 99, 235, 0.4) !important;">
+                <img [src]="audiobook.cover" 
+                     class="w-100 h-100" 
+                     style="object-fit: cover;" 
+                     [alt]="audiobook.title" />
+            </div>
+        </div>
+
+        <!-- Title and Author -->
+        <div class="text-center mb-4">
+            <h3 class="fw-bold mb-2">{{ audiobook.title }}</h3>
+            <p class="text-gray-400 mb-0">{{ audiobook.author }}</p>
+        </div>
+
+        <!-- Waveform Visualization -->
+        <div class="mb-4 px-3">
+            <div class="d-flex justify-content-center align-items-end gap-1" style="height: 80px;">
+                @for (bar of waveformBars; track $index) {
+                    <div class="rounded-pill" 
+                         [style.height.%]="bar.height"
+                         [style.width]="'4px'"
+                         [style.background-color]="$index < currentBarIndex ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.3)'"
+                         style="transition: all 0.2s ease;"></div>
+                }
+            </div>
+        </div>
+
+        <!-- Time Display -->
+        <div class="d-flex justify-content-between align-items-center mb-4 px-3 text-gray-400">
+            <span style="color: var(--color-primary); font-weight: 600;">{{ currentTime }}</span>
+            <span>{{ totalTime }}</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="d-flex justify-content-center align-items-center gap-4 mb-5">
+            <button class="btn btn-link text-white p-0" (click)="toggleShuffle()">
+                <i class="bi bi-shuffle" [class.text-primary]="isShuffle" style="font-size: 1.5rem;"></i>
+            </button>
+            
+            <button class="btn btn-link text-white p-0" (click)="skipBackward()">
+                <i class="bi bi-skip-start-fill" style="font-size: 2rem;"></i>
+            </button>
+            
+            <button class="btn rounded-circle d-flex align-items-center justify-content-center" 
+                    (click)="togglePlay()"
+                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); border: none; box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);">
+                <i class="bi" [class.bi-pause-fill]="isPlaying" [class.bi-play-fill]="!isPlaying" style="font-size: 2.5rem;"></i>
+            </button>
+            
+            <button class="btn btn-link text-white p-0" (click)="skipForward()">
+                <i class="bi bi-skip-end-fill" style="font-size: 2rem;"></i>
+            </button>
+            
+            <button class="btn btn-link text-white p-0" (click)="toggleRepeat()">
+                <i class="bi" [class.bi-repeat]="!isRepeat" [class.bi-repeat-1]="isRepeat" [class.text-primary]="isRepeat" style="font-size: 1.5rem;"></i>
+            </button>
+        </div>
+
+        <!-- Additional Controls -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openChapters()">
+                <i class="bi bi-list-ul"></i> Chapters
+            </button>
+            <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openSpeed()">
+                <i class="bi bi-speedometer2"></i> {{ playbackSpeed }}x
+            </button>
+            <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openTimer()">
+                <i class="bi bi-clock"></i> Timer
+            </button>
+        </div>
+
+    </div>
+
+</div>
+

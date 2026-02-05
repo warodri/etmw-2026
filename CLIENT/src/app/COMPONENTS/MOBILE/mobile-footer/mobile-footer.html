@@ -1,0 +1,18 @@
+<div class="fixed-bottom pb-4 text-light" style="border-top-left-radius: 50px; border-top-right-radius: 50px;">
+    <div class="container d-flex justify-content-center align-items-center gap-4">
+        
+        <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'home'" [class.btn-dark]="selected != 'home'" style="width:60px; height:54px;" (click)="goHome()">
+            <h3 class="m-0"><i class="bi bi-house"></i></h3>
+        </button>
+
+        <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'fav'" [class.btn-dark]="selected != 'fav'" style="width:60px; height:54px;">
+            <h3 class="m-0"><i class="bi bi-heart"></i></h3>
+        </button>
+        <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'user'" [class.btn-dark]="selected != 'user'" style="width:60px; height:54px;">
+            <h3 class="m-0"><i class="bi bi-person-lines-fill"></i></h3>
+        </button>
+        <button class="btn btn-lg btn-dark rounded-circle" style="width:60px; height:54px;">
+            <h3 class="m-0"><i class="bi bi-three-dots"></i></h3>
+        </button>
+    </div>
+</div>

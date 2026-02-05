@@ -1,0 +1,323 @@
+<div class="container-fluid p-0 min-vh-100 d-flex align-items-start">
+    <div class="w-100">
+        <div class="col-12 col-md-6 col-lg-4 mx-auto px-3 px-md-0">
+
+            <!-- 
+                PROFILE HEADER WITH COVER
+            -->
+            <div class="position-relative" style="margin-top: -1rem;">
+                <!-- Cover Image -->
+                <div class="rounded-4 overflow-hidden" style="height: 180px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
+                    <img src="cover-placeholder.jpg" class="w-100 h-100" style="object-fit: cover; opacity: 0.6;" alt="Cover" />
+                </div>
+                
+                <!-- Profile Picture - Overlapping -->
+                <div class="position-absolute" style="bottom: -50px; left: 50%; transform: translateX(-50%);">
+                    <div class="rounded-circle overflow-hidden border border-4 bg-secondary" style="width: 120px; height: 120px; border-color: var(--color-bg-main) !important;">
+                        <img src="f-author-1.jpeg" class="w-100 h-100" style="object-fit: cover;" />
+                    </div>
+                    <!-- Online/Offline Badge -->
+                    <div class="position-absolute" style="bottom: 8px; right: 8px; width: 24px; height: 24px; background-color: #22c55e; border-radius: 50%; border: 3px solid var(--color-bg-main);"></div>
+                </div>
+            </div>
+
+            <!-- 
+                USER INFO & STATS
+            -->
+            <div class="mt-5 pt-4 text-center">
+                <h2 class="fw-bold mb-2">Mariano E. Rodriguez</h2>
+                
+                <!-- Author Badge -->
+                <div class="d-inline-flex align-items-center gap-2 mb-3">
+                    <span class="author-badge">
+                        <i class="bi bi-pencil-fill"></i> AUTHOR
+                    </span>
+                    <span class="author-badge" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+                        <i class="bi bi-shield-check"></i> VERIFIED
+                    </span>
+                </div>
+
+                <!-- Bio -->
+                <p class="text-gray-400 mb-4" style="line-height: 1.75;">
+                    📚 Passionate writer crafting stories that inspire | 🎧 Creating immersive audiobook experiences | 🌍 Based in Argentina
+                </p>
+
+                <!-- Quick Stats Grid -->
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
+                        <div class="text-primary fw-bold text-2xl mb-1">24</div>
+                        <div class="text-gray-400 small">Works</div>
+                    </div>
+                    <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
+                        <div class="text-primary fw-bold text-2xl mb-1">1.2K</div>
+                        <div class="text-gray-400 small">Followers</div>
+                    </div>
+                    <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
+                        <div class="text-primary fw-bold text-2xl mb-1">342</div>
+                        <div class="text-gray-400 small">Following</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
+                    <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-heart-fill"></i> Follow
+                    </button>
+                    <button class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-chat-dots-fill"></i> Message
+                    </button>
+                    <button class="btn btn-secondary rounded-pill px-3 py-2">
+                        <i class="bi bi-share-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 
+                ADDITIONAL INFO TABS/SECTIONS
+            -->
+            <div class="mt-4 bg-secondary rounded-4 p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-info-circle-fill text-primary"></i> About
+                </h5>
+                
+                <!-- Info Grid -->
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-calendar-event text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-gray-400">Member Since</div>
+                            <div class="fw-semibold">January 2024</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-geo-alt-fill text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-gray-400">Location</div>
+                            <div class="fw-semibold">Buenos Aires, Argentina</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-translate text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-gray-400">Languages</div>
+                            <div class="d-flex gap-2 mt-1">
+                                <span class="badge bg-slate-800 text-white px-2 py-1">Spanish</span>
+                                <span class="badge bg-slate-800 text-white px-2 py-1">English</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-headphones text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="small text-gray-400">Total Completions</div>
+                            <div class="fw-semibold">3,421 listeners finished</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+                ACHIEVEMENTS / BADGES
+            -->
+            <div class="mt-4 bg-secondary rounded-4 p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-trophy-fill text-primary"></i> Achievements
+                </h5>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="text-center" style="width: 70px;">
+                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); aspect-ratio: 1;">
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-star-fill" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                        <div class="small text-gray-400">First Work</div>
+                    </div>
+                    <div class="text-center" style="width: 70px;">
+                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); aspect-ratio: 1;">
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-people-fill" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                        <div class="small text-gray-400">1K Followers</div>
+                    </div>
+                    <div class="text-center" style="width: 70px;">
+                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); aspect-ratio: 1;">
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-fire" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                        <div class="small text-gray-400">10 Day Streak</div>
+                    </div>
+                    <div class="text-center" style="width: 70px;">
+                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); aspect-ratio: 1;">
+                            <div class="d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-book-fill" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                        </div>
+                        <div class="small text-gray-400">10 Works</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+                PUBLISHED WORKS
+            -->
+            <div class="mt-4 bg-secondary rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0">
+                        <i class="bi bi-book-fill text-primary"></i> Published Works
+                    </h5>
+                    <span class="badge bg-slate-800 text-primary px-3 py-2">24 Total</span>
+                </div>
+                
+                <!-- Horizontal Scroll Container -->
+                <div class="d-flex flex-nowrap gap-3" style="overflow-x: auto; padding-bottom: 1rem;">
+                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
+                        <app-item></app-item>
+                    </div>
+                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
+                        <app-item></app-item>
+                    </div>
+                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
+                        <app-item></app-item>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+                ACTIVITY / RECENT INTERACTIONS
+            -->
+            <div class="mt-4 bg-secondary rounded-4 p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-clock-history text-primary"></i> Recent Activity
+                </h5>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-upload text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Published new work</div>
+                            <div class="text-gray-400 small">"How to stop feeling like sh*t" • 2 hours ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-chat-fill text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Replied to a debate</div>
+                            <div class="text-gray-400 small">In "Philosophy of Life" • 5 hours ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-heart-fill text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold small">Gained 50 new followers</div>
+                            <div class="text-gray-400 small">Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+                EDIT PROFILE SECTION (Only visible to profile owner)
+            -->
+            <div class="mt-4 bg-secondary rounded-4 p-4 border border-2" style="border-color: var(--color-primary) !important;">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-pencil-square text-primary"></i> Edit Your Profile
+                </h5>
+                
+                <!-- Upload Profile Picture -->
+                <div class="debate-item-highlight rounded-4 mb-3">
+                    <div class="text-center py-3">
+                        <div class="small text-gray-400 mb-2">Profile Picture</div>
+                        <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2">
+                            <i class="bi bi-upload"></i> &nbsp; Change Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Cover Picture -->
+                <div class="debate-item-highlight rounded-4 mb-3">
+                    <div class="text-center py-3">
+                        <div class="small text-gray-400 mb-2">Cover Image</div>
+                        <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2">
+                            <i class="bi bi-image"></i> &nbsp; Change Cover
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Form Fields -->
+                <div class="mb-3">
+                    <label class="contact-label">First Name</label>
+                    <input type="text" placeholder="Type here..." name="firstName" class="contact-input" value="Mariano">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="contact-label">Last Name</label>
+                    <input type="text" placeholder="Type here..." name="lastName" class="contact-input" value="Rodriguez">
+                </div>
+
+                <div class="mb-3">
+                    <label class="contact-label">Bio</label>
+                    <textarea placeholder="Tell us about yourself..." name="bio" class="contact-input" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="contact-label">Location</label>
+                    <input type="text" placeholder="City, Country" name="location" class="contact-input" value="Buenos Aires, Argentina">
+                </div>
+
+                <div class="mb-3">
+                    <label class="contact-label">Languages (comma separated)</label>
+                    <input type="text" placeholder="Spanish, English..." name="languages" class="contact-input" value="Spanish, English">
+                </div>
+                
+                <!-- Status Toggle -->
+                <div class="mb-4">
+                    <label class="contact-label d-block mb-2">Status</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="status" id="status-connected" checked>
+                        <label class="btn btn-outline-success" for="status-connected">
+                            <i class="bi bi-circle-fill"></i> Online
+                        </label>
+                        
+                        <input type="radio" class="btn-check" name="status" id="status-disconnected">
+                        <label class="btn btn-outline-secondary" for="status-disconnected">
+                            <i class="bi bi-dash-circle-fill"></i> Offline
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Update Button -->
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg rounded-pill px-5">
+                        <i class="bi bi-check-circle-fill"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div style="height:10rem;"></div>
+
+<app-mobile-footer selected="user"></app-mobile-footer>
