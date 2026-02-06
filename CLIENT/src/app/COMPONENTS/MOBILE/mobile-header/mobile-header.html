@@ -1,3 +1,5 @@
+@let myUserObj = myUser();
+
 @if (showLogin()) {
     <div class="fixed-top overlay"></div>
 }
@@ -23,9 +25,12 @@
                         -->
                         <div class="row g-4">                
                             <div class="col-12">
-                                <label class="contact-label">Your Email Address</label>
+                                <label class="contact-label">
+                                    Your Email Address
+                                </label>
                                 <input 
                                     type="email" 
+                                    [(ngModel)]="email"
                                     class="contact-input w-100" 
                                     placeholder="john@example.com"
                                     name="email">
@@ -33,7 +38,7 @@
                             <div class="col-12">
                                 <button class="btn btn-primary btn-lg w-100 rounded-pill" (click)="sendCode()">
                                     <i class="bi bi-send-fill"></i>&nbsp;&nbsp;
-                                    Send Code
+                                    {{ working() ? 'Please wait...' : 'Send Code' }}
                                 </button>
                                 <div class="contact-form-note">
                                     We will send you a code to your Email
@@ -49,6 +54,7 @@
                                 <label class="contact-label">Enter the Verification Code</label>
                                 <input 
                                     type="number" 
+                                    [(ngModel)]="code"
                                     class="contact-input" 
                                     placeholder="123456"
                                     name="email">
@@ -56,7 +62,7 @@
                             <div class="col-12">
                                 <button class="btn btn-primary btn-lg w-100 rounded-pill" (click)="validateCode()">
                                     <i class="bi bi-send-fill"></i>&nbsp;&nbsp;
-                                    Validate Code
+                                    {{ working() ? 'Please wait...' : 'Validate Code' }}
                                 </button>
                                 <div class="contact-form-note">
                                     Type the code you received in your Email
@@ -104,13 +110,32 @@
                         <!--
                             SHOW USER IF LOGGED IN
                         -->
-                        <div class="d-flex justify-content-start align-items-center gap-2 etmw-bg-main rounded-5 pointer" (click)="gotoUserProfile()">
-                            <img class="rounded-circle" src="f-author-1.jpeg" style="width:50px; height:50px; object-fit: cover;" />
-                            <div class="small p-2">
-                                <div>Walter Rodriguez&nbsp;&nbsp;</div>
-                                <div class="text-gray-400">Author</div>
+                        @if (myUserObj) {
+                            <div class="d-flex justify-content-start align-items-center gap-2 etmw-bg-main rounded-5 pointer" (click)="gotoUserProfile()">
+                                @if (myUserObj.profilePicture) {
+                                    <img class="rounded-circle" src="f-author-1.jpeg" style="width:50px; height:50px; object-fit: cover;" />
+                                } @else {
+                                    <img class="rounded-circle" src="nouser.png" style="width:50px; height:50px; object-fit: cover;" />
+                                }
+                                <div class="small p-2">
+                                    <div>
+                                        @if (!myUserObj.firstName) {
+                                            No name
+                                        } @else {
+                                            myUserObj.firstName
+                                        }
+                                        &nbsp;&nbsp;
+                                    </div>
+                                    <div class="text-gray-400">
+                                        @if (myUserObj.isAuthor) {
+                                            Author
+                                        } @else {
+                                            Listener
+                                        }
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        }
                     } @else {
                         <!--
                             SHOW LOGIN BUTTON

@@ -33,31 +33,33 @@
                         See all
                     </button>
                 </div>
-                <div class="mt-3 d-flex flex-nowrap justify-content-start align-items-center gap-3 overflow-hidden" style="width: 100%;">
-                    <button class="btn btn-lg btn-dark rounded-3 p-3" (click)="gotoSearchResult()">
-                        <img src="cat-fiction.png" style="height: 30px; margin-top:-5px" />
-                        <div class="mt-2 small">
-                            Fiction
-                        </div>
-                    </button>
-                    <button class="btn btn-lg btn-dark rounded-3 p-3" (click)="gotoSearchResult()">
-                        <img src="cat-non-fiction.png" style="height: 30px; margin-top:-5px" />                        
-                        <div class="mt-2 small">
-                            Non Fiction
-                        </div>
-                    </button>
-                    <button class="btn btn-lg btn-dark rounded-3 p-3" (click)="gotoSearchResult()">
-                        <img src="cat-philosofy.png" style="height: 30px; margin-top:-5px" />                        
-                        <div class="mt-2 small">
-                            Philosofy
-                        </div>
-                    </button>
-                    <button class="btn btn-lg btn-dark rounded-3 p-3" (click)="gotoSearchResult()">
-                        <img src="cat-education.png" style="height: 30px; margin-top:-5px" />                        
-                        <div class="mt-2 small">
-                            Education
-                        </div>
-                    </button>
+                <div class="mt-3  overflow-hidden" style="width: 100%;">
+                    <div clas="d-flex flex-nowrap justify-content-start align-items-center gap-3" style="width: 200%;">
+                        <button class="btn btn-lg btn-dark rounded-3 p-3" style="margin-right: 1rem;" (click)="gotoSearchResult()">
+                            <img src="cat-fiction.png" style="height: 30px; margin-top:-5px" />
+                            <div class="mt-2 small">
+                                Fiction
+                            </div>
+                        </button>
+                        <button class="btn btn-lg btn-dark rounded-3 p-3" style="margin-right: 1rem;" (click)="gotoSearchResult()">
+                            <img src="cat-non-fiction.png" style="height: 30px; margin-top:-5px" />                        
+                            <div class="mt-2 small">
+                                Non Fiction
+                            </div>
+                        </button>
+                        <button class="btn btn-lg btn-dark rounded-3 p-3" style="margin-right: 1rem;" (click)="gotoSearchResult()">
+                            <img src="cat-philosofy.png" style="height: 30px; margin-top:-5px" />                        
+                            <div class="mt-2 small">
+                                Philosofy
+                            </div>
+                        </button>
+                        <button class="btn btn-lg btn-dark rounded-3 p-3" style="margin-right: 1rem;" (click)="gotoSearchResult()">
+                            <img src="cat-education.png" style="height: 30px; margin-top:-5px" />                        
+                            <div class="mt-2 small">
+                                Education
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -219,3 +221,5 @@
 <div style="height:8rem"></div>
 
 <app-mobile-footer></app-mobile-footer>
+
+<app-first-run></app-first-run>

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { LangUtils } from "../utils/lang";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { InternetService } from './internet.service';
+import { UserModel } from '../models/user';
 
 @Injectable({
     providedIn: 'root'
@@ -14,19 +15,18 @@ export class InternetUserService extends InternetService {
         super(httpClient)  // Pass to parent
     }   
 
-    sendCode(cityId: string, email: string, callback: any) {
+    sendCode(email: string, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'SendCode',
             lang,
             data: {
-                cityId,
                 email,
             }
         }, callback);
     }
 
-    validateCode(email: string, code: number, callback: any) {
+    validateCode(email: string, code: string, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'ValidateCode',
@@ -59,14 +59,13 @@ export class InternetUserService extends InternetService {
         }, callback);
     }
 
-    updateMyProfile(firstName: string, lastName: string, callback: any) {
+    updateMyProfile(user: UserModel, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'UpdateMyProfile',
             lang,
             data: {
-                firstName,
-                lastName,
+                ...user
             }
         }, callback);
     }

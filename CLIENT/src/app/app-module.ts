@@ -1,5 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -25,6 +26,14 @@ import { ScreenDebates } from './SCREEN/DEBATES/screen-debates/screen-debates';
 import { AuthorItem } from './COMPONENTS/AUTHOR/author-item/author-item';
 import { ScreenAuthors } from './SCREEN/AUTHOR/screen-authors/screen-authors';
 import { ScreenPartners } from './SCREEN/PARTNERS/screen-partners/screen-partners';
+import { FirstRun } from './COMPONENTS/SYSTEM/first-run/first-run';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ImageCropperComponent } from 'ngx-image-cropper';
+import { NgxEditorModule } from 'ngx-editor';
+import { AuthInterceptor } from './utils/auth.interceptor';
+import { ToastComponent } from './COMPONENTS/SYSTEM/toast/toast.component';
+import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audiobook/screen-upload-audiobook';
 
 @NgModule({
     declarations: [
@@ -50,14 +59,25 @@ import { ScreenPartners } from './SCREEN/PARTNERS/screen-partners/screen-partner
         ScreenDebates,
         AuthorItem,
         ScreenAuthors,
-        ScreenPartners
+        ScreenPartners,
+        FirstRun,
+        ToastComponent,
+        ScreenUploadAudiobook
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [
+        HttpClientModule, 
         BrowserModule,
-        AppRoutingModule
+        AppRoutingModule,
+        FormsModule,
+        ImageCropperComponent,
+        NgxEditorModule,
+        FormsModule,
+        ReactiveFormsModule,
     ],
     providers: [
+        provideHttpClient(),
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         provideBrowserGlobalErrorListeners()
     ],
     bootstrap: [App]

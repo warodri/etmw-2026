@@ -1,5 +1,8 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { UserModel } from '../../../models/user';
+import { ToastService } from '../../../SERVICES/toast';
 
 @Component({
     selector: 'app-mobile-header',
@@ -10,23 +13,46 @@ import { Router } from '@angular/router';
 export class MobileHeader implements OnInit {
 
     @Input() showBack = false;
+    
+    myUser = signal<UserModel | null>(null);
+
+    email = signal<string | null>(null);
+    code = signal<number | null>(null);
 
     isLoggedIn = signal<boolean>(false);
     showLogin = signal<boolean>(false);
     askForCode = signal<boolean>(false);
-    working = signal<boolean>(false);
     showSearch = signal<boolean>(false);
+    working = signal<boolean>(false);
 
     constructor(
-        private router: Router
+        private router: Router,
+        private iUser: InternetUserService,
+        private toast: ToastService
     ) {}
 
     ngOnInit(): void {
-        
+        this.init();
     }
 
-    loadMyUser() {
+    init() {
+        this.getMyUser(() => {
+            const user = this.myUser();
+            if (user) {
+                this.isLoggedIn.set(true);
+                this.showLogin.set(false);
+            }
+        })
+    }
 
+    getMyUser(callback: any) {
+        this.iUser.getMyUser((response: any) => {
+            console.log('getMyUser', response)
+            if (response && response.success) {
+                this.myUser.set(response.user);
+            }
+            callback()
+        })
     }
 
     toggleShowLogin() {
@@ -34,12 +60,41 @@ export class MobileHeader implements OnInit {
     }
 
     sendCode() {
-        this.askForCode.set(true);
+        const email = this.email();
+        if (this.working() || !email) return;
+        this.working.set(true);
+        this.iUser.sendCode(email, (response: any) => {
+            this.working.set(false);
+            console.log('sendCode', response);
+            if (response && response.success) {
+                this.askForCode.set(true);
+            } else {
+                this.toast.show(this.toast.getMessageErrorUnexpected())
+            }
+        })
     }
 
     validateCode() {
-        this.isLoggedIn.set(true);
-        this.showLogin.set(false);
+        const email = this.email();
+        const code = this.code();
+        if (this.working() || !email || !code) return;
+        this.working.set(true);
+        this.iUser.validateCode(email, code.toString(), (response: any) => {
+            this.working.set(false);
+            console.log('validateCode', response);
+            if (response && response.success) {
+                this.myUser.set(response.user);
+                const token = response.token;
+                localStorage.setItem('auth_token_etmw', token);
+                this.isLoggedIn.set(true);
+                this.showLogin.set(false);
+                setTimeout(() => {
+                    this.gotoUserProfile()
+                }, 100)
+            } else {
+                this.toast.show(this.toast.getMessageErrorUnexpected())
+            }
+        })
     }
 
     toggleShowSearch() {

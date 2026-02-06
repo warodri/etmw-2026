@@ -12,7 +12,7 @@ export class Config {
 
     public static SERVER = {
         dev: true,
-        local: 'http://localhost:3051',
+        local: 'http://localhost:3080',
         remote: 'https://entertomyworld.com',
     }
 

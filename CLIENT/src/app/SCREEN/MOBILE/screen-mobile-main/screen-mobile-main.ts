@@ -1,5 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { UserModel } from '../../../models/user';
 
 @Component({
     selector: 'app-screen-mobile-main',
@@ -7,7 +9,7 @@ import { Router } from '@angular/router';
     templateUrl: './screen-mobile-main.html',
     styleUrl: './screen-mobile-main.css',
 })
-export class ScreenMobileMain {
+export class ScreenMobileMain implements OnInit {
 
     latestAuthors = signal([{
         userPhoto: 'f-author-2.jpeg',
@@ -24,8 +26,12 @@ export class ScreenMobileMain {
     }])
 
     constructor(
-        private router: Router
+        private router: Router,
     ) {}
+
+    ngOnInit(): void {
+        
+    }
 
     gotoSearchResult() {
         this.router.navigate(['app/search'])

@@ -7,16 +7,35 @@ const model = new Schema({
         type: String,
         index: true,
     },
+    code: { 
+        type: String
+    },
+    sessionToken: { 
+        type: String
+    },
     firstName: { 
         type: String
     },
     lastName: { 
         type: String
     },
+    city: { 
+        type: String
+    },
+    country: { 
+        type: String
+    },
     profilePicture: { 
         type: String
     },
-    code: { 
+    coverPicture: { 
+        type: String
+    },
+    isAuthor: { 
+        type: Boolean,
+        default: false
+    },
+    bio: { 
         type: String
     },
     lastIp: { 
@@ -55,9 +74,21 @@ const model = new Schema({
         default: 0
     },
 
-    enabled: { type: Boolean, index: true },
-    createdAt: { type: Number, index: true },
-    updatedAt: { type: Number, index: true },
+    enabled: { 
+        type: Boolean, 
+        index: true,
+        default: true
+    },
+    createdAt: { 
+        type: Number, 
+        index: true,
+        default: Date.now()
+    },
+    updatedAt: { 
+        type: Number, 
+        index: true,
+        default: Date.now()
+    },
 });
 
 const m = mongoose.model("etmw2026_users", model);

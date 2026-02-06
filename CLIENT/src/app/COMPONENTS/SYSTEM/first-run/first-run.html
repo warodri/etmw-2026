@@ -1,0 +1,25 @@
+@if (showCookies()) {
+    <div class="fixed-top overlay"></div>
+    
+    <div class="fixed-top h-100">
+        <div class="h-100 d-flex justify-content-center align-items-end p-5">
+            <div class="card border-0 rounded-5">
+                <div class="card-body">
+                    <b>Privacy Notice</b>
+                    <div class="p-3">
+                        We respect your privacy. Our app does not track users across apps or websites for 
+                        advertising or profiling purposes. While we may use cookies on our own web content 
+                        to enhance functionality (such as remembering preferences), these are not used 
+                        for tracking or third party advertising.
+                    </div>
+            
+                    <div class="mt-1 text-center">
+                        <button class="btn btn-dark rounded-pill" (click)="setCookies()">
+                            Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

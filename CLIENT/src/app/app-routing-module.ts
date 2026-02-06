@@ -9,6 +9,7 @@ import { ScreenPlayer } from './SCREEN/PLAYER/screen-player/screen-player';
 import { ScreenDebates } from './SCREEN/DEBATES/screen-debates/screen-debates';
 import { ScreenAuthors } from './SCREEN/AUTHOR/screen-authors/screen-authors';
 import { ScreenPartners } from './SCREEN/PARTNERS/screen-partners/screen-partners';
+import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audiobook/screen-upload-audiobook';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -20,6 +21,7 @@ const routes: Routes = [
     { path: 'app/debate', component: ScreenDebates },
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
+    { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
 ];
 
 @NgModule({

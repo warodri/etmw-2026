@@ -1,0 +1,783 @@
+<div class="container-fluid p-0 min-vh-100">
+
+    <!-- Header -->
+    <div class="etmw-bg-lighter rounded-bottom-xl px-4 pt-3 pb-4 sticky-top" style="top: 0; z-index: 100;">
+        <div class="d-flex justify-content-between align-items-center gap-3">
+            <button class="btn btn-link text-white p-0" (click)="goBack()">
+                <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
+            </button>
+            <h3 class="fw-bold m-0 flex-grow-1 text-center">
+                Upload Your Book
+            </h3>
+            <div style="width: 32px;"></div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="d-flex justify-content-between align-items-center mt-4 position-relative">
+            <!-- Progress line -->
+            <div class="position-absolute top-50 start-0 end-0 translate-middle-y" 
+                 style="height: 2px; background-color: rgba(255, 255, 255, 0.1); z-index: 0;">
+                <div class="h-100 bg-primary" 
+                     [style.width.%]="getProgressPercent()"
+                     style="transition: width 0.3s ease;"></div>
+            </div>
+
+            @for (step of steps; track step.number; let idx = $index) {
+                <div class="text-center position-relative" style="z-index: 1;">
+                    <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold"
+                         [class.bg-primary]="currentStep >= step.number"
+                         [class.bg-secondary]="currentStep < step.number"
+                         style="width: 40px; height: 40px; border: 3px solid var(--color-bg-main);">
+                        @if (currentStep > step.number) {
+                            <i class="bi bi-check-lg"></i>
+                        } @else {
+                            {{ step.number }}
+                        }
+                    </div>
+                    <div class="small" [class.text-primary]="currentStep === step.number" [class.text-gray-400]="currentStep !== step.number">
+                        {{ step.label }}
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="px-4 pb-5">
+
+        <!-- STEP 1: PRICING & REFERRAL -->
+        @if (currentStep === 1) {
+            <div class="mt-4 fade-in-up">
+                
+                <!-- Free with Referral Card -->
+                <div class="bg-slate-800 rounded-4 p-4 mb-4 border border-2"
+                     style="border-color: var(--color-primary) !important; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);">
+                    <div class="text-center mb-3">
+                        <div style="font-size: 3rem;">🎉</div>
+                        <h5 class="fw-bold mb-2">Upload for FREE</h5>
+                        <p class="text-gray-400 mb-3">
+                            Have a referral code from our partners? <br>
+                            Upload your book at no cost!
+                        </p>
+                    </div>
+
+                    <!-- Referral code input -->
+                    <div class="mb-3">
+                        <div class="d-flex gap-2">
+                            <input type="text" 
+                                   class="contact-input flex-grow-1"
+                                   placeholder="Enter your code..."
+                                   [(ngModel)]="referralCode"
+                                   (input)="validateReferralCode()">
+                            <button class="btn btn-primary rounded-pill px-4"
+                                    [disabled]="!referralCode"
+                                    (click)="applyReferralCode()">
+                                Apply
+                            </button>
+                        </div>
+                        @if (referralValid === true) {
+                            <div class="small text-success mt-2">
+                                <i class="bi bi-check-circle-fill"></i> Code validated! Your upload is FREE.
+                            </div>
+                        } @else if (referralValid === false) {
+                            <div class="small text-danger mt-2">
+                                <i class="bi bi-x-circle-fill"></i> Invalid code. Please try again.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Partners button -->
+                    <div class="text-center">
+                        <button class="btn btn-secondary rounded-pill px-4" (click)="showPartners()">
+                            <i class="bi bi-building"></i> View Our Partners
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Standard Pricing -->
+                @if (!referralValid) {
+                    <div class="bg-secondary rounded-4 p-4">
+                        <h5 class="fw-bold mb-3">Standard Pricing</h5>
+                        
+                        <!-- Pricing tiers -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <div class="bg-slate-800 rounded-4 p-3 text-center">
+                                    <div class="small text-gray-400 mb-1">Up to 100 pages</div>
+                                    <div class="text-primary fw-bold text-2xl">$49</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-slate-800 rounded-4 p-3 text-center">
+                                    <div class="small text-gray-400 mb-1">101-250 pages</div>
+                                    <div class="text-primary fw-bold text-2xl">$89</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-slate-800 rounded-4 p-3 text-center">
+                                    <div class="small text-gray-400 mb-1">251-500 pages</div>
+                                    <div class="text-primary fw-bold text-2xl">$149</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-slate-800 rounded-4 p-3 text-center">
+                                    <div class="small text-gray-400 mb-1">500+ pages</div>
+                                    <div class="text-primary fw-bold text-2xl">Custom</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="small text-gray-400 text-center">
+                            <i class="bi bi-info-circle"></i> &nbsp;Pricing includes 
+                            professional voice, curated expressions and quality control
+                        </div>
+                    </div>
+                }
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg rounded-pill px-5" (click)="nextStep()">
+                        Continue <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- STEP 2: UPLOAD METHOD -->
+        @if (currentStep === 2) {
+            <div class="mt-4 fade-in-up">
+                
+                <h5 class="fw-bold mb-4">How would you like to submit your book?</h5>
+
+                <!-- Digital Upload Option -->
+                <div class="bg-secondary rounded-4 p-4 mb-3 pointer"
+                     [class.border]="uploadMethod === 'digital'"
+                     [class.border-primary]="uploadMethod === 'digital'"
+                     [class.border-2]="uploadMethod === 'digital'"
+                     (click)="selectUploadMethod('digital')">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-primary p-3 flex-shrink-0">
+                            <i class="bi bi-cloud-upload-fill" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">Digital Upload</h6>
+                            <p class="small text-gray-400 mb-0">
+                                Upload PDF or TXT file directly (Fastest option)
+                            </p>
+                        </div>
+                        @if (uploadMethod === 'digital') {
+                            <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem;"></i>
+                        }
+                    </div>
+                </div>
+
+                <!-- Physical Mail Option -->
+                <div class="bg-secondary rounded-4 p-4 mb-3 pointer"
+                     [class.border]="uploadMethod === 'mail'"
+                     [class.border-primary]="uploadMethod === 'mail'"
+                     [class.border-2]="uploadMethod === 'mail'"
+                     (click)="selectUploadMethod('mail')">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 bg-slate-800 p-3 flex-shrink-0">
+                            <i class="bi bi-mailbox" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">Mail Physical Copy</h6>
+                            <p class="small text-gray-400 mb-0">
+                                Send your book via mail (Argentina & UK only)
+                            </p>
+                        </div>
+                        @if (uploadMethod === 'mail') {
+                            <i class="bi bi-check-circle-fill text-primary" style="font-size: 1.5rem;"></i>
+                        }
+                    </div>
+                </div>
+
+                <!-- Mail addresses (if mail selected) -->
+                @if (uploadMethod === 'mail') {
+                    <div class="bg-slate-800 rounded-4 p-4 mb-3">
+                        <h6 class="fw-bold mb-3">Mailing Addresses</h6>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex align-items-start gap-2 mb-2">
+                                <span class="badge bg-primary px-2 py-1">🇦🇷 Argentina</span>
+                            </div>
+                            <div class="bg-secondary rounded-3 p-3">
+                                <div class="small">
+                                    <strong>ETMW Publishing</strong><br>
+                                    PO Box 12345<br>
+                                    C1425 Buenos Aires<br>
+                                    Argentina
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex align-items-start gap-2 mb-2">
+                                <span class="badge bg-primary px-2 py-1">🇬🇧 United Kingdom</span>
+                            </div>
+                            <div class="bg-secondary rounded-3 p-3">
+                                <div class="small">
+                                    <strong>ETMW Publishing UK</strong><br>
+                                    PO Box 67890<br>
+                                    London EC1A 1BB<br>
+                                    United Kingdom
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert bg-slate-900 border border-warning text-warning mt-3 mb-0" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>Note:</strong> Processing time for mailed books is 5-7 business days after receipt.
+                        </div>
+                    </div>
+                }
+
+                <!-- File upload (if digital selected) -->
+                @if (uploadMethod === 'digital') {
+                    <div class="bg-slate-800 rounded-4 p-4 text-center mb-3">
+                        @if (!uploadedFile) {
+                            <div class="py-4">
+                                <div class="mb-3" style="font-size: 3rem;">📄</div>
+                                <h6 class="fw-bold mb-2">Upload Your Book</h6>
+                                <p class="small text-gray-400 mb-3">
+                                    Supported formats: PDF, TXT (Max 100MB)
+                                </p>
+                                <input type="file" 
+                                       #fileInput 
+                                       accept=".pdf,.txt" 
+                                       (change)="onFileSelected($event)"
+                                       style="display: none;">
+                                <button class="btn btn-primary rounded-pill px-5" (click)="fileInput.click()">
+                                    <i class="bi bi-upload"></i> Choose File
+                                </button>
+                            </div>
+                        } @else {
+                            <div class="bg-secondary rounded-3 p-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-file-earmark-text-fill text-primary" style="font-size: 2rem;"></i>
+                                    <div class="flex-grow-1 text-start">
+                                        <div class="fw-semibold">{{ uploadedFile.name }}</div>
+                                        <div class="small text-gray-400">{{ formatFileSize(uploadedFile.size) }}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-secondary rounded-circle" (click)="removeFile()">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="d-flex gap-3">
+                    <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" 
+                            [disabled]="!canProceedFromStep2()"
+                            (click)="nextStep()">
+                        Continue <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- STEP 3: BOOK DETAILS & VOICE CONFIGURATION -->
+        @if (currentStep === 3) {
+            <div class="mt-4 fade-in-up">
+                
+                <h5 class="fw-bold mb-4">Configure Your Audiobook</h5>
+
+                <!-- Source Language -->
+                <div class="mb-4">
+                    <label class="contact-label">Source Language</label>
+                    <div class="small text-gray-400 mt-1 mb-1">
+                        The language your book is written in
+                    </div>
+                    <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage">
+                        <option value="">Select language...</option>
+                        @for (lang of availableLanguages; track lang.code) {
+                            <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Target Language -->
+                <div class="mb-4">
+                    <label class="contact-label">Target Language (Optional)</label>
+                    <div class="small text-gray-400 mt-1 mb-1">
+                        Translate and narrate in a different language
+                    </div>
+                    <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage">
+                        <option value="">Same as source</option>
+                        @for (lang of availableLanguages; track lang.code) {
+                            <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
+                        }
+                    </select>
+                    @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                        <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">
+                            <i class="bi bi-info-circle-fill"></i> Translation adds +$0.02 per word
+                        </div>
+                    }
+                </div>
+
+                <!-- Voice Selection -->
+                <div class="mb-4">
+                    <label class="contact-label">Narrator Voice</label>
+                    <div class="row g-3">
+                        @for (voice of standardVoices; track voice.id) {
+                            <div class="col-6">
+                                <div class="bg-secondary rounded-4 p-3 pointer position-relative"
+                                     [class.border]="bookConfig.voiceId === voice.id"
+                                     [class.border-primary]="bookConfig.voiceId === voice.id"
+                                     [class.border-2]="bookConfig.voiceId === voice.id"
+                                     (click)="selectVoice(voice.id)">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="fw-bold">{{ voice.name }}</div>
+                                            <div class="small text-gray-400">{{ voice.gender }} • {{ voice.accent }}</div>
+                                        </div>
+                                        @if (bookConfig.voiceId === voice.id) {
+                                            <i class="bi bi-check-circle-fill text-primary"></i>
+                                        }
+                                    </div>
+                                    <button class="btn btn-sm btn-slate-800 rounded-pill w-100" 
+                                            (click)="playVoiceSample($event, voice.sampleUrl)">
+                                        <i class="bi bi-play-fill"></i> Preview
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-link text-primary" (click)="showPremiumVoices()">
+                            <i class="bi bi-stars"></i> View Premium Voices (+$20)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Expression Settings -->
+                <div class="mb-4">
+                    <div class="mt-4 bg-secondary rounded-4 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label>Voice Expression</label>
+                            <span class="rounded-3 bg-slate-800 text-warning px-3 py-1">+$15</span>
+                        </div>
+                        <div class="mt-3 form-check form-switch">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="expressionToggle"
+                                   [(ngModel)]="bookConfig.useExpression">
+                            <label class="form-check-label" for="expressionToggle">
+                                Enable emotional expression and natural intonation
+                            </label>
+                            <div class="text-gray-400 mt-2">
+                                Creates more dynamic and engaging narration with varied emotions
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Options -->
+                <div class="mb-4">
+                    <button class="btn btn-link text-primary p-0" (click)="showAdvanced = !showAdvanced">
+                        <i class="bi" [class.bi-chevron-down]="!showAdvanced" [class.bi-chevron-up]="showAdvanced"></i>
+                        Advanced Options
+                    </button>
+                    
+                    @if (showAdvanced) {
+                        <div class="mt-3">
+                            <!-- Speech Rate -->
+                            <div class="mb-4">
+                                <label class="contact-label">Speech Rate</label>
+                                <select class="contact-input" [(ngModel)]="bookConfig.speechRate">
+                                    <option value="0.75">Slow (0.75x)</option>
+                                    <option value="1.0" selected>Normal (1.0x)</option>
+                                    <option value="1.25">Fast (1.25x)</option>
+                                </select>
+                            </div>
+
+                            <!-- Stability -->
+                            <div class="mb-4">
+                                <label class="contact-label">Voice Stability</label>
+                                <input type="range" 
+                                       class="form-range" 
+                                       min="0" 
+                                       max="100" 
+                                       [(ngModel)]="bookConfig.stability">
+                                <div class="d-flex justify-content-between small text-gray-400">
+                                    <span>More Variable</span>
+                                    <span>{{ bookConfig.stability }}%</span>
+                                    <span>More Stable</span>
+                                </div>
+                            </div>
+
+                            <!-- Clarity -->
+                            <div class="mb-4">
+                                <label class="contact-label">Clarity + Similarity</label>
+                                <input type="range" 
+                                       class="form-range" 
+                                       min="0" 
+                                       max="100" 
+                                       [(ngModel)]="bookConfig.clarity">
+                                <div class="d-flex justify-content-between small text-gray-400">
+                                    <span>More Similar</span>
+                                    <span>{{ bookConfig.clarity }}%</span>
+                                    <span>More Clear</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Book Metadata -->
+                <div class="bg-slate-800 rounded-4 p-4 mb-4">
+                    
+                    <h5 class="fw-bold mb-3">Book Information</h5>
+                    
+                    <div class="mb-3">
+                        <label class="text-gray-400">Title</label>
+                        <input type="text" 
+                               class="contact-input"
+                               placeholder="Enter book title..."
+                               [(ngModel)]="bookConfig.title">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-gray-400">Author Name</label>
+                        <input type="text" 
+                               class="contact-input"
+                               placeholder="Enter author name..."
+                               [(ngModel)]="bookConfig.authorName">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-gray-400">Description</label>
+                        <textarea class="contact-input"
+                                  rows="3"
+                                  placeholder="Brief description of your book..."
+                                  [(ngModel)]="bookConfig.description"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="contact-label">
+                            Categories <span class="text-gray-400">(Select up to 3)</span>
+                        </label>
+                        <div class="mt-3 d-flex flex-wrap gap-2">
+                            @for (category of availableCategories; track category) {
+                                <button class="btn rounded-pill"
+                                        [class.btn-primary]="bookConfig.categories.includes(category)"
+                                        [class.btn-secondary]="!bookConfig.categories.includes(category)"
+                                        (click)="toggleCategory(category)">
+                                    {{ category }}
+                                </button>
+                            }
+                            <button class="btn btn-sm btn-dark rounded-pill">
+                                Show more
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="bg-secondary rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3">Cost Summary</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-gray-400">Base Price</span>
+                        <span class="fw-semibold">${{ calculateBasePrice() }}</span>
+                    </div>
+                    @if (bookConfig.useExpression) {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-gray-400">Voice Expression</span>
+                            <span class="fw-semibold">+$15</span>
+                        </div>
+                    }
+                    @if (selectedVoiceIsPremium()) {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-gray-400">Premium Voice</span>
+                            <span class="fw-semibold">+$20</span>
+                        </div>
+                    }
+                    @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-gray-400">Translation (est.)</span>
+                            <span class="fw-semibold">+$50</span>
+                        </div>
+                    }
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold text-primary text-2xl">${{ calculateTotalPrice() }}</span>
+                    </div>
+                    @if (referralValid) {
+                        <div class="text-center mt-3">
+                            <span class="badge bg-success px-4 py-2">
+                                <i class="bi bi-check-circle-fill"></i> FREE with referral code!
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" 
+                            [disabled]="!canProceedFromStep3()"
+                            (click)="nextStep()">
+                        Review <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- STEP 4: REVIEW & SUBMIT -->
+        @if (currentStep === 4) {
+            <div class="mt-4 fade-in-up">
+                
+                <h5 class="fw-bold mb-4">Review Your Submission</h5>
+
+                <!-- Upload Summary -->
+                <div class="bg-secondary rounded-4 p-4 mb-3">
+                    <h6 class="fw-semibold mb-3">Upload Method</h6>
+                    @if (uploadMethod === 'digital') {
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-cloud-upload-fill text-primary" style="font-size: 2rem;"></i>
+                            <div>
+                                <div class="fw-semibold">{{ uploadedFile?.name }}</div>
+                                <div class="small text-gray-400">{{ formatFileSize(uploadedFile?.size || 0) }}</div>
+                            </div>
+                        </div>
+                    } @else {
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-mailbox text-primary" style="font-size: 2rem;"></i>
+                            <div>
+                                <div class="fw-semibold">Physical Mail</div>
+                                <div class="small text-gray-400">Please send to the provided address</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Book Details Summary -->
+                <div class="bg-secondary rounded-4 p-4 mb-3">
+                    <h6 class="fw-semibold mb-3">Book Details</h6>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="small text-gray-400">Title</div>
+                            <div class="fw-semibold">{{ bookConfig.title }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-gray-400">Author</div>
+                            <div class="fw-semibold">{{ bookConfig.authorName }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="small text-gray-400">Categories</div>
+                            <div class="d-flex gap-2 mt-1">
+                                @for (cat of bookConfig.categories; track cat) {
+                                    <span class="badge bg-primary px-3 py-1">{{ cat }}</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Configuration Summary -->
+                <div class="bg-secondary rounded-4 p-4 mb-3">
+                    <h6 class="fw-semibold mb-3">Voice Configuration</h6>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="small text-gray-400">Language</div>
+                            <div class="fw-semibold">{{ getLanguageName(bookConfig.sourceLanguage) }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-gray-400">Voice</div>
+                            <div class="fw-semibold">{{ getVoiceName(bookConfig.voiceId) }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                @if (bookConfig.useExpression) {
+                                    <span class="badge bg-slate-800 px-3 py-1">
+                                        <i class="bi bi-emoji-smile"></i> Expression Enabled
+                                    </span>
+                                }
+                                @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                                    <span class="badge bg-slate-800 px-3 py-1">
+                                        <i class="bi bi-translate"></i> Translating to {{ getLanguageName(bookConfig.targetLanguage) }}
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Price -->
+                <div class="bg-slate-800 rounded-4 p-4 mb-4 text-center border border-2"
+                     [class.border-success]="referralValid"
+                     [class.border-primary]="!referralValid">
+                    <h6 class="fw-bold mb-2">Total Cost</h6>
+                    @if (referralValid) {
+                        <div class="text-success" style="font-size: 3rem; font-weight: 700;">FREE</div>
+                        <div class="small text-gray-400">Referral code applied</div>
+                    } @else {
+                        <div class="text-primary" style="font-size: 3rem; font-weight: 700;">${{ calculateTotalPrice() }}</div>
+                        <div class="small text-gray-400">One-time payment</div>
+                    }
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="bg-secondary rounded-4 p-4 mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               id="termsCheck"
+                               [(ngModel)]="acceptedTerms">
+                        <label class="form-check-label" for="termsCheck">
+                            I have read and agree to the 
+                            <a href="#" class="text-primary" (click)="showTerms($event)">Terms & Conditions</a>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" 
+                            [disabled]="!acceptedTerms"
+                            (click)="submitUpload()">
+                        <i class="bi bi-check-circle-fill"></i> Submit
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- SUCCESS STATE -->
+        @if (currentStep === 5) {
+            <div class="mt-5 text-center fade-in-up">
+                <div class="mb-4" style="font-size: 5rem;">✅</div>
+                <h3 class="fw-bold mb-3">Thank You!</h3>
+                <p class="text-gray-400 mb-4" style="max-width: 500px; margin: 0 auto;">
+                    Your book has been submitted successfully. Our team of expert humans will personally review and process your audiobook to ensure the highest quality output.
+                </p>
+                
+                <div class="bg-slate-800 rounded-4 p-4 mb-4" style="max-width: 500px; margin: 0 auto;">
+                    <h6 class="fw-bold mb-3">What Happens Next?</h6>
+                    <div class="d-flex align-items-start gap-3 mb-3 text-start">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width: 32px; height: 32px; font-size: 0.875rem;">
+                            1
+                        </div>
+                        <div>
+                            <div class="fw-semibold small">Quality Check</div>
+                            <div class="small text-gray-400">Our team reviews your submission</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3 text-start">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width: 32px; height: 32px; font-size: 0.875rem;">
+                            2
+                        </div>
+                        <div>
+                            <div class="fw-semibold small">AI Processing</div>
+                            <div class="small text-gray-400">Your book is converted to audio</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 text-start">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width: 32px; height: 32px; font-size: 0.875rem;">
+                            3
+                        </div>
+                        <div>
+                            <div class="fw-semibold small">Publication</div>
+                            <div class="small text-gray-400">We'll notify you via app & email</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 justify-content-center">
+                    <button class="btn btn-secondary rounded-pill px-5" (click)="goToMyBooks()">
+                        View My Books
+                    </button>
+                    <button class="btn btn-primary rounded-pill px-5" (click)="uploadAnother()">
+                        Upload Another
+                    </button>
+                </div>
+            </div>
+        }
+
+    </div>
+
+</div>
+
+<!-- Partners Modal -->
+@if (showPartnersModal) {
+    <div class="modal fade show d-block px-4" style="background-color: rgba(0,0,0,0.8);" (click)="closePartners()">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" (click)="$event.stopPropagation()">
+            <div class="modal-content bg-secondary">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-light fw-bold">Our Partners</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="closePartners()"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-gray-400 mb-4">
+                        Get a referral code from any of our trusted partners to upload your book for free!
+                    </p>
+                    
+                    @for (partner of partners; track partner.name) {
+                        <div class="bg-slate-800 rounded-4 p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold text-light mb-1">{{ partner.name }}</h6>
+                                    <p class="small text-gray-400 mb-0">{{ partner.description }}</p>
+                                </div>
+                                <a [href]="partner.website" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <h5 class="m-0">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </h5>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Terms Modal -->
+@if (showTermsModal) {
+    <div class="modal fade show d-block px-4" style="background-color: rgba(0,0,0,0.8);" (click)="closeTerms()">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" (click)="$event.stopPropagation()">
+            <div class="modal-content bg-secondary">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold text-light">Terms & Conditions</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="closeTerms()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-gray-400" style="line-height: 1.75;">
+                        <h6 class="fw-bold text-white mb-3">1. Content Ownership</h6>
+                        <p>You retain all rights to your original content. By uploading, you grant us a license to convert, distribute, and promote your audiobook on our platform.</p>
+
+                        <h6 class="fw-bold text-white mb-3 mt-4">2. Quality Standards</h6>
+                        <p>We reserve the right to review all submissions for quality and appropriateness. Content that violates our community guidelines may be rejected.</p>
+
+                        <h6 class="fw-bold text-white mb-3 mt-4">3. Payment & Refunds</h6>
+                        <p>All payments are non-refundable once processing begins. Processing time is estimated at 7-14 business days.</p>
+
+                        <h6 class="fw-bold text-white mb-3 mt-4">4. Distribution Rights</h6>
+                        <p>Your audiobook will be available on our platform. You may request removal at any time with 30 days notice.</p>
+
+                        <h6 class="fw-bold text-white mb-3 mt-4">5. Revenue Sharing</h6>
+                        <p>Authors receive 70% of net revenue from audiobook sales and subscriptions. Payments are made monthly.</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary rounded-pill px-4" (click)="acceptTermsFromModal()">
+                        I Agree
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div style="height: 5rem;"></div>
