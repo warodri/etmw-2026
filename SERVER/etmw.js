@@ -42,6 +42,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.static('public'));
 
 app.use((req, res, next) => {
     res.removeHeader('X-Frame-Options'); // remove if already set

@@ -23,6 +23,8 @@ export interface UserModel {
     lastCheckTime: number,
     lastUnreadMessages: number,
 
+    languages: Array<string>,
+
     createdAt: number,
     updatedAt: number,
     

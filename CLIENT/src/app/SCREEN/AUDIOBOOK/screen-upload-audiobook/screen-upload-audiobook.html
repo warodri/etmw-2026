@@ -1,4 +1,6 @@
-<div class="container-fluid p-0 min-vh-100">
+@let referralCodeObj = referralCode();
+
+<div class="container p-0 min-vh-100">
 
     <!-- Header -->
     <div class="etmw-bg-lighter rounded-bottom-xl px-4 pt-3 pb-4 sticky-top" style="top: 0; z-index: 100;">
@@ -11,15 +13,11 @@
             </h3>
             <div style="width: 32px;"></div>
         </div>
-
         <!-- Progress Steps -->
         <div class="d-flex justify-content-between align-items-center mt-4 position-relative">
             <!-- Progress line -->
-            <div class="position-absolute top-50 start-0 end-0 translate-middle-y" 
-                 style="height: 2px; background-color: rgba(255, 255, 255, 0.1); z-index: 0;">
-                <div class="h-100 bg-primary" 
-                     [style.width.%]="getProgressPercent()"
-                     style="transition: width 0.3s ease;"></div>
+            <div class="position-absolute top-50 start-0 end-0 translate-middle-y" style="height: 2px; background-color: rgba(255, 255, 255, 0.1); z-index: 0;">
+                <div class="h-100 bg-primary" [style.width.%]="getProgressPercent()" style="transition: width 0.3s ease;"></div>
             </div>
 
             @for (step of steps; track step.number; let idx = $index) {
@@ -42,90 +40,104 @@
         </div>
     </div>
 
+    @if (showInstructionsStep1()) {
+        <div class="px-5 pt-4 pb-3 text-center">
+            <div class="etmw-bg-lighter rounded-4 px-4 pt-3 pb-3 lh-175 position-relative">
+                <div class="position-absolute bg-secondary text-light rounded-circle pointer" style="right:-15px; top:-9px; width:30px; height:30px;" (click)="closeInstructionsStep1()">
+                    <i class="bi bi-x-lg"></i>
+                </div>
+                Upload your book, essay, or paper.
+                We turn it into an audiobook and publish it on Enter To My World.
+                Subscribers listen to your work, and you get paid every month.
+            </div>
+        </div>
+    }
+    
     <div class="px-4 pb-5">
 
         <!-- STEP 1: PRICING & REFERRAL -->
         @if (currentStep === 1) {
             <div class="mt-4 fade-in-up">
                 
-                <!-- Free with Referral Card -->
-                <div class="bg-slate-800 rounded-4 p-4 mb-4 border border-2"
-                     style="border-color: var(--color-primary) !important; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);">
-                    <div class="text-center mb-3">
-                        <div style="font-size: 3rem;">🎉</div>
-                        <h5 class="fw-bold mb-2">Upload for FREE</h5>
-                        <p class="text-gray-400 mb-3">
-                            Have a referral code from our partners? <br>
-                            Upload your book at no cost!
-                        </p>
-                    </div>
-
-                    <!-- Referral code input -->
-                    <div class="mb-3">
-                        <div class="d-flex gap-2">
-                            <input type="text" 
-                                   class="contact-input flex-grow-1"
-                                   placeholder="Enter your code..."
-                                   [(ngModel)]="referralCode"
-                                   (input)="validateReferralCode()">
-                            <button class="btn btn-primary rounded-pill px-4"
-                                    [disabled]="!referralCode"
-                                    (click)="applyReferralCode()">
-                                Apply
+                @if (!showPricingOptions()) {
+                    <!-- Free with Referral Card -->
+                    <div class="bg-slate-800 rounded-4 p-4 mb-4 border border-2"
+                        style="border-color: var(--color-primary) !important; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);">
+                        <div class="text-center mb-3">
+                            <div style="font-size: 3rem;">🎉</div>
+                            <h5 class="fw-bold mb-2">Upload for FREE</h5>
+                            <p class="text-gray-400 mb-3">
+                                Have a referral code from our partners? <br>
+                                Upload your book at no cost!
+                            </p>
+                        </div>
+                        <!-- Referral code input -->
+                        <div class="mb-3">
+                            <div class="d-flex gap-2">
+                                <input type="text"  class="contact-input flex-grow-1" placeholder="Enter your code..." [(ngModel)]="referralCode" />
+                                <button class="btn btn-primary rounded-pill px-4" [disabled]="!referralCode()" (click)="applyReferralCode()">
+                                    Apply
+                                </button>
+                            </div>
+                            @if (referralCodeObj) {
+                                @if (referralValid() === true) {
+                                    <div class="small text-success p-2">
+                                        <i class="bi bi-check-circle-fill"></i> &nbsp;Code validated! Your upload is FREE.
+                                    </div>
+                                } @else if (referralValid() === false) {
+                                    <div class="small text-danger p-2">
+                                        <i class="bi bi-x-circle-fill"></i> &nbsp;Invalid code. Please try again.
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <!-- Partners button -->
+                        <div class="pt-2 text-center">
+                            <button class="btn btn-secondary rounded-pill px-4" (click)="showPartners()">
+                                <i class="bi bi-building"></i> View Our Partners
                             </button>
                         </div>
-                        @if (referralValid === true) {
-                            <div class="small text-success mt-2">
-                                <i class="bi bi-check-circle-fill"></i> Code validated! Your upload is FREE.
-                            </div>
-                        } @else if (referralValid === false) {
-                            <div class="small text-danger mt-2">
-                                <i class="bi bi-x-circle-fill"></i> Invalid code. Please try again.
-                            </div>
-                        }
+                        <div class="pt-2 small text-gray-400 text-center">
+                            Max amount of pages: 200
+                        </div>
                     </div>
 
-                    <!-- Partners button -->
-                    <div class="text-center">
-                        <button class="btn btn-secondary rounded-pill px-4" (click)="showPartners()">
-                            <i class="bi bi-building"></i> View Our Partners
+                    <div class="pt-3 mb-5 text-center">
+                        <button class="btn btn-lg btn-secondary rounded-4 px-4 pt-3 pb-3" (click)="dontHaveReferralCodeSelected()">
+                            ❌ &nbsp;I don't have a referral code
                         </button>
                     </div>
-                </div>
+                }
 
                 <!-- Standard Pricing -->
-                @if (!referralValid) {
+                @if (showPricingOptions()) {
                     <div class="bg-secondary rounded-4 p-4">
-                        <h5 class="fw-bold mb-3">Standard Pricing</h5>
-                        
+                        <h5 class="fw-bold mb-3">
+                            Standard Pricing
+                        </h5>                        
                         <!-- Pricing tiers -->
                         <div class="row g-3 mb-4">
-                            <div class="col-6">
-                                <div class="bg-slate-800 rounded-4 p-3 text-center">
-                                    <div class="small text-gray-400 mb-1">Up to 100 pages</div>
-                                    <div class="text-primary fw-bold text-2xl">$49</div>
+                            @for (item of standardPricing; track item) {
+                                <div class="col-6 pointer" (click)="selectUploadBasePrice(item)">
+                                    <div class="bg-slate-800 rounded-4 p-3 text-center">
+                                        <div class="small text-gray-400 mb-1">
+                                            {{ item.label }}
+                                        </div>
+                                        <div class="text-primary fw-bold text-2xl">
+                                            @if (regionDetected() == 'latam') {
+                                                {{ selectedCurrency() }}{{ item.latam }}
+                                            } @else if (regionDetected() == 'us') {
+                                                {{ selectedCurrency() }}{{ item.us }}
+                                            } @else if (regionDetected() == 'uk') {
+                                                {{ selectedCurrency() }}{{ item.us }}
+                                            } @else {
+                                                {{ selectedCurrency() }}{{ item.global }}
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-slate-800 rounded-4 p-3 text-center">
-                                    <div class="small text-gray-400 mb-1">101-250 pages</div>
-                                    <div class="text-primary fw-bold text-2xl">$89</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-slate-800 rounded-4 p-3 text-center">
-                                    <div class="small text-gray-400 mb-1">251-500 pages</div>
-                                    <div class="text-primary fw-bold text-2xl">$149</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-slate-800 rounded-4 p-3 text-center">
-                                    <div class="small text-gray-400 mb-1">500+ pages</div>
-                                    <div class="text-primary fw-bold text-2xl">Custom</div>
-                                </div>
-                            </div>
+                            }
                         </div>
-
                         <div class="small text-gray-400 text-center">
                             <i class="bi bi-info-circle"></i> &nbsp;Pricing includes 
                             professional voice, curated expressions and quality control
@@ -154,7 +166,7 @@
                      [class.border-2]="uploadMethod === 'digital'"
                      (click)="selectUploadMethod('digital')">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-primary p-3 flex-shrink-0">
+                        <div class="rounded-3 p-3 flex-shrink-0" [class.bg-primary]="uploadMethod === 'digital'" [class.bg-slate-800]="uploadMethod !== 'digital'">
                             <i class="bi bi-cloud-upload-fill" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -176,7 +188,7 @@
                      [class.border-2]="uploadMethod === 'mail'"
                      (click)="selectUploadMethod('mail')">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-slate-800 p-3 flex-shrink-0">
+                        <div class="rounded-3 p-3 flex-shrink-0" [class.bg-primary]="uploadMethod === 'mail'" [class.bg-slate-800]="uploadMethod !== 'mail'">
                             <i class="bi bi-mailbox" style="font-size: 2rem;"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -284,15 +296,19 @@
         @if (currentStep === 3) {
             <div class="mt-4 fade-in-up">
                 
-                <h5 class="fw-bold mb-4">Configure Your Audiobook</h5>
+                <h5 class="fw-bold mb-4">
+                    Configure Your Audiobook
+                </h5>
 
                 <!-- Source Language -->
                 <div class="mb-4">
-                    <label class="contact-label">Source Language</label>
+                    <label class="contact-label">
+                        Source Language
+                    </label>
                     <div class="small text-gray-400 mt-1 mb-1">
                         The language your book is written in
                     </div>
-                    <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage">
+                    <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage" (change)="calculateTranslationCost()">
                         <option value="">Select language...</option>
                         @for (lang of availableLanguages; track lang.code) {
                             <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
@@ -302,70 +318,135 @@
 
                 <!-- Target Language -->
                 <div class="mb-4">
-                    <label class="contact-label">Target Language (Optional)</label>
+                    <label class="contact-label">
+                        Target Language (Optional)
+                    </label>
                     <div class="small text-gray-400 mt-1 mb-1">
                         Translate and narrate in a different language
                     </div>
-                    <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage">
+                    <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage" (change)="calculateTranslationCost()">
                         <option value="">Same as source</option>
                         @for (lang of availableLanguages; track lang.code) {
                             <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
                         }
                     </select>
                     @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
-                        <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">
-                            <i class="bi bi-info-circle-fill"></i> Translation adds +$0.02 per word
-                        </div>
+                        @if (!translation.useFixedPrice) {
+                            <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">
+                                <i class="bi bi-info-circle-fill"></i> 
+                                Translation adds +{{ selectedCurrency() }}{{ TRANSLATION_PRICE_PER_WORD }} per word
+                            </div>
+                        }
                     }
                 </div>
 
                 <!-- Voice Selection -->
                 <div class="mb-4">
-                    <label class="contact-label">Narrator Voice</label>
-                    <div class="row g-3">
-                        @for (voice of standardVoices; track voice.id) {
+                    <h3>Voices Included</h3>
+                    <p class="text-gray-400 mb-3">
+                        You can pick any of these voices or select a premium from below
+                    </p>
+                    <div class="row g-3" [class.included-voices-limit]="!includedVoicesShowMore()">
+                        @for (voice of standardVoices(); track voice.id) {
                             <div class="col-6">
                                 <div class="bg-secondary rounded-4 p-3 pointer position-relative"
                                      [class.border]="bookConfig.voiceId === voice.id"
                                      [class.border-primary]="bookConfig.voiceId === voice.id"
                                      [class.border-2]="bookConfig.voiceId === voice.id"
-                                     (click)="selectVoice(voice.id)">
+                                     (click)="selectVoice(voice.id, false)">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div>
                                             <div class="fw-bold">{{ voice.name }}</div>
-                                            <div class="small text-gray-400">{{ voice.gender }} • {{ voice.accent }}</div>
+                                            <div class="small text-gray-400">{{ voice.labels?.gender }} • {{ voice.labels?.accent }}</div>
                                         </div>
                                         @if (bookConfig.voiceId === voice.id) {
                                             <i class="bi bi-check-circle-fill text-primary"></i>
                                         }
                                     </div>
-                                    <button class="btn btn-sm btn-slate-800 rounded-pill w-100" 
-                                            (click)="playVoiceSample($event, voice.sampleUrl)">
-                                        <i class="bi bi-play-fill"></i> Preview
-                                    </button>
+                                    @if (voice.previewUrl) {
+                                        <button class="btn btn-sm btn-secondary rounded-pill w-100" (click)="playVoiceSample($event, voice.previewUrl)">
+                                            <i class="bi bi-play-fill"></i> Preview
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         }
                     </div>
-                    <div class="text-center mt-3">
-                        <button class="btn btn-link text-primary" (click)="showPremiumVoices()">
-                            <i class="bi bi-stars"></i> View Premium Voices (+$20)
-                        </button>
-                    </div>
+                    @if (!includedVoicesShowMore()) {
+                        <div class="mt-4 p-3 text-center">
+                            <button class="btn btn-secondary rounded-pill" (click)="toggleShowMoreIncludedVouces()">
+                                Show more voices
+                            </button>
+                        </div>
+                    }
+                    <!--
+                        Button to see Premium Voices
+                    -->
+                    @if (!premiumVoicesShowMore()) {
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary rounded-pill" (click)="toggleShowPremiumVoices()">
+                                <i class="bi bi-stars"></i> View Premium Voices 
+                                (+{{ selectedCurrency() }}{{ SELECTED_PREMIUM_VOICE_COST() }})
+                            </button>
+                        </div>
+                    }
+                    <!--
+                        Premium Voices List
+                    -->
+                    @if (showPremiumVoices()) {
+                        <div class="mt-4 mb-5 p-4 bg-slate-800 rounded-4 border-primary-2x">                        
+                            <h3>Premium Voices</h3>
+                            <p class="text-gray-400 mb-3">
+                                You can pick any of these voices at extra cost
+                            </p>
+                            <div class="row g-3" [class.included-voices-limit]="!premiumVoicesShowMore()">
+                                @for (voice of premiumVoices(); track voice.id) {
+                                    <div class="col-6">
+                                        <div class="bg-secondary rounded-4 p-3 pointer position-relative"
+                                            [class.border]="bookConfig.voiceId === voice.id"
+                                            [class.border-primary]="bookConfig.voiceId === voice.id"
+                                            [class.border-2]="bookConfig.voiceId === voice.id"
+                                            (click)="selectVoice(voice.id, true)">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <div class="fw-bold">{{ voice.name }}</div>
+                                                    <div class="small text-gray-400">{{ voice.labels?.gender }} • {{ voice.labels?.accent }}</div>
+                                                </div>
+                                                @if (bookConfig.voiceId === voice.id) {
+                                                    <i class="bi bi-check-circle-fill text-primary"></i>
+                                                }
+                                            </div>
+                                            @if (voice.previewUrl) {
+                                                <button class="btn btn-sm btn-secondary rounded-pill w-100" (click)="playVoiceSample($event, voice.previewUrl)">
+                                                    <i class="bi bi-play-fill"></i> Preview
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (!premiumVoicesShowMore()) {
+                                <div class="mt-4 text-center">
+                                    <button class="btn btn-secondary rounded-pill" (click)="toggleShowMorePremiumVouces()">
+                                        Show more voices
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
 
                 <!-- Expression Settings -->
                 <div class="mb-4">
                     <div class="mt-4 bg-secondary rounded-4 p-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label>Voice Expression</label>
+                            <h3>
+                                Voice Expression
+                            </h3>
                             <span class="rounded-3 bg-slate-800 text-warning px-3 py-1">+$15</span>
                         </div>
                         <div class="mt-3 form-check form-switch">
-                            <input class="form-check-input" 
-                                   type="checkbox" 
-                                   id="expressionToggle"
-                                   [(ngModel)]="bookConfig.useExpression">
+                            <input class="form-check-input" type="checkbox" id="expressionToggle" [(ngModel)]="bookConfig.useExpression">
                             <label class="form-check-label" for="expressionToggle">
                                 Enable emotional expression and natural intonation
                             </label>
@@ -387,7 +468,9 @@
                         <div class="mt-3">
                             <!-- Speech Rate -->
                             <div class="mb-4">
-                                <label class="contact-label">Speech Rate</label>
+                                <label class="contact-label">
+                                    Speech Rate
+                                </label>
                                 <select class="contact-input" [(ngModel)]="bookConfig.speechRate">
                                     <option value="0.75">Slow (0.75x)</option>
                                     <option value="1.0" selected>Normal (1.0x)</option>
@@ -397,12 +480,10 @@
 
                             <!-- Stability -->
                             <div class="mb-4">
-                                <label class="contact-label">Voice Stability</label>
-                                <input type="range" 
-                                       class="form-range" 
-                                       min="0" 
-                                       max="100" 
-                                       [(ngModel)]="bookConfig.stability">
+                                <label class="contact-label">
+                                    Voice Stability
+                                </label>
+                                <input type="range" class="form-range" min="0" max="100" [(ngModel)]="bookConfig.stability">
                                 <div class="d-flex justify-content-between small text-gray-400">
                                     <span>More Variable</span>
                                     <span>{{ bookConfig.stability }}%</span>
@@ -412,12 +493,10 @@
 
                             <!-- Clarity -->
                             <div class="mb-4">
-                                <label class="contact-label">Clarity + Similarity</label>
-                                <input type="range" 
-                                       class="form-range" 
-                                       min="0" 
-                                       max="100" 
-                                       [(ngModel)]="bookConfig.clarity">
+                                <label class="contact-label">
+                                    Clarity + Similarity
+                                </label>
+                                <input type="range" class="form-range" min="0" max="100" [(ngModel)]="bookConfig.clarity">
                                 <div class="d-flex justify-content-between small text-gray-400">
                                     <span>More Similar</span>
                                     <span>{{ bookConfig.clarity }}%</span>
@@ -479,7 +558,9 @@
 
                 <!-- Cost Summary -->
                 <div class="bg-secondary rounded-4 p-4 mb-4">
-                    <h6 class="fw-bold mb-3">Cost Summary</h6>
+                    <h3 class="fw-bold mb-3">
+                        Cost Summary
+                    </h3>
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-gray-400">Base Price</span>
                         <span class="fw-semibold">${{ calculateBasePrice() }}</span>
@@ -490,7 +571,7 @@
                             <span class="fw-semibold">+$15</span>
                         </div>
                     }
-                    @if (selectedVoiceIsPremium()) {
+                    @if (isVoiceProfessional()) {
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-gray-400">Premium Voice</span>
                             <span class="fw-semibold">+$20</span>
@@ -498,8 +579,8 @@
                     }
                     @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-gray-400">Translation (est.)</span>
-                            <span class="fw-semibold">+$50</span>
+                            <span class="text-gray-400">Translation</span>
+                            <span class="fw-semibold">+{{ selectedCurrency() }}{{ totalTranslation()}}</span>
                         </div>
                     }
                     <hr style="border-color: rgba(255,255,255,0.1);">
@@ -507,7 +588,7 @@
                         <span class="fw-bold">Total</span>
                         <span class="fw-bold text-primary text-2xl">${{ calculateTotalPrice() }}</span>
                     </div>
-                    @if (referralValid) {
+                    @if (referralValid()) {
                         <div class="text-center mt-3">
                             <span class="badge bg-success px-4 py-2">
                                 <i class="bi bi-check-circle-fill"></i> FREE with referral code!
@@ -611,10 +692,10 @@
 
                 <!-- Final Price -->
                 <div class="bg-slate-800 rounded-4 p-4 mb-4 text-center border border-2"
-                     [class.border-success]="referralValid"
-                     [class.border-primary]="!referralValid">
+                     [class.border-success]="referralValid()"
+                     [class.border-primary]="!referralValid()">
                     <h6 class="fw-bold mb-2">Total Cost</h6>
-                    @if (referralValid) {
+                    @if (referralValid()) {
                         <div class="text-success" style="font-size: 3rem; font-weight: 700;">FREE</div>
                         <div class="small text-gray-400">Referral code applied</div>
                     } @else {
@@ -709,7 +790,7 @@
 </div>
 
 <!-- Partners Modal -->
-@if (showPartnersModal) {
+@if (showPartnersModal()) {
     <div class="modal fade show d-block px-4" style="background-color: rgba(0,0,0,0.8);" (click)="closePartners()">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" (click)="$event.stopPropagation()">
             <div class="modal-content bg-secondary">
@@ -722,7 +803,7 @@
                         Get a referral code from any of our trusted partners to upload your book for free!
                     </p>
                     
-                    @for (partner of partners; track partner.name) {
+                    @for (partner of partners(); track partner.name) {
                         <div class="bg-slate-800 rounded-4 p-3 mb-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -753,22 +834,7 @@
                     <button type="button" class="btn-close btn-close-white" (click)="closeTerms()"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="text-gray-400" style="line-height: 1.75;">
-                        <h6 class="fw-bold text-white mb-3">1. Content Ownership</h6>
-                        <p>You retain all rights to your original content. By uploading, you grant us a license to convert, distribute, and promote your audiobook on our platform.</p>
-
-                        <h6 class="fw-bold text-white mb-3 mt-4">2. Quality Standards</h6>
-                        <p>We reserve the right to review all submissions for quality and appropriateness. Content that violates our community guidelines may be rejected.</p>
-
-                        <h6 class="fw-bold text-white mb-3 mt-4">3. Payment & Refunds</h6>
-                        <p>All payments are non-refundable once processing begins. Processing time is estimated at 7-14 business days.</p>
-
-                        <h6 class="fw-bold text-white mb-3 mt-4">4. Distribution Rights</h6>
-                        <p>Your audiobook will be available on our platform. You may request removal at any time with 30 days notice.</p>
-
-                        <h6 class="fw-bold text-white mb-3 mt-4">5. Revenue Sharing</h6>
-                        <p>Authors receive 70% of net revenue from audiobook sales and subscriptions. Payments are made monthly.</p>
-                    </div>
+                    <app-terms-text></app-terms-text>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-primary rounded-pill px-4" (click)="acceptTermsFromModal()">

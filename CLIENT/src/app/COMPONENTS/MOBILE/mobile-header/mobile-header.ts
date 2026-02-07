@@ -106,7 +106,10 @@ export class MobileHeader implements OnInit {
     }
     
     gotoUserProfile() {
-        this.router.navigate(['app/user-profile'])
+        const myUser = this.myUser();
+        if (myUser && myUser._id) {
+            this.router.navigate(['app/user-profile', myUser._id])
+        }
     }
 
 }

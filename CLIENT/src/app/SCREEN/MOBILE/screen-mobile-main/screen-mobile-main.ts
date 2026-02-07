@@ -37,4 +37,8 @@ export class ScreenMobileMain implements OnInit {
         this.router.navigate(['app/search'])
     }
 
+    gotoUpload() {
+        this.router.navigate(['app/audiobooks/upload'])
+    }
+
 }

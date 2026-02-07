@@ -22,4 +22,44 @@ export class InternetService {
         this.internetCommon = new InternetCommon(this.httpClient);
     }
 
+    getAppConfig(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'GetAppConfig',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
+
+    uploadFileAndReturn(file: File, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        const formData = new FormData();
+        formData.append('action', 'UploadFileAndReturn');
+        formData.append('lang', lang);
+        formData.append('file', file);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
+    }
+
+    getPromoCodes(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
+            action: 'GetPromoCodes',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
+    validatePromoCode(promoCode: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'ValidatePromoCode',
+            lang,
+            data: {
+                promoCode
+            }
+        }, callback);
+    }
+
+
 }

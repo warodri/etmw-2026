@@ -15,7 +15,7 @@ const routes: Routes = [
     { path: '', component: ScreenHome },
     { path: 'app', component: ScreenMobileMain },
     { path: 'app/inbox', component: ScreenInbox },
-    { path: 'app/user-profile', component: ScreenUserProfile },
+    { path: 'app/user-profile/:id', component: ScreenUserProfile },
     { path: 'app/search', component: ScreenSearch },
     { path: 'app/player', component: ScreenPlayer },
     { path: 'app/debate', component: ScreenDebates },

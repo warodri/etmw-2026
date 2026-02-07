@@ -1,14 +1,9 @@
 @if (message()) {
 <div class="fixed-top" (click)="toggleToast()" style="z-index:999999999999">
     <div class="d-flex justify-content-center">
-        <div
-            class="m-4 bg-body text-body p-4 rounded-4 shadow text-center text-primary d-flex justify-content-center align-items-center">
-            <h5>{{ message() }}</h5>
-            <!-- &nbsp;&nbsp;
-        <div class="pointer cursor">
-          <i class="bi bi-x-circle"></i>
-        </div> -->
-        </div>
+        <div class="m-4 bg-body p-4 rounded-4 shadow text-center text-primary d-flex justify-content-center align-items-center">
+            <h5 class="text-dark">{{ message() }}</h5>
+         </div>
     </div>
 </div>
 }

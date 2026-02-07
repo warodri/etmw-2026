@@ -5,7 +5,7 @@ export class Config {
     public static dev = true;
 
     public static ASSETS_BASE_URL = 'https://entertomyworld.com/images/never-delete'
-
+    
     public static MARKETPLACE = {
         feePercent: 10
     }

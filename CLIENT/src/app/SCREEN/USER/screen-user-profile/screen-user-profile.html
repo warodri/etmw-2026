@@ -1,4 +1,6 @@
 @let userObj = user();
+@let profilePhotoObj = profilePhoto();
+@let coverPhotoObj = coverPhoto();
 
 @if (userObj) {
     <div class="container-fluid p-0 min-vh-100 d-flex align-items-start">
@@ -20,7 +22,11 @@
                             <img [src]="userObj.profilePicture ? userObj.profilePicture : 'nouser.png'" class="w-100 h-100" style="object-fit: cover;" />
                         </div>
                         <!-- Online/Offline Badge -->
-                        <div class="position-absolute" style="bottom: 8px; right: 8px; width: 24px; height: 24px; background-color: #22c55e; border-radius: 50%; border: 3px solid var(--color-bg-main);"></div>
+                         @if (userObj.connected) {
+                             <div class="position-absolute" style="bottom: 8px; right: 8px; width: 24px; height: 24px; background-color: #22c55e; border-radius: 50%; border: 3px solid var(--color-bg-main);"></div>
+                        } @else {
+                             <div class="position-absolute" style="bottom: 8px; right: 8px; width: 24px; height: 24px; background-color: #8a8a8a; border-radius: 50%; border: 3px solid var(--color-bg-main);"></div>
+                         }
                     </div>
                 </div>
     
@@ -115,7 +121,13 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="small text-gray-400">Location</div>
-                                <div class="fw-semibold">Buenos Aires, Argentina</div>
+                                <div class="fw-semibold">
+                                    @if (userObj.city && userObj.country) {
+                                        {{ userObj.country }}
+                                    } @else {
+                                        Not defined
+                                    }
+                                </div>
                             </div>
                         </div>
                         
@@ -126,8 +138,11 @@
                             <div class="flex-grow-1">
                                 <div class="small text-gray-400">Languages</div>
                                 <div class="d-flex gap-2 mt-1">
-                                    <span class="badge bg-slate-800 text-white px-2 py-1">Spanish</span>
-                                    <span class="badge bg-slate-800 text-white px-2 py-1">English</span>
+                                    @for (item of userObj.languages; track item) {
+                                        <span class="badge bg-slate-800 text-white px-2 py-1">
+                                            {{ item }}
+                                        </span>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -193,7 +208,7 @@
                 <div class="mt-4 bg-secondary rounded-4 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold m-0">
-                            <i class="bi bi-book-fill text-primary"></i> Published Works
+                            <i class="bi bi-book-fill text-primary"></i> &nbsp;Published Works
                         </h5>
                         <span class="badge bg-slate-800 text-primary px-3 py-2">24 Total</span>
                     </div>
@@ -217,7 +232,7 @@
                 -->
                 <div class="mt-4 bg-secondary rounded-4 p-4">
                     <h5 class="fw-bold mb-3">
-                        <i class="bi bi-clock-history text-primary"></i> Recent Activity
+                        <i class="bi bi-clock-history text-primary"></i> &nbsp;Recent Activity
                     </h5>
                     
                     <div class="d-flex flex-column gap-3">
@@ -256,81 +271,130 @@
                 <!-- 
                     EDIT PROFILE SECTION (Only visible to profile owner)
                 -->
-                <div class="mt-4 bg-secondary rounded-4 p-4 border border-2" style="border-color: var(--color-primary) !important;">
-                    <h5 class="fw-bold mb-3">
-                        <i class="bi bi-pencil-square text-primary"></i> Edit Your Profile
-                    </h5>
-                    
-                    <!-- Upload Profile Picture -->
-                    <div class="debate-item-highlight rounded-4 mb-3">
-                        <div class="text-center py-3">
-                            <div class="small text-gray-400 mb-2">Profile Picture</div>
-                            <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2">
-                                <i class="bi bi-upload"></i> &nbsp; Change Photo
-                            </button>
+                @if (isMine()) {
+                    <div class="mt-4 bg-secondary rounded-4 p-4 border border-2" style="border-color: var(--color-primary) !important;">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-pencil-square text-primary"></i> &nbsp;Edit Your Profile
+                        </h5>
+                        
+                        <!-- Upload Profile Picture -->
+                        <div class="debate-item-highlight rounded-4 mb-3">
+                            <div class="text-center py-3">
+                                <input #changeProfilePicture type="file" class="invisible" accept="image/*" (change)="onFileSelected($event, 'profile')" />
+                                <div class="small text-gray-400 mb-2">Profile Picture</div>
+                                @if (profilePhotoObj) {
+                                    <div class="mb-3 flex-grow-1 text-center">
+                                        <div class="fw-semibold">{{ profilePhotoObj.name }}</div>
+                                        <div class="small text-gray-400">{{ formatFileSize(profilePhotoObj.size) }}</div>
+                                    </div>
+                                }
+                                <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2" (click)="changeProfilePicture.click()">
+                                    <i class="bi bi-upload"></i> &nbsp; Change Photo
+                                </button>
+                            </div>
                         </div>
-                    </div>
-    
-                    <!-- Upload Cover Picture -->
-                    <div class="debate-item-highlight rounded-4 mb-3">
-                        <div class="text-center py-3">
-                            <div class="small text-gray-400 mb-2">Cover Image</div>
-                            <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2">
-                                <i class="bi bi-image"></i> &nbsp; Change Cover
-                            </button>
+        
+                        <!-- Upload Cover Picture -->
+                        <div class="debate-item-highlight rounded-4 mb-3">
+                            <div class="text-center py-3">
+                                <input #changeCoverPicture type="file" class="invisible" accept="image/*" (change)="onFileSelected($event, 'banner')" />
+                                <div class="small text-gray-400 mb-2">Cover Image</div>
+                                @if (coverPhotoObj) {
+                                    <div class="mb-3 flex-grow-1 text-center">
+                                        <div class="fw-semibold">{{ coverPhotoObj.name }}</div>
+                                        <div class="small text-gray-400">{{ formatFileSize(coverPhotoObj.size) }}</div>
+                                    </div>
+                                }
+                                <button class="btn btn-secondary rounded-pill px-4 pt-2 pb-2" (click)="changeCoverPicture.click()">
+                                    <i class="bi bi-image"></i> &nbsp; Change Cover
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Form Fields -->
-                    <div class="mb-3">
-                        <label class="contact-label">First Name</label>
-                        <input type="text" placeholder="Type here..." name="firstName" class="contact-input" value="Mariano">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="contact-label">Last Name</label>
-                        <input type="text" placeholder="Type here..." name="lastName" class="contact-input" value="Rodriguez">
-                    </div>
-    
-                    <div class="mb-3">
-                        <label class="contact-label">Bio</label>
-                        <textarea placeholder="Tell us about yourself..." name="bio" class="contact-input" rows="3"></textarea>
-                    </div>
-    
-                    <div class="mb-3">
-                        <label class="contact-label">Location</label>
-                        <input type="text" placeholder="City, Country" name="location" class="contact-input" value="Buenos Aires, Argentina">
-                    </div>
-    
-                    <div class="mb-3">
-                        <label class="contact-label">Languages (comma separated)</label>
-                        <input type="text" placeholder="Spanish, English..." name="languages" class="contact-input" value="Spanish, English">
-                    </div>
-                    
-                    <!-- Status Toggle -->
-                    <div class="mb-4">
-                        <label class="contact-label d-block mb-2">Status</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="status" id="status-connected" checked>
-                            <label class="btn btn-outline-success" for="status-connected">
-                                <i class="bi bi-circle-fill"></i> Online
-                            </label>
+                        
+                        <!-- Form Fields -->
+                        <div class="mb-3">
+                            <label class="text-gray-400">First Name</label>
+                            <input type="text" placeholder="Type here..." name="firstName" class="contact-input" [(ngModel)]="userObj.firstName">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="text-gray-400">Last Name</label>
+                            <input type="text" placeholder="Type here..." name="lastName" class="contact-input" [(ngModel)]="userObj.lastName">
+                        </div>
+        
+                        <div class="mb-3">
+                            <label class="text-gray-400">Bio</label>
+                            <textarea placeholder="Tell us about yourself..." name="bio" class="contact-input" rows="3" [(ngModel)]="userObj.bio"></textarea>
+                        </div>
+        
+                        <div class="mb-3">
+                            <label class="text-gray-400">City</label>
+                            <input type="text" placeholder="City..." name="location" class="contact-input" [(ngModel)]="userObj.city">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-gray-400">Country</label>
+                            <input type="text" placeholder="Country..." name="location" class="contact-input" [(ngModel)]="userObj.country">
+                        </div>
+        
+                        <div class="mb-3">
+                            <label class="contact-label">Languages</label>
                             
-                            <input type="radio" class="btn-check" name="status" id="status-disconnected">
-                            <label class="btn btn-outline-secondary" for="status-disconnected">
-                                <i class="bi bi-dash-circle-fill"></i> Offline
-                            </label>
+                            <!-- Dropdown selector -->
+                            <select class="contact-input mb-2" 
+                                    [(ngModel)]="selectedLanguageToAdd"
+                                    (change)="addLanguage()">
+                                <option value="">Select a language to add...</option>
+                                @for (lang of availableLanguages; track lang.code) {
+                                    <option [value]="lang.code" 
+                                            [disabled]="userObj.languages.includes(lang.code)">
+                                        {{ lang.flag }} {{ lang.name }}
+                                    </option>
+                                }
+                            </select>
+                            
+                            <!-- Selected languages as removable tags -->
+                            @if (userObj.languages .length > 0) {
+                                <div class="d-flex flex-wrap gap-2">
+                                    @for (langCode of userObj.languages; track langCode) {
+                                        <span class="badge bg-primary px-3 py-2 d-flex align-items-center gap-2">
+                                            {{ getLanguageDisplay(langCode) }}
+                                            <i class="bi bi-x pointer" (click)="removeLanguage(langCode)" style="font-size: 1rem;"></i>
+                                        </span>
+                                    }
+                                </div>
+                            } @else {
+                                <div class="small text-gray-400">
+                                    <i class="bi bi-info-circle"></i> Select the languages you write in
+                                </div>
+                            }
                         </div>
+
+                        <!-- Status Toggle -->
+                        <div class="mb-4">
+                            <label class="text-gray-400 d-block mb-2">Status</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="status" id="status-connected" checked>
+                                <label class="btn btn-outline-success" for="status-connected" (click)="toggleForcedStatus(true)">
+                                    <i class="bi bi-circle-fill"></i> Online
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="status" id="status-disconnected">
+                                <label class="btn btn-outline-secondary" for="status-disconnected" (click)="toggleForcedStatus(false)">
+                                    <i class="bi bi-dash-circle-fill"></i> Offline
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Update Button -->
+                        <div class="text-center">
+                            <button class="btn btn-primary btn-lg rounded-pill px-5" (click)="saveChanges()">
+                                <i class="bi bi-check-circle-fill"></i> Save Changes
+                            </button>
+                        </div>
+
                     </div>
-                    
-                    <!-- Update Button -->
-                    <div class="text-center">
-                        <button class="btn btn-primary btn-lg rounded-pill px-5">
-                            <i class="bi bi-check-circle-fill"></i> Save Changes
-                        </button>
-                    </div>
-                </div>
-    
+                }    
             </div>
         </div>
     </div>

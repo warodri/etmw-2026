@@ -34,6 +34,7 @@ import { NgxEditorModule } from 'ngx-editor';
 import { AuthInterceptor } from './utils/auth.interceptor';
 import { ToastComponent } from './COMPONENTS/SYSTEM/toast/toast.component';
 import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audiobook/screen-upload-audiobook';
+import { TermsText } from './COMPONENTS/SYSTEM/terms-text/terms-text';
 
 @NgModule({
     declarations: [
@@ -62,7 +63,8 @@ import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audioboo
         ScreenPartners,
         FirstRun,
         ToastComponent,
-        ScreenUploadAudiobook
+        ScreenUploadAudiobook,
+        TermsText
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

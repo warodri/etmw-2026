@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UtilClass } from '../../utils/utils';
 
 @Component({
     selector: 'app-screen-home',
@@ -100,15 +101,8 @@ export class ScreenHome implements OnInit {
     }
 
     private detectRegion() {
-        const browserLanguage = navigator.language || (navigator as any).userLanguage;
-        
-        const latamCountries = [
-            'es-AR', 'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-CU', 'es-DO', 
-            'es-EC', 'es-SV', 'es-GT', 'es-HN', 'es-MX', 'es-NI', 'es-PA', 
-            'es-PY', 'es-PE', 'es-PR', 'es-UY', 'es-VE'
-        ];
-        
-        if (latamCountries.includes(browserLanguage)) {
+        const regionInfo = UtilClass.detectRegion();        
+        if (regionInfo.region == 'latam') {
             this.selectedRegion.set('latam');
             this.currency.set('$');
             this.prices.set({
@@ -116,15 +110,8 @@ export class ScreenHome implements OnInit {
                 reader: '4.99',
                 unlimited: '8.49'
             });
-        } else if (browserLanguage.startsWith('es-') && browserLanguage !== 'es-US' && browserLanguage !== 'es-ES') {
-            this.selectedRegion.set('latam');
-            this.currency.set('$');
-            this.prices.set({
-                explorer: '3.49',
-                reader: '4.99',
-                unlimited: '8.49'
-            });
-        } else if (browserLanguage === 'en-US') {
+        }        
+        else if (regionInfo.region == 'us') {
             this.selectedRegion.set('us');
             this.currency.set('$');
             this.prices.set({
@@ -132,7 +119,8 @@ export class ScreenHome implements OnInit {
                 reader: '9.99',
                 unlimited: '14.99'
             });
-        } else if (browserLanguage.startsWith('en-GB')) {
+        } 
+        else if (regionInfo.region == 'uk') {
             this.selectedRegion.set('uk');
             this.currency.set('£');
             this.prices.set({
@@ -140,7 +128,8 @@ export class ScreenHome implements OnInit {
                 reader: '9.99',
                 unlimited: '14.99'
             });
-        } else {
+        } 
+        else {
             this.selectedRegion.set('global');
             this.currency.set('€');
             this.prices.set({

@@ -1,4 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+import { UserModel } from '../../../models/user';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { InternetService } from '../../../SERVICES/internet.service';
+import { ToastService } from '../../../SERVICES/toast';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PromoCodeModel } from '../../../models/promo-codes';
+import { UtilClass } from '../../../utils/utils';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { Language, ProcessedVoice } from '../../../models/voices';
+import { Config } from '../../../utils/config';
 
 @Component({
     selector: 'app-screen-upload-audiobook',
@@ -6,7 +16,15 @@ import { Component } from '@angular/core';
     templateUrl: './screen-upload-audiobook.html',
     styleUrl: './screen-upload-audiobook.css',
 })
-export class ScreenUploadAudiobook {
+export class ScreenUploadAudiobook implements OnInit {
+    
+    //  My logged user (mandatory)
+    myUser = signal<UserModel | null>(null);
+
+    //  Promo codes providers arriving from server
+    promoCodes = signal<PromoCodeModel[]>([]);
+
+    //  Steps of the process
     currentStep = 1;
     steps = [
         { number: 1, label: 'Pricing' },
@@ -16,36 +34,54 @@ export class ScreenUploadAudiobook {
     ];
 
     // Step 1: Referral & Pricing
-    referralCode = '';
-    referralValid: boolean | null = null;
-    showPartnersModal = false;
+    referralCode = signal<string | null>(null);
+    referralValid = signal<boolean>(false);
+    showPricingOptions = signal<boolean>(false);
+    selectedPricing = signal<number | null>(null);
 
-    partners = [
-        {
-            name: 'Writers Guild International',
-            description: 'Professional writers association',
-            website: 'https://example.com/wgi'
-        },
-        {
-            name: 'Independent Publishers Alliance',
-            description: 'Supporting indie authors worldwide',
-            website: 'https://example.com/ipa'
-        },
-        {
-            name: 'BookLovers Community',
-            description: 'Global reading community',
-            website: 'https://example.com/booklovers'
-        },
-        {
-            name: 'Literary Circle Network',
-            description: 'Connect with fellow authors',
-            website: 'https://example.com/lcn'
-        }
-    ];
+    //  This is the list of partners to show in the popup
+    partners = signal<Array<{
+        name: string,
+        description: string,
+        website: string
+    }>>([]);
 
     // Step 2: Upload Method
     uploadMethod: 'digital' | 'mail' | null = null;
     uploadedFile: File | null = null;
+    estimatedWordCount = signal<number>(0);
+    translation: {
+        useFixedPrice: boolean,
+        PER_WORD: {
+            latam: number,
+            us: number,
+            uk: number,
+            global: number,
+        }, 
+        FIXED_PRICE: {
+            latam: number,
+            us: number,
+            uk: number,
+            global: number,
+        }
+    } = {
+        useFixedPrice: true,
+        PER_WORD: {
+            latam: 0.002,
+            us: 0.002,
+            uk: 0.002,
+            global: 0.002,
+        }, 
+        FIXED_PRICE: {
+            latam: 5,
+            us: 50,
+            uk: 50,
+            global: 50,
+        }
+    }
+    TRANSLATION_PRICE_PER_WORD = 0;
+    totalTranslation = signal<number>(0);
+    isVoiceProfessional = signal<boolean>(false);
 
     // Step 3: Configuration
     showAdvanced = false;
@@ -80,40 +116,33 @@ export class ScreenUploadAudiobook {
         { code: 'ru', name: 'Russian', flag: '🇷🇺' }
     ];
 
-    standardVoices = [
-        {
-            id: 'voice-1',
-            name: 'Rachel',
-            gender: 'Female',
-            accent: 'American',
-            sampleUrl: 'https://example.com/sample1.mp3',
-            isPremium: false
-        },
-        {
-            id: 'voice-2',
-            name: 'Daniel',
-            gender: 'Male',
-            accent: 'British',
-            sampleUrl: 'https://example.com/sample2.mp3',
-            isPremium: false
-        },
-        {
-            id: 'voice-3',
-            name: 'Sophia',
-            gender: 'Female',
-            accent: 'Australian',
-            sampleUrl: 'https://example.com/sample3.mp3',
-            isPremium: false
-        },
-        {
-            id: 'voice-4',
-            name: 'Michael',
-            gender: 'Male',
-            accent: 'American',
-            sampleUrl: 'https://example.com/sample4.mp3',
-            isPremium: false
-        }
-    ];
+    availableVoiceLanguages: Array<Language> = [];
+
+    //  Region detected depends the pricing
+    regionDetected = signal<string>('global');
+    selectedCurrency = signal<string>('$');
+    standardPricing: Array<{
+        label: string,
+        latam: number,
+        us: number,
+        uk: number,
+        global: number,
+    }> = []
+
+    standardVoices = signal<Array<ProcessedVoice>>([]);
+    premiumVoices = signal<Array<ProcessedVoice>>([]);
+    premiumVoiceCost: {
+        latam: number,
+        us: number,
+        uk: number,
+        global: number,
+    } = {
+        latam: 3,
+        us: 9,
+        uk: 9,
+        global: 9,
+    }
+    SELECTED_PREMIUM_VOICE_COST = signal<number>(0);
 
     availableCategories = [
         'Literary Fiction',
@@ -131,6 +160,142 @@ export class ScreenUploadAudiobook {
     // Step 4: Review & Submit
     acceptedTerms = false;
     showTermsModal = false;
+    showPartnersModal = signal<boolean>(false);
+    includedVoicesShowMore = signal<boolean>(false);
+    showPremiumVoices = signal<boolean>(false);
+    premiumVoicesShowMore = signal<boolean>(false);
+
+    // Flags
+    working = signal<boolean>(true);
+    showInstructionsStep1 = signal<boolean>(true);
+    private audio?: HTMLAudioElement;
+
+    constructor(
+        private iUser: InternetUserService,
+        private iAudiobook: InternetAudiobookService,
+        private internet: InternetService,
+        private toast: ToastService,
+        private router: Router,
+        private route: ActivatedRoute,
+    ) {}
+
+    ngOnInit(): void {
+        this.getAppConfig(() => {
+            this.calculatePremiumVoiceCost();
+            this.loadMyUser(() => {
+                this.getPromoCodes(() => {
+                    this.populatePartnersArray();
+                    this.detectRegion();
+                    this.checkShowInstructionsStep1();
+                    this.working.set(false);
+                });
+            })
+        })
+    }
+
+    getAppConfig(callback: any) {
+        this.internet.getAppConfig((response: any) => {
+            console.log('getAppConfig', response);
+            if (response && response.success) {
+                this.standardPricing = response.standardPricing
+                this.translation = response.translation;
+                this.premiumVoiceCost = response.premiumVoiceCost;
+                callback();
+            }
+        })
+    }
+
+    calculatePremiumVoiceCost() {
+        const regionDetected = this.regionDetected();
+        if (regionDetected && this.premiumVoiceCost) {
+            if (regionDetected == 'latam') {
+                this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.latam)
+            }
+            else if (regionDetected == 'us') {
+                this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.us);
+            }
+            else if (regionDetected == 'uk') {
+                this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.uk);
+            } else {
+                this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.global);
+            }            
+        }
+    }
+
+    checkShowInstructionsStep1() {
+        const showInstructions = localStorage.getItem('etmw-na-step-1');
+        if (showInstructions && showInstructions == '1') {
+            this.showInstructionsStep1.set(false);
+        }
+    }
+
+    closeInstructionsStep1() {
+        localStorage.setItem('etmw-na-step-1', '1');
+        this.showInstructionsStep1.set(false);
+    }
+
+    loadMyUser(callback: any) {
+        this.iUser.getMyUser((response: any) => {
+            console.log('getMyUser', response)
+            if (response && response.success) {
+                this.myUser.set(response.user);
+                callback();
+            }
+        })
+    }
+
+    getPromoCodes(callback: any) {
+        this.internet.getPromoCodes((response: any) => {
+            console.log('getPromoCodes', response)
+            if (response && response.success) {
+                this.promoCodes.set( response.data );
+            }
+            callback();
+        })
+    }
+
+    populatePartnersArray() {
+        const a: Array<{
+            name: string,
+            description: string,
+            website: string
+        }> = [];
+        for (let item of this.promoCodes()) {
+            a.push({
+                name: item.partnerName,
+                description: item.partnerDescription,
+                website: item.linkToCode
+            })
+        }
+        this.partners.set(a);
+    }
+
+    detectRegion() {
+        const regionInfo = UtilClass.detectRegion();        
+        this.regionDetected.set(regionInfo.region);
+        this.selectedCurrency.set(regionInfo.currency);
+    }
+
+    selectUploadBasePrice(item: {
+        label: string,
+        latam: number,
+        us: number,
+        uk: number,
+        global: number,
+    }) {
+        let price = 0;
+        if (this.regionDetected() == 'latam') {
+            price = item.latam;
+        } else if (this.regionDetected() == 'us') {
+            price = item.us;
+        } else if (this.regionDetected() == 'uk') {
+            price = item.us;
+        } else {
+            price = item.global;
+        }
+        this.selectedPricing.set(price);
+        this.nextStep();
+    }
 
     // Progress calculation
     getProgressPercent(): number {
@@ -139,6 +304,28 @@ export class ScreenUploadAudiobook {
 
     // Step navigation
     nextStep() {
+        if (this.currentStep == 1) {
+            //  Validate a PROMO CODE or pricing
+            const referralCode = this.referralCode();
+            const referralValid = this.referralValid();
+            const selectedPricing = this.selectedPricing();
+            if ((!referralCode || !referralValid) && !selectedPricing) {
+                this.toast.show('Please enter a promo code or pick a pricing');
+                return;
+            }
+            //  Donwlod voices for next step
+            this.iAudiobook.getVoicesByTier((response: any) => {
+                console.log('getVoicesByTier', response)
+                if (response && response.success) {
+                    this.standardVoices.set(response.voices.standard)
+                    this.premiumVoices.set(response.voices.premium)
+                }
+            })
+        }
+        //  Next Step 2
+        if (this.currentStep == 2) {
+
+        }
         if (this.currentStep < 5) {
             this.currentStep++;
         }
@@ -151,26 +338,28 @@ export class ScreenUploadAudiobook {
     }
 
     // Step 1: Referral
-    validateReferralCode() {
-        // Simulate validation
-        if (this.referralCode.length > 0) {
-            this.referralValid = null;
-        }
-    }
-
     applyReferralCode() {
-        // Simulate API call
-        setTimeout(() => {
-            this.referralValid = this.referralCode.toLowerCase() === 'partner2024';
-        }, 500);
+        const promoCode = this.referralCode();
+        if (this.working() || !promoCode) return;
+        this.working.set(true);
+        this.internet.validatePromoCode(promoCode, (response: any) => {
+            this.working.set(false);
+            console.log('validatePromoCode', response);
+            if (response && response.success) {
+                this.referralValid.set(true);
+                this.nextStep();
+            } else {
+                this.toast.show('This code seems to be incorrect.')
+            }
+        })
     }
 
     showPartners() {
-        this.showPartnersModal = true;
+        this.showPartnersModal.set(true);
     }
 
     closePartners() {
-        this.showPartnersModal = false;
+        this.showPartnersModal.set(false);
     }
 
     // Step 2: Upload
@@ -182,11 +371,24 @@ export class ScreenUploadAudiobook {
         const file = event.target.files[0];
         if (file) {
             this.uploadedFile = file;
+            this.countWordsInFile(file);
+        }
+    }
+
+    async countWordsInFile(file: File) {
+        try {
+            const text = await file.text();
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            this.estimatedWordCount.set(words.length);
+        } catch (error) {
+            console.error('Error counting words:', error);
+            this.estimatedWordCount.set(0);
         }
     }
 
     removeFile() {
         this.uploadedFile = null;
+        this.estimatedWordCount.set(0);
     }
 
     formatFileSize(bytes: number): string {
@@ -207,19 +409,23 @@ export class ScreenUploadAudiobook {
     }
 
     // Step 3: Configuration
-    selectVoice(voiceId: string) {
+    selectVoice(voiceId: string, isPro: boolean) {
         this.bookConfig.voiceId = voiceId;
+        this.isVoiceProfessional.set(isPro);
     }
 
     playVoiceSample(event: Event, sampleUrl: string) {
         event.stopPropagation();
-        console.log('Play sample:', sampleUrl);
-        // Implement audio playback
-    }
-
-    showPremiumVoices() {
-        console.log('Show premium voices modal');
-        // Open modal with premium voice options
+        if (!sampleUrl) return;
+        // Stop previous audio if playing
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.currentTime = 0;
+        }
+        this.audio = new Audio(sampleUrl);
+        this.audio.play().catch(err => {
+            console.error('Audio play failed:', err);
+        });
     }
 
     toggleCategory(category: string) {
@@ -233,19 +439,16 @@ export class ScreenUploadAudiobook {
         }
     }
 
-    calculateBasePrice(): number {
-        if (this.referralValid) return 0;
-        // Simulate based on file size or page count
-        return 89;
+    calculateBasePrice() {
+        const price = this.selectedPricing();
+        if (!price) {
+            return 0;
+        } else {
+            return price;
+        }
     }
 
-    selectedVoiceIsPremium(): boolean {
-        const voice = this.standardVoices.find(v => v.id === this.bookConfig.voiceId);
-        return voice?.isPremium || false;
-    }
-
-    calculateTotalPrice(): number {
-        if (this.referralValid) return 0;
+    calculateTotalPrice(): number {        
         
         let total = this.calculateBasePrice();
         
@@ -253,16 +456,46 @@ export class ScreenUploadAudiobook {
             total += 15;
         }
         
-        if (this.selectedVoiceIsPremium()) {
+        if (this.isVoiceProfessional()) {
             total += 20;
         }
         
         if (this.bookConfig.targetLanguage && 
             this.bookConfig.targetLanguage !== this.bookConfig.sourceLanguage) {
-            total += 50; // Estimated translation cost
+            total += this.getTranslationCost();
         }
         
         return total;
+    }
+
+    getTranslationCost(): number {
+        return this.totalTranslation();
+    }
+
+    calculateTranslationCost() {
+        const regionDetected = this.regionDetected() || 'global';
+        let total = 0;
+        if (this.translation.useFixedPrice) {
+            //  USING FIXED PRICE FOR TRANSLATION
+            if (regionDetected == 'latam') total = this.translation.FIXED_PRICE.latam;
+            else if (regionDetected == 'us') total = this.translation.FIXED_PRICE.us;
+            else if (regionDetected == 'uk') total = this.translation.FIXED_PRICE.uk;
+            else total = this.translation.FIXED_PRICE.global;
+            this.totalTranslation.set(total);
+        } else {
+            //  USING PRICE PER WORD FOR TRANSLATION
+            const wordCount = this.estimatedWordCount();
+            if (wordCount !== 0) {
+                let pricePerWord = 0;
+                if (regionDetected == 'latam') pricePerWord = this.translation.PER_WORD.latam;
+                else if (regionDetected == 'us') pricePerWord = this.translation.PER_WORD.us;
+                else if (regionDetected == 'uk') pricePerWord = this.translation.PER_WORD.uk;
+                else pricePerWord = this.translation.PER_WORD.global;    
+                total = Math.round(wordCount * pricePerWord);
+                this.totalTranslation.set(total);
+                this.TRANSLATION_PRICE_PER_WORD = pricePerWord;
+            }
+        }
     }
 
     canProceedFromStep3(): boolean {
@@ -280,7 +513,7 @@ export class ScreenUploadAudiobook {
     }
 
     getVoiceName(voiceId: string): string {
-        const voice = this.standardVoices.find(v => v.id === voiceId);
+        const voice = this.standardVoices().find(v => v.id === voiceId);
         return voice ? voice.name : voiceId;
     }
 
@@ -322,8 +555,8 @@ export class ScreenUploadAudiobook {
     uploadAnother() {
         // Reset form
         this.currentStep = 1;
-        this.referralCode = '';
-        this.referralValid = null;
+        this.referralCode.set(null);
+        this.referralValid.set(false);
         this.uploadMethod = null;
         this.uploadedFile = null;
         this.bookConfig = {
@@ -344,6 +577,22 @@ export class ScreenUploadAudiobook {
 
     goBack() {
         console.log('Navigate back');
+    }
+
+    dontHaveReferralCodeSelected() {
+        this.showPricingOptions.set(true);
+    }
+
+    toggleShowMoreIncludedVouces() {
+        this.includedVoicesShowMore.set(!this.includedVoicesShowMore())
+    }
+
+    toggleShowPremiumVoices() {
+        this.showPremiumVoices.set(!this.showPremiumVoices())
+    }
+ 
+    toggleShowMorePremiumVouces() {
+        this.premiumVoicesShowMore.set(!this.premiumVoicesShowMore())
     }
 
 }

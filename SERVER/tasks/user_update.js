@@ -3,22 +3,23 @@ const User = require('../models/user');
 async function run(data, req, res) {
     try {
         const {
-            id,
-            email,
             firstName,
             lastName,
+            city,
+            languages,
+            country,
             profilePicture,
-            code,
-            lastIp,
-            lastBrowserAgent,
+            coverPicture,
+            isAuthor,
+            bio,
             connected,
             forceStatus,
             totalFollowers,
             totlaFollowing,
             lastCheckTime,
             lastUnreadMessages,
-            enabled
         } = data;
+
         const userId = req.userId || null;
 
         if (!userId) {
@@ -29,22 +30,23 @@ async function run(data, req, res) {
         }
 
         const updateData = { updatedAt: Date.now() };
-        if (email !== undefined) updateData.email = email;
         if (firstName !== undefined) updateData.firstName = firstName;
         if (lastName !== undefined) updateData.lastName = lastName;
+        if (city !== undefined) updateData.city = city;
+        if (country !== undefined) updateData.country = country;
+        if (languages !== undefined) updateData.languages = languages;
         if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
-        if (code !== undefined) updateData.code = code;
-        if (lastIp !== undefined) updateData.lastIp = lastIp;
-        if (lastBrowserAgent !== undefined) updateData.lastBrowserAgent = lastBrowserAgent;
+        if (coverPicture !== undefined) updateData.coverPicture = coverPicture;
+        if (isAuthor !== undefined) updateData.isAuthor = isAuthor;
+        if (bio !== undefined) updateData.bio = bio;
         if (connected !== undefined) updateData.connected = connected;
         if (forceStatus !== undefined) updateData.forceStatus = forceStatus;
         if (totalFollowers !== undefined) updateData.totalFollowers = totalFollowers;
         if (totlaFollowing !== undefined) updateData.totlaFollowing = totlaFollowing;
         if (lastCheckTime !== undefined) updateData.lastCheckTime = lastCheckTime;
         if (lastUnreadMessages !== undefined) updateData.lastUnreadMessages = lastUnreadMessages;
-        if (enabled !== undefined) updateData.enabled = enabled;
 
-        const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+        const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
         if (!user) {
             return res.status(200).json({
@@ -55,7 +57,7 @@ async function run(data, req, res) {
 
         return res.status(200).json({
             success: true,
-            data: user
+            user
         })
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)

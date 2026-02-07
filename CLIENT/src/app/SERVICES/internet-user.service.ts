@@ -51,10 +51,10 @@ export class InternetUserService extends InternetService {
     getUserById(userId: string, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
-            action: 'GetUserByid',
+            action: 'GetUserById',
             lang,
             data: {
-                userId,
+                id: userId,
             }
         }, callback);
     }

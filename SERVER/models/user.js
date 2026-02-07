@@ -22,6 +22,10 @@ const model = new Schema({
     city: { 
         type: String
     },
+    languages: {
+        type: Object,
+        default: []
+    },
     country: { 
         type: String
     },

@@ -4,6 +4,43 @@ import { Config } from './config';
 
 export class UtilClass {
 
+    public static detectRegion() {
+        const browserLanguage = navigator.language || (navigator as any).userLanguage;
+        
+        const latamCountries = [
+            'es-AR', 'es-BO', 'es-CL', 'es-CO', 'es-CR', 'es-CU', 'es-DO', 
+            'es-EC', 'es-SV', 'es-GT', 'es-HN', 'es-MX', 'es-NI', 'es-PA', 
+            'es-PY', 'es-PE', 'es-PR', 'es-UY', 'es-VE'
+        ];
+        
+        if (latamCountries.includes(browserLanguage)) {
+            return {
+                region: 'latam',
+                currency: '$'    
+            }
+        } else if (browserLanguage.startsWith('es-') && browserLanguage !== 'es-US' && browserLanguage !== 'es-ES') {
+            return {
+                region: 'latam',
+                currency: '$'    
+            }
+        } else if (browserLanguage === 'en-US') {
+            return {
+                region: 'us',
+                currency: '$'
+            }
+        } else if (browserLanguage.startsWith('en-GB')) {
+            return {
+                region: 'uk',
+                currency: '£'
+            }
+        } else {
+            return {
+                region: 'global',
+                currency: '€'
+            }
+        }
+    }
+
     public static getPolygonCentroid(polygon: { lat: number; lng: number }[]): { lat: number; lng: number } {
         let lat = 0, lng = 0;
         for (const p of polygon) {
