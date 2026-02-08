@@ -7,6 +7,9 @@ const AudiobookAdd = require("./tasks/audiobook_add");
 const AudiobookCreateStripeCheckout = require("./tasks/audiobook_create_stripe_checkout");
 const AudiobookCheckPaymentStatus = require("./tasks/audiobook_check_payment_status");
 const AudiobooksGetAdmin = require("./tasks/audiobook_get_admin");
+const UpdateAudiobookTotalPages = require("./tasks/audiobook_update_total_pages");
+const ConvertToMP3 = require("./tasks/audiobook_convert_to_mp3");
+const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 
 //
 //  VOICES
@@ -42,6 +45,9 @@ const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const TasksRegistry = {
 
     //  AUDIOBOOK
+    AudiobookGetChapterAudio,
+    ConvertToMP3,
+    UpdateAudiobookTotalPages,
     AudiobooksGetAdmin,
     AudiobookCheckPaymentStatus,
     AudiobookCreateStripeCheckout,

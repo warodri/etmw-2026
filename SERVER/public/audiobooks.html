@@ -1,13 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audiobook Management</title>
+    <title>Gestión de Audiolibros</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
+        .textLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
+            user-select: text;
+        }
         .audiobook-card {
             cursor: pointer;
             transition: all 0.3s ease;
@@ -63,138 +70,83 @@
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
-                <h1 class="mb-4">
-                    <i class="bi bi-book-half"></i> Audiobook Management
+                <h1 class="mb-4 fw-bold">
+                    Gestión de Audiolibros
                 </h1>
             </div>
         </div>
 
-        <!-- Audiobooks List -->
+        <!-- Lista de Audiolibros -->
         <div id="audiobooksList" class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3>Uploaded Audiobooks</h3>
+                    <h3>Audiolibros subidos</h3>
                     <button class="btn btn-primary" onclick="loadAudiobooks()">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar
                     </button>
                 </div>
                 <div id="audiobooksContainer"></div>
             </div>
         </div>
 
-        <!-- Audiobook Detail View -->
+        <!-- Vista Detalle -->
         <div id="audiobookDetail" class="row d-none">
             <div class="col-12 mb-3">
                 <button class="btn btn-secondary" onclick="backToList()">
-                    <i class="bi bi-arrow-left"></i> Back to List
+                    <i class="bi bi-arrow-left"></i> Volver a la lista
                 </button>
             </div>
 
-            <!-- Important Info Card -->
+            <!-- Información Importante -->
             <div class="col-md-4 mb-4">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="bi bi-info-circle"></i> Important Information
+                            <i class="bi bi-info-circle"></i> Información importante
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="fw-bold">Title:</label>
+                            <label class="fw-bold">Título:</label>
                             <div id="detailTitle"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Author:</label>
+                            <label class="fw-bold">Autor:</label>
                             <div id="detailAuthor"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Payment Date:</label>
+                            <label class="fw-bold">Fecha de pago:</label>
                             <div id="detailPaymentDate"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Total Price:</label>
+                            <label class="fw-bold">Precio total:</label>
                             <div id="detailTotalPrice"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Total Pages:</label>
+                            <label class="fw-bold">Total de páginas:</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="detailTotalPages" placeholder="Enter total pages">
+                                <input type="number" class="form-control" id="detailTotalPages" placeholder="Introduce el total de páginas">
                                 <button class="btn btn-success" onclick="updateTotalPages()">
-                                    <i class="bi bi-check-lg"></i> Update
+                                    <i class="bi bi-check-lg"></i> Actualizar
                                 </button>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Description:</label>
+                            <label class="fw-bold">Descripción:</label>
                             <div id="detailDescription" class="text-muted"></div>
                         </div>
                         <div class="mb-3">
-                            <label class="fw-bold">Categories:</label>
+                            <label class="fw-bold">Categorías:</label>
                             <div id="detailCategories"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Conversion Settings -->
-                <div class="card mt-3 shadow">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-gear"></i> Conversion Settings
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-2">
-                            <label class="fw-bold">Source Language:</label>
-                            <span id="detailSourceLanguage"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Target Language:</label>
-                            <span id="detailTargetLanguage"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Voice ID:</label>
-                            <span id="detailVoiceId" class="font-monospace"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Voice Name:</label>
-                            <span id="detailVoiceName"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Use Expression:</label>
-                            <span id="detailUseExpression"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Speech Rate:</label>
-                            <span id="detailSpeechRate"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Stability:</label>
-                            <span id="detailStability"></span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="fw-bold">Clarity:</label>
-                            <span id="detailClarity"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Completed Chapters -->
-                <div class="card mt-3 shadow">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-music-note-list"></i> Completed Chapters (<span id="completedCount">0</span>)
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="completedChapters" class="list-group"></div>
-                    </div>
-                </div>
-
-                <!-- Additional Details (Collapsed) -->
+                <!-- Detalles Adicionales -->
                 <div class="card mt-3 shadow">
                     <div class="card-header">
                         <a class="text-decoration-none text-dark d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#additionalDetails">
-                            <span><i class="bi bi-list-ul"></i> Additional Details</span>
+                            <span><i class="bi bi-list-ul"></i> Detalles adicionales</span>
                             <i class="bi bi-chevron-down"></i>
                         </a>
                     </div>
@@ -206,73 +158,98 @@
                 </div>
             </div>
 
-            <!-- File Viewer & Converter -->
+            <!-- Visor de Archivo -->
             <div class="col-md-8">
+
+                <!-- Capítulos Completados -->
                 <div class="card shadow">
-                    <div class="card-header bg-warning">
+                    <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="bi bi-file-earmark-text"></i> File Viewer & Converter
+                            <i class="bi bi-music-note-list"></i> Capítulos completados (<span id="completedCount">0</span>)
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- PDF Viewer -->
-                        <div id="pdfViewer" class="d-none">
-                            <div class="d-flex justify-content-between mb-3">
-                                <button class="btn btn-sm btn-outline-primary" onclick="previousPage()">
-                                    <i class="bi bi-chevron-left"></i> Previous
-                                </button>
-                                <span>Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
-                                <button class="btn btn-sm btn-outline-primary" onclick="nextPage()">
-                                    Next <i class="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
-                            <canvas id="pdfCanvas" class="w-100 mb-3"></canvas>
+                        <div id="completedChapters" class="list-group"></div>
+                    </div>
+                </div>
+
+                <!-- Configuración de Conversión -->
+                <div class="card mt-3 shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-gear"></i> Configuración de conversión
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2 text-primary rounded-3">
+                            <label class="fw-bold">Idioma de origen:</label>
+                            <span id="detailSourceLanguage"></span>
+                        </div>
+                        <div class="mb-2 text-primary rounded-3">
+                            <label class="fw-bold">Idioma de destino:</label>
+                            <span id="detailTargetLanguage"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">ID de voz:</label>
+                            <span id="detailVoiceId" class="font-monospace"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Nombre de la voz:</label>
+                            <span id="detailVoiceName"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Usar expresión:</label>
+                            <span id="detailUseExpression"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Velocidad de habla:</label>
+                            <span id="detailSpeechRate"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Estabilidad:</label>
+                            <span id="detailStability"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Claridad:</label>
+                            <span id="detailClarity"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Convierte a MP3 -->
+                <div class="mt-3 card shadow">
+                    <div class="card-header bg-primary text-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-file-earmark-text"></i> Convierte a Audio
+                        </h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="p-3" id="openBookLink">
+                            <!-- Dinamicamente mostrar el enlace para abrir el archivo -->
                         </div>
 
-                        <!-- TXT Viewer -->
-                        <div id="txtViewer" class="d-none">
-                            <div class="d-flex justify-content-between mb-3">
-                                <button class="btn btn-sm btn-outline-primary" onclick="previousTxtPage()">
-                                    <i class="bi bi-chevron-left"></i> Previous
-                                </button>
-                                <span>Page <span id="currentTxtPage">1</span> of <span id="totalTxtPages">1</span></span>
-                                <button class="btn btn-sm btn-outline-primary" onclick="nextTxtPage()">
-                                    Next <i class="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
-                            <div id="txtContent" class="text-viewer"></div>
-                        </div>
-
-                        <!-- Selected Text Display -->
-                        <div class="mt-3">
-                            <label class="fw-bold">Selected Text:</label>
-                            <div id="selectedTextDisplay" class="selected-text-box mb-3">
-                                <em class="text-muted">Select text above to convert to MP3</em>
-                            </div>
-                            <button class="btn btn-primary w-100" onclick="convertSelectedText()" id="convertSelectedBtn" disabled>
-                                <i class="bi bi-file-earmark-music"></i> Convert Selected Text to MP3
-                            </button>
-                        </div>
-
-                        <hr>
-
-                        <!-- Manual Text Input -->
+                        <!-- Entrada Manual -->
                         <div>
-                            <label class="fw-bold">Or Paste Text to Convert:</label>
-                            <textarea id="manualTextInput" class="form-control conversion-textarea mb-3" rows="8" placeholder="Paste text here to convert to MP3..."></textarea>
-                            <div class="mb-3">
-                                <label class="fw-bold">Chapter Number:</label>
-                                <input type="number" id="chapterNumber" class="form-control" placeholder="e.g., 1, 2, 3..." min="1">
+                            <label class="fw-bold">Pega el texto seleccionado para convertir</label>
+                            <textarea id="manualTextInput" class="form-control conversion-textarea mt-2 mb-3" rows="8" placeholder="Pega aquí el texto para convertirlo a MP3..."></textarea>
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                                <div class="fw-bold" style="width:285px">
+                                    Número de capítulo:
+                                </div>
+                                <div>
+                                    <input type="number" id="chapterNumber" class="form-control" placeholder="ej.: 1, 2, 3..." min="1">
+                                </div>
+                                <button class="btn btn-success" onclick="convertManualText()" style="width:300px;">
+                                    <i class="bi bi-file-earmark-music"></i> Convertir texto a MP3
+                                </button>
                             </div>
-                            <button class="btn btn-success w-100" onclick="convertManualText()">
-                                <i class="bi bi-file-earmark-music"></i> Convert Manual Text to MP3
-                            </button>
                         </div>
 
-                        <!-- Conversion Status -->
+                        <!-- Estado de Conversión -->
                         <div id="conversionStatus" class="alert alert-info mt-3 d-none">
                             <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                            <span id="conversionStatusText">Converting...</span>
+                            <span id="conversionStatusText">Convirtiendo...</span>
                         </div>
                     </div>
                 </div>
@@ -282,7 +259,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Global variables
+        // Variables globales
         let audiobooks = [];
         let currentAudiobook = null;
         let pdfDoc = null;
@@ -291,32 +268,31 @@
         let currentTxtPage = 0;
         let selectedText = '';
 
-        // Language mapping
+        // Mapeo de idiomas
         const LANGUAGE_MAP = {
-            'en': 'English',
-            'es': 'Spanish',
-            'fr': 'French',
-            'de': 'German',
-            'it': 'Italian',
-            'pt': 'Portuguese',
-            'pl': 'Polish',
-            'nl': 'Dutch',
+            'en': 'Inglés',
+            'es': 'Español',
+            'fr': 'Francés',
+            'de': 'Alemán',
+            'it': 'Italiano',
+            'pt': 'Portugués',
+            'pl': 'Polaco',
+            'nl': 'Neerlandés',
             'hi': 'Hindi',
-            'ja': 'Japanese',
-            'zh': 'Chinese',
-            'ko': 'Korean',
-            'ar': 'Arabic',
-            'ru': 'Russian'
+            'ja': 'Japonés',
+            'zh': 'Chino',
+            'ko': 'Coreano',
+            'ar': 'Árabe',
+            'ru': 'Ruso'
         };
 
         function getLanguageName(code) {
             return LANGUAGE_MAP[code] || code;
         }
 
-        // Load audiobooks on page load
+        // Cargar audiolibros al iniciar
         window.addEventListener('DOMContentLoaded', () => {
             loadAudiobooks();
-            setupTextSelection();
         });
 
         async function loadAudiobooks() {
@@ -331,7 +307,7 @@
                 if (data.success) {
                     audiobooks = data.audiobooks;
                     
-                    // Sort: paymentCompleted + digital first
+                    // Ordenar: pagos completados + digital primero
                     audiobooks.sort((a, b) => {
                         const aPriority = (a.paymentCompleted && a.uploadMethod === 'digital') ? 1 : 0;
                         const bPriority = (b.paymentCompleted && b.uploadMethod === 'digital') ? 1 : 0;
@@ -342,14 +318,14 @@
                 }
             } catch (error) {
                 console.error('Error loading audiobooks:', error);
-                alert('Error loading audiobooks');
+                alert('Error al cargar los audiolibros');
             }
         }
 
         function displayAudiobooks() {
             const container = document.getElementById('audiobooksContainer');
             if (audiobooks.length === 0) {
-                container.innerHTML = '<p class="text-muted">No audiobooks found</p>';
+                container.innerHTML = '<p class="text-muted">No se encontraron audiolibros</p>';
                 return;
             }
 
@@ -362,14 +338,14 @@
                     <div class="col-md-4 col-lg-3 mb-3">
                         <div class="card audiobook-card ${isPriority ? 'priority' : ''}" onclick="viewAudiobook('${book._id}')">
                             <div class="card-body">
-                                ${isPriority ? '<span class="badge bg-success mb-2">Ready to Convert</span>' : ''}
-                                <h6 class="card-title">${book.title || 'Untitled'}</h6>
-                                <p class="card-text text-muted small mb-2">${book.authorName || 'Unknown Author'}</p>
+                                ${isPriority ? '<span class="badge bg-success mb-2">Listo para convertir</span>' : ''}
+                                <h6 class="card-title">${book.title || 'Sin título'}</h6>
+                                <p class="card-text text-muted small mb-2">${book.authorName || 'Autor desconocido'}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">
-                                        <i class="bi bi-music-note"></i> ${chapterCount} chapters
+                                        <i class="bi bi-music-note"></i> ${chapterCount} capítulos
                                     </small>
-                                    <small class="text-muted">${book.uploadMethod || 'N/A'}</small>
+                                    <small class="text-muted">${book.uploadMethod || 'N/D'}</small>
                                 </div>
                             </div>
                         </div>
@@ -384,58 +360,59 @@
             currentAudiobook = audiobooks.find(b => b._id === id);
             if (!currentAudiobook) return;
 
-            // Hide list, show detail
             document.getElementById('audiobooksList').classList.add('d-none');
             document.getElementById('audiobookDetail').classList.remove('d-none');
 
-            // Populate important fields
-            document.getElementById('detailTitle').textContent = currentAudiobook.title || 'N/A';
-            document.getElementById('detailAuthor').textContent = currentAudiobook.authorName || 'N/A';
+            document.getElementById('detailTitle').textContent = currentAudiobook.title || 'N/D';
+            document.getElementById('detailAuthor').textContent = currentAudiobook.authorName || 'N/D';
             document.getElementById('detailPaymentDate').textContent = currentAudiobook.paymentDate 
                 ? new Date(currentAudiobook.paymentDate).toLocaleString()
-                : 'N/A';
+                : 'N/D';
             document.getElementById('detailTotalPrice').textContent = currentAudiobook.totalPrice 
                 ? `$${currentAudiobook.totalPrice}` 
-                : 'N/A';
+                : 'N/D';
             document.getElementById('detailTotalPages').value = currentAudiobook.totalPages || '';
-            document.getElementById('detailDescription').textContent = currentAudiobook.description || 'No description';
-            
-            // Categories
+            document.getElementById('detailDescription').textContent = currentAudiobook.description || 'Sin descripción';
+
             const categories = Array.isArray(currentAudiobook.categories) ? currentAudiobook.categories : [];
             document.getElementById('detailCategories').innerHTML = categories.length 
                 ? categories.map(cat => `<span class="badge bg-secondary me-1">${cat}</span>`).join('')
-                : '<span class="text-muted">None</span>';
+                : '<span class="text-muted">Ninguna</span>';
 
-            // Conversion settings
             document.getElementById('detailSourceLanguage').textContent = getLanguageName(currentAudiobook.sourceLanguage);
             document.getElementById('detailTargetLanguage').textContent = getLanguageName(currentAudiobook.targetLanguage);
-            document.getElementById('detailVoiceId').textContent = currentAudiobook.voiceId || 'N/A';
-            document.getElementById('detailVoiceName').textContent = currentAudiobook.voiceName || 'N/A';
-            document.getElementById('detailUseExpression').textContent = currentAudiobook.useExpression ? 'Yes' : 'No';
+            document.getElementById('detailVoiceId').textContent = currentAudiobook.voiceId || 'N/D';
+            document.getElementById('detailVoiceName').textContent = currentAudiobook.voiceName || 'N/D';
+            document.getElementById('detailUseExpression').textContent = currentAudiobook.useExpression ? 'Sí' : 'No';
             document.getElementById('detailSpeechRate').textContent = currentAudiobook.speechRate || '1.0';
             document.getElementById('detailStability').textContent = currentAudiobook.stability || '0.5';
             document.getElementById('detailClarity').textContent = currentAudiobook.clarity || '0.75';
 
-            // Completed chapters
             const audioFiles = currentAudiobook.audioFiles || [];
             document.getElementById('completedCount').textContent = audioFiles.length;
-            const chaptersHtml = audioFiles.length > 0
+            document.getElementById('completedChapters').innerHTML = audioFiles.length
                 ? audioFiles.map(file => `
                     <div class="list-group-item chapter-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span><strong>Chapter ${file.chapter}</strong></span>
-                            <small class="text-muted">${file.durationSec ? Math.round(file.durationSec / 60) + ' min' : 'N/A'}</small>
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <div class="d-flex justify-content-start align-items-center gap-3">
+                                <span><strong>Capítulo ${file.chapter}</strong></span>
+                                <button class="btn btn-sm btn-primary rounded-pill" onclick="playChapter(${file.chapter})">
+                                    <i class="bi bi-play-fill"></i> Reproducir
+                                </button>
+                            </div>
+                            <small class="text-muted">${file.durationSec ? Math.round(file.durationSec / 60) + ' min' : 'N/D'}</small>
                         </div>
-                        <small class="text-muted d-block">${file.url}</small>
+                        <div id="player-${file.chapter}" class="mt-2 d-none">
+                            <audio controls class="w-100" id="audio-${file.chapter}">
+                                Su navegador no soporta el elemento de audio.
+                            </audio>
+                        </div>
                     </div>
                 `).join('')
-                : '<p class="text-muted">No chapters converted yet</p>';
-            document.getElementById('completedChapters').innerHTML = chaptersHtml;
+                : '<p class="text-muted">Aún no hay capítulos convertidos</p>';
 
-            // Additional details JSON
             document.getElementById('detailsJson').textContent = JSON.stringify(currentAudiobook, null, 2);
 
-            // Load file viewer
             loadFileViewer();
         }
 
@@ -447,7 +424,6 @@
             txtPages = [];
             selectedText = '';
         }
-
         async function updateTotalPages() {
             const totalPages = document.getElementById('detailTotalPages').value;
             if (!totalPages || !currentAudiobook) return;
@@ -465,14 +441,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Total pages updated successfully!');
+                    alert('¡Total de páginas actualizado correctamente!');
                     currentAudiobook.totalPages = parseInt(totalPages);
                 } else {
-                    alert('Error updating total pages');
+                    alert('Error al actualizar el total de páginas');
                 }
             } catch (error) {
                 console.error('Error updating total pages:', error);
-                alert('Error updating total pages');
+                alert('Error al actualizar el total de páginas');
             }
         }
 
@@ -484,24 +460,18 @@
             const file = currentAudiobook.file;
             const filename = file.filename;
             const mimetype = file.mimetype;
-            // URL-safe base64
             const encodedMime = btoa(mimetype);
             const filePath = `/file/${filename}/${encodedMime}`;
 
-            if (file.mimetype === 'application/pdf') {
-                document.getElementById('pdfViewer').classList.remove('d-none');
-                document.getElementById('txtViewer').classList.add('d-none');
-                await loadPDF(filePath);
-            } else if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
-                document.getElementById('txtViewer').classList.remove('d-none');
-                document.getElementById('pdfViewer').classList.add('d-none');
-                await loadTXT(filePath);
-            }
+            const openBookLink = document.getElementById('openBookLink');
+            openBookLink.innerHTML = `<a href="${filePath}" class="btn btn-primary rounded-pill" target="_blank">Abrir archivo<a/>`
+
         }
 
         async function loadPDF(url) {
             try {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                 
                 const loadingTask = pdfjsLib.getDocument(url);
                 pdfDoc = await loadingTask.promise;
@@ -511,7 +481,7 @@
                 renderPDFPage(currentPdfPage);
             } catch (error) {
                 console.error('Error loading PDF:', error);
-                alert('Error loading PDF file');
+                alert('Error al cargar el archivo PDF');
             }
         }
 
@@ -533,12 +503,22 @@
                 await page.render(renderContext).promise;
                 document.getElementById('currentPage').textContent = pageNum;
                 
-                // Extract text from page
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(' ');
+
+                const textLayerDiv = document.getElementById('pdfTextLayer');
+                textLayerDiv.innerHTML = '';
+                textLayerDiv.style.width = canvas.width + 'px';
+                textLayerDiv.style.height = canvas.height + 'px';
+
+                pdfjsLib.renderTextLayer({
+                    textContent,
+                    container: textLayerDiv,
+                    viewport,
+                    textDivs: []
+                });
                 
-                // Make text selectable (we'll use manual text input for PDF)
-                document.getElementById('manualTextInput').placeholder = 'PDF text cannot be directly selected. Copy text from PDF viewer or paste here...';
+                document.getElementById('manualTextInput').placeholder =
+                    'El texto del PDF no puede seleccionarse directamente. Copia el texto del visor o pégalo aquí...';
                 
             } catch (error) {
                 console.error('Error rendering PDF page:', error);
@@ -564,10 +544,8 @@
                 const response = await fetch(url);
                 const text = await response.text();
                 
-                // Split by form feed character (page break)
                 txtPages = text.split('\f');
                 if (txtPages.length === 1) {
-                    // If no page breaks, split by character count (~3000 chars per page)
                     const charsPerPage = 3000;
                     txtPages = [];
                     for (let i = 0; i < text.length; i += charsPerPage) {
@@ -580,7 +558,7 @@
                 renderTxtPage(currentTxtPage);
             } catch (error) {
                 console.error('Error loading TXT:', error);
-                alert('Error loading TXT file');
+                alert('Error al cargar el archivo TXT');
             }
         }
 
@@ -604,23 +582,10 @@
             }
         }
 
-        function setupTextSelection() {
-            document.addEventListener('mouseup', () => {
-                const selection = window.getSelection();
-                const text = selection.toString().trim();
-                
-                if (text.length > 0) {
-                    selectedText = text;
-                    document.getElementById('selectedTextDisplay').innerHTML = `<div class="small">${text.substring(0, 200)}${text.length > 200 ? '...' : ''}</div><div class="small text-muted mt-2">${text.length} characters</div>`;
-                    document.getElementById('convertSelectedBtn').disabled = false;
-                }
-            });
-        }
-
         async function convertSelectedText() {
             if (!selectedText || !currentAudiobook) return;
 
-            const chapterNum = prompt('Enter chapter number for this text:');
+            const chapterNum = prompt('Introduce el número de capítulo para este texto:');
             if (!chapterNum) return;
 
             await convertToMP3(selectedText, parseInt(chapterNum));
@@ -631,15 +596,65 @@
             const chapterNum = document.getElementById('chapterNumber').value;
             
             if (!text) {
-                alert('Please enter text to convert');
+                alert('Por favor introduce texto para convertir');
                 return;
             }
             if (!chapterNum) {
-                alert('Please enter chapter number');
+                alert('Por favor introduce el número de capítulo');
                 return;
             }
 
             await convertToMP3(text, parseInt(chapterNum));
+        }
+
+        async function playChapter(chapterNumber) {
+            if (!currentAudiobook) return;
+
+            const playerDiv = document.getElementById(`player-${chapterNumber}`);
+            const audioElement = document.getElementById(`audio-${chapterNumber}`);
+
+            // Show player
+            playerDiv.classList.remove('d-none');
+
+            try {
+                // Fetch the audio stream
+                const response = await fetch('/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'AudiobookGetChapterAudio',
+                        data: {
+                            audiobookId: currentAudiobook._id,
+                            chapterNumber: chapterNumber,
+                            password: 'car0lina',
+                        }
+                    })
+                });
+
+                // Check if response is audio
+                const contentType = response.headers.get('Content-Type');
+                
+                if (contentType && contentType.includes('audio')) {
+                    // Create blob URL from audio stream
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    
+                    // Set audio source and play
+                    audioElement.src = audioUrl;
+                    audioElement.load();
+                    audioElement.play();
+                } else {
+                    // Response is JSON (error)
+                    const data = await response.json();
+                    alert('Error: ' + (data.message || 'No se pudo cargar el audio'));
+                    playerDiv.classList.add('d-none');
+                }
+                
+            } catch (error) {
+                console.error('Error loading audio:', error);
+                alert('Error al cargar el audio');
+                playerDiv.classList.add('d-none');
+            }
         }
 
         async function convertToMP3(text, chapterNumber) {
@@ -648,9 +663,13 @@
             const statusDiv = document.getElementById('conversionStatus');
             const statusText = document.getElementById('conversionStatusText');
             statusDiv.classList.remove('d-none');
-            statusText.textContent = 'Converting to MP3...';
+            statusText.textContent = 'Convirtiendo a MP3...';
 
             try {
+                // Convert stability and clarity from 0-100 to 0-1 range
+                const stability = parseFloat(currentAudiobook.stability) || 50;
+                const clarity = parseFloat(currentAudiobook.clarity) || 75;
+
                 const response = await fetch('/api/v1', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -661,8 +680,8 @@
                             voiceId: currentAudiobook.voiceId,
                             text: text,
                             modelId: 'eleven_turbo_v2',
-                            stability: parseFloat(currentAudiobook.stability) || 0.5,
-                            similarity: parseFloat(currentAudiobook.clarity) || 0.75,
+                            stability: stability / 100, // Convert to 0-1 range
+                            similarity: clarity / 100, // Convert to 0-1 range
                             style: currentAudiobook.useExpression ? 0.5 : 0,
                             speakerBoost: true,
                             outputFormat: 'mp3_44100_128',
@@ -674,24 +693,20 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    statusText.textContent = 'Conversion successful!';
+                    statusText.textContent = '¡Conversión exitosa!';
                     statusDiv.classList.remove('alert-info');
                     statusDiv.classList.add('alert-success');
                     
-                    // Clear inputs
                     selectedText = '';
-                    document.getElementById('selectedTextDisplay').innerHTML = '<em class="text-muted">Select text above to convert to MP3</em>';
-                    document.getElementById('convertSelectedBtn').disabled = true;
                     document.getElementById('manualTextInput').value = '';
                     document.getElementById('chapterNumber').value = '';
                     
-                    // Reload audiobook to show updated chapters
                     setTimeout(() => {
                         statusDiv.classList.add('d-none');
                         viewAudiobook(currentAudiobook._id);
                     }, 2000);
                 } else {
-                    statusText.textContent = 'Conversion failed: ' + (data.message || 'Unknown error');
+                    statusText.textContent = 'Error en la conversión: ' + (data.message || 'Error desconocido');
                     statusDiv.classList.remove('alert-info');
                     statusDiv.classList.add('alert-danger');
                 }
@@ -702,7 +717,6 @@
                 statusDiv.classList.add('alert-danger');
             }
         }
-    
     </script>
 </body>
 </html>

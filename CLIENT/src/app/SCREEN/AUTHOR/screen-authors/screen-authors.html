@@ -1,201 +1,108 @@
-<div class="container-fluid p-0 min-vh-100">
+<div class="container-fluid">
 
-    <!-- Header -->
-    <div class="etmw-bg-lighter rounded-bottom-xl px-4 pt-3 pb-4 sticky-top" style="top: 0; z-index: 100;">
-        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-            <h3 class="fw-bold m-0">
-                ✍️ &nbsp; Discover Authors
-            </h3>
-            <div class="d-flex gap-2">
-                <button class="btn btn-secondary rounded-pill px-3" (click)="toggleFilters()">
-                    <i class="bi bi-sliders"></i>
-                </button>
-                <button class="btn btn-dark rounded-pill" (click)="goHome()">
-                    <i class="bi bi-house-door-fill"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="position-relative mb-3">
-            <input type="text" 
-                   class="form-control form-control-lg rounded-pill ps-5 bg-secondary border-0 text-white input-light-placeholder" 
-                   placeholder="Search authors by name, genre, language..."
-                   [(ngModel)]="searchQuery"
-                   (input)="onSearch()">
-            <i class="bi bi-search position-absolute text-gray-400" 
-               style="left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.25rem;"></i>
-            @if (searchQuery) {
-                <button class="btn btn-link position-absolute text-gray-400" 
-                        style="right: 10px; top: 50%; transform: translateY(-50%);"
-                        (click)="clearSearch()">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            }
-        </div>
-
-        <!-- View Mode Toggle -->
-        <div class="d-flex gap-2">
-            <button class="btn btn-sm rounded-pill flex-grow-1" 
-                    [class.btn-primary]="viewMode === 'grid'"
-                    [class.btn-secondary]="viewMode !== 'grid'"
-                    (click)="viewMode = 'grid'">
-                <i class="bi bi-grid-3x3-gap"></i> Grid
-            </button>
-            <button class="btn btn-sm rounded-pill flex-grow-1" 
-                    [class.btn-primary]="viewMode === 'list'"
-                    [class.btn-secondary]="viewMode !== 'list'"
-                    (click)="viewMode = 'list'">
-                <i class="bi bi-list-ul"></i> List
-            </button>
-            <button class="btn btn-sm rounded-pill flex-grow-1" 
-                    [class.btn-primary]="viewMode === 'category'"
-                    [class.btn-secondary]="viewMode !== 'category'"
-                    (click)="viewMode = 'category'">
-                <i class="bi bi-tag"></i> Categories
-            </button>
-        </div>
-    </div>
-
-    <div class="px-4 pb-5">
-
-        <!-- Filter Chips (if active) -->
-        @if (activeFilters.length > 0) {
-            <div class="mt-3 d-flex gap-2 overflow-x-auto pb-2">
-                @for (filter of activeFilters; track filter) {
-                    <span class="badge bg-primary px-3 py-2 d-flex align-items-center gap-2">
-                        {{ filter }}
-                        <i class="bi bi-x pointer" (click)="removeFilter(filter)" style="font-size: 1rem;"></i>
-                    </span>
-                }
-                <button class="btn btn-sm btn-link text-gray-400" (click)="clearAllFilters()">
-                    Clear All
-                </button>
-            </div>
-        }
-
-        <!-- FEATURED AUTHORS SECTION -->
-        @if (!searchQuery && viewMode !== 'category') {
-            <div class="mt-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold m-0">
-                        <i class="bi bi-star-fill text-warning"></i> &nbsp;Featured Authors
-                    </h5>
-                </div>
-                
-                <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                    @for (author of featuredAuthors; track author._id) {
-                        <div class="flex-shrink-0" style="width: 260px;">
-                            <app-author-item [author]="author" 
-                                           template="extended"
-                                           (onView)="viewAuthorProfile($event)"
-                                           (onFollow)="handleFollow($event)"></app-author-item>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-
-        <!-- GRID VIEW -->
-        @if (viewMode === 'grid' && !searchQuery) {
-            <div class="mt-4">
-                <h5 class="fw-bold mb-3">All Authors</h5>
-                <div class="row g-3">
-                    @for (author of allAuthors; track author._id) {
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <app-author-item [author]="author" 
-                                           template="extended"
-                                           (onView)="viewAuthorProfile($event)"
-                                           (onFollow)="handleFollow($event)"></app-author-item>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-
-        <!-- LIST VIEW -->
-        @if (viewMode === 'list') {
-            <div class="mt-4">
-                @if (searchQuery) {
-                    <div class="mb-3">
-                        <span class="text-gray-400">Results for</span> 
-                        <span class="fw-bold text-primary">"{{ searchQuery }}"</span>
-                        <span class="badge bg-slate-800 ms-2">{{ searchResults.length }} found</span>
-                    </div>
-                }
-                
-                <div class="d-flex flex-column gap-3">
-                    @for (author of searchQuery ? searchResults : allAuthors; track author._id) {
-                        <app-author-item [author]="author" 
-                                       template="simple"
-                                       (onView)="viewAuthorProfile($event)"
-                                       (onFollow)="handleFollow($event)"></app-author-item>
-                    }
-                </div>
-            </div>
-        }
-
-        <!-- CATEGORY VIEW -->
-        @if (viewMode === 'category') {
-            <div class="mt-4">
-                
-                <!-- Category Navigation Tabs -->
-                <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4">
-                    <button class="btn rounded-pill flex-shrink-0"
-                            [class.btn-primary]="!selectedCategory"
-                            [class.btn-secondary]="selectedCategory"
-                            (click)="selectCategory(null)">
-                        All Categories
+    <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
+        <!-- Header -->
+        <div class="etmw-bg-lighter rounded-bottom-xl px-4 pt-3 pb-4 sticky-top" style="top: 0; z-index: 100;">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h3 class="fw-bold m-0">
+                    ✍️ &nbsp; Discover Authors
+                </h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-secondary rounded-pill px-3" (click)="toggleFilters()">
+                        <i class="bi bi-sliders"></i>
                     </button>
-                    @for (category of categories; track category.name) {
-                        <button class="btn rounded-pill flex-shrink-0"
-                                [class.btn-primary]="selectedCategory === category.name"
-                                [class.btn-secondary]="selectedCategory !== category.name"
-                                (click)="selectCategory(category.name)">
-                            {{ category.icon }} {{ category.name }} ({{ category.authorCount }})
-                        </button>
-                    }
+                    <button class="btn btn-dark rounded-pill" (click)="goHome()">
+                        <i class="bi bi-house-door-fill"></i>
+                    </button>
                 </div>
-
-                <!-- Category Content -->
-                @if (!selectedCategory) {
-                    <!-- Show all categories with top authors -->
-                    @for (category of categories; track category.name) {
-                        <div class="mb-5">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="fw-bold m-0">
-                                    {{ category.icon }} {{ category.name }}
-                                </h5>
-                                <button class="btn btn-sm btn-secondary rounded-pill px-3"
-                                        (click)="selectCategory(category.name)">
-                                    View All <i class="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
-                            
-                            <!-- Horizontal scroll of authors -->
-                            <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                                @for (author of getCategoryAuthors(category.name).slice(0, 6); track author._id) {
-                                    <div class="flex-shrink-0" style="width: 260px;">
-                                        <app-author-item [author]="author" 
-                                                       template="extended"
-                                                       (onView)="viewAuthorProfile($event)"
-                                                       (onFollow)="handleFollow($event)"></app-author-item>
-                                    </div>
-                                }
-                            </div>
-                        </div>
+            </div>
+    
+            <!-- Search Bar -->
+            <div class="position-relative mb-3">
+                <input type="text" 
+                       class="form-control form-control-lg rounded-pill ps-5 bg-secondary border-0 text-white input-light-placeholder" 
+                       placeholder="Search authors by name, genre, language..."
+                       [(ngModel)]="searchQuery"
+                       (input)="onSearch()">
+                <i class="bi bi-search position-absolute text-gray-400" 
+                   style="left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.25rem;"></i>
+                @if (searchQuery) {
+                    <button class="btn btn-link position-absolute text-gray-400" 
+                            style="right: 10px; top: 50%; transform: translateY(-50%);"
+                            (click)="clearSearch()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                }
+            </div>
+    
+            <!-- View Mode Toggle -->
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm rounded-pill flex-grow-1" 
+                        [class.btn-primary]="viewMode === 'grid'"
+                        [class.btn-secondary]="viewMode !== 'grid'"
+                        (click)="viewMode = 'grid'">
+                    <i class="bi bi-grid-3x3-gap"></i> Grid
+                </button>
+                <button class="btn btn-sm rounded-pill flex-grow-1" 
+                        [class.btn-primary]="viewMode === 'list'"
+                        [class.btn-secondary]="viewMode !== 'list'"
+                        (click)="viewMode = 'list'">
+                    <i class="bi bi-list-ul"></i> List
+                </button>
+                <button class="btn btn-sm rounded-pill flex-grow-1" 
+                        [class.btn-primary]="viewMode === 'category'"
+                        [class.btn-secondary]="viewMode !== 'category'"
+                        (click)="viewMode = 'category'">
+                    <i class="bi bi-tag"></i> Categories
+                </button>
+            </div>
+        </div>
+    
+        <div class="px-4 pb-5">
+    
+            <!-- Filter Chips (if active) -->
+            @if (activeFilters.length > 0) {
+                <div class="mt-3 d-flex gap-2 overflow-x-auto pb-2">
+                    @for (filter of activeFilters; track filter) {
+                        <span class="badge bg-primary px-3 py-2 d-flex align-items-center gap-2">
+                            {{ filter }}
+                            <i class="bi bi-x pointer" (click)="removeFilter(filter)" style="font-size: 1rem;"></i>
+                        </span>
                     }
-                } @else {
-                    <!-- Show selected category authors in grid -->
-                    <div class="mb-3">
-                        <h5 class="fw-bold">
-                            {{ getCategoryIcon(selectedCategory) }} {{ selectedCategory }} Authors
+                    <button class="btn btn-sm btn-link text-gray-400" (click)="clearAllFilters()">
+                        Clear All
+                    </button>
+                </div>
+            }
+    
+            <!-- FEATURED AUTHORS SECTION -->
+            @if (!searchQuery && viewMode !== 'category') {
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">
+                            <i class="bi bi-star-fill text-warning"></i> &nbsp;Featured Authors
                         </h5>
-                        <p class="text-gray-400 small">{{ getCategoryAuthors(selectedCategory).length }} authors writing in {{ selectedCategory }}</p>
                     </div>
                     
+                    <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
+                        @for (author of featuredAuthors; track author._id) {
+                            <div class="flex-shrink-0" style="width: 260px;">
+                                <app-author-item [author]="author" 
+                                               template="extended"
+                                               (onView)="viewAuthorProfile($event)"
+                                               (onFollow)="handleFollow($event)"></app-author-item>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+    
+            <!-- GRID VIEW -->
+            @if (viewMode === 'grid' && !searchQuery) {
+                <div class="mt-4">
+                    <h5 class="fw-bold mb-3">All Authors</h5>
                     <div class="row g-3">
-                        @for (author of getCategoryAuthors(selectedCategory); track author._id) {
+                        @for (author of allAuthors; track author._id) {
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                                 <app-author-item [author]="author" 
                                                template="extended"
@@ -204,92 +111,187 @@
                             </div>
                         }
                     </div>
-                }
-            </div>
-        }
-
-        <!-- TRENDING AUTHORS -->
-        @if (!searchQuery && viewMode !== 'category') {
-            <div class="mt-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold m-0">
-                        <i class="bi bi-graph-up-arrow text-success"></i> &nbsp;Trending This Week
-                    </h5>
                 </div>
-                
-                <div class="d-flex flex-column gap-3">
-                    @for (author of trendingAuthors; track author._id; let idx = $index) {
-                        <div class="bg-secondary rounded-4 p-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <!-- Ranking badge -->
-                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
-                                     style="width: 40px; height: 40px;">
-                                    {{ idx + 1 }}
+            }
+    
+            <!-- LIST VIEW -->
+            @if (viewMode === 'list') {
+                <div class="mt-4">
+                    @if (searchQuery) {
+                        <div class="mb-3">
+                            <span class="text-gray-400">Results for</span> 
+                            <span class="fw-bold text-primary">"{{ searchQuery }}"</span>
+                            <span class="badge bg-slate-800 ms-2">{{ searchResults.length }} found</span>
+                        </div>
+                    }
+                    
+                    <div class="d-flex flex-column gap-3">
+                        @for (author of searchQuery ? searchResults : allAuthors; track author._id) {
+                            <app-author-item [author]="author" 
+                                           template="simple"
+                                           (onView)="viewAuthorProfile($event)"
+                                           (onFollow)="handleFollow($event)"></app-author-item>
+                        }
+                    </div>
+                </div>
+            }
+    
+            <!-- CATEGORY VIEW -->
+            @if (viewMode === 'category') {
+                <div class="mt-4">
+                    
+                    <!-- Category Navigation Tabs -->
+                    <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4">
+                        <button class="btn rounded-pill flex-shrink-0"
+                                [class.btn-primary]="!selectedCategory"
+                                [class.btn-secondary]="selectedCategory"
+                                (click)="selectCategory(null)">
+                            All Categories
+                        </button>
+                        @for (category of categories; track category.name) {
+                            <button class="btn rounded-pill flex-shrink-0"
+                                    [class.btn-primary]="selectedCategory === category.name"
+                                    [class.btn-secondary]="selectedCategory !== category.name"
+                                    (click)="selectCategory(category.name)">
+                                {{ category.icon }} {{ category.name }} ({{ category.authorCount }})
+                            </button>
+                        }
+                    </div>
+    
+                    <!-- Category Content -->
+                    @if (!selectedCategory) {
+                        <!-- Show all categories with top authors -->
+                        @for (category of categories; track category.name) {
+                            <div class="mb-5">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold m-0">
+                                        {{ category.icon }} {{ category.name }}
+                                    </h5>
+                                    <button class="btn btn-sm btn-secondary rounded-pill px-3"
+                                            (click)="selectCategory(category.name)">
+                                        View All <i class="bi bi-chevron-right"></i>
+                                    </button>
                                 </div>
                                 
-                                <!-- Author info -->
-                                <div class="flex-grow-1">
+                                <!-- Horizontal scroll of authors -->
+                                <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
+                                    @for (author of getCategoryAuthors(category.name).slice(0, 6); track author._id) {
+                                        <div class="flex-shrink-0" style="width: 260px;">
+                                            <app-author-item [author]="author" 
+                                                           template="extended"
+                                                           (onView)="viewAuthorProfile($event)"
+                                                           (onFollow)="handleFollow($event)"></app-author-item>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    } @else {
+                        <!-- Show selected category authors in grid -->
+                        <div class="mb-3">
+                            <h5 class="fw-bold">
+                                {{ getCategoryIcon(selectedCategory) }} {{ selectedCategory }} Authors
+                            </h5>
+                            <p class="text-gray-400 small">{{ getCategoryAuthors(selectedCategory).length }} authors writing in {{ selectedCategory }}</p>
+                        </div>
+                        
+                        <div class="row g-3">
+                            @for (author of getCategoryAuthors(selectedCategory); track author._id) {
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                                     <app-author-item [author]="author" 
-                                                   template="simple"
+                                                   template="extended"
                                                    (onView)="viewAuthorProfile($event)"
                                                    (onFollow)="handleFollow($event)"></app-author-item>
                                 </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+    
+            <!-- TRENDING AUTHORS -->
+            @if (!searchQuery && viewMode !== 'category') {
+                <div class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">
+                            <i class="bi bi-graph-up-arrow text-success"></i> &nbsp;Trending This Week
+                        </h5>
+                    </div>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        @for (author of trendingAuthors; track author._id; let idx = $index) {
+                            <div class="bg-secondary rounded-4 p-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Ranking badge -->
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                         style="width: 40px; height: 40px;">
+                                        {{ idx + 1 }}
+                                    </div>
+                                    
+                                    <!-- Author info -->
+                                    <div class="flex-grow-1">
+                                        <app-author-item [author]="author" 
+                                                       template="simple"
+                                                       (onView)="viewAuthorProfile($event)"
+                                                       (onFollow)="handleFollow($event)"></app-author-item>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
-        }
-
-        <!-- NEW AUTHORS -->
-        @if (!searchQuery && viewMode !== 'category') {
-            <div class="mt-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold m-0">
-                        <i class="bi bi-stars text-primary"></i> New Authors to Follow
-                    </h5>
+            }
+    
+            <!-- NEW AUTHORS -->
+            @if (!searchQuery && viewMode !== 'category') {
+                <div class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">
+                            <i class="bi bi-stars text-primary"></i> New Authors to Follow
+                        </h5>
+                    </div>
+                    
+                    <div class="row g-3">
+                        @for (author of newAuthors; track author._id) {
+                            <div class="col-12 col-sm-6 col-md-4">
+                                <app-author-item [author]="author" 
+                                               template="extended"
+                                               (onView)="viewAuthorProfile($event)"
+                                               (onFollow)="handleFollow($event)"></app-author-item>
+                            </div>
+                        }
+                    </div>
                 </div>
-                
-                <div class="row g-3">
-                    @for (author of newAuthors; track author._id) {
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <app-author-item [author]="author" 
-                                           template="extended"
-                                           (onView)="viewAuthorProfile($event)"
-                                           (onFollow)="handleFollow($event)"></app-author-item>
-                        </div>
-                    }
+            }
+    
+            <!-- Load More -->
+            @if (hasMore) {
+                <div class="text-center mt-5">
+                    <button class="btn btn-secondary rounded-pill px-5 py-3" (click)="loadMore()">
+                        <i class="bi bi-arrow-down-circle"></i> Load More Authors
+                    </button>
                 </div>
-            </div>
-        }
-
-        <!-- Load More -->
-        @if (hasMore) {
-            <div class="text-center mt-5">
-                <button class="btn btn-secondary rounded-pill px-5 py-3" (click)="loadMore()">
-                    <i class="bi bi-arrow-down-circle"></i> Load More Authors
-                </button>
-            </div>
-        }
-
-        <!-- Empty State -->
-        @if (searchQuery && searchResults.length === 0) {
-            <div class="text-center py-5 mt-5">
-                <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
-                    🔍
+            }
+    
+            <!-- Empty State -->
+            @if (searchQuery && searchResults.length === 0) {
+                <div class="text-center py-5 mt-5">
+                    <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
+                        🔍
+                    </div>
+                    <h5 class="text-gray-400">No authors found</h5>
+                    <p class="text-gray-400 small">Try adjusting your search or filters</p>
+                    <button class="btn btn-primary rounded-pill px-4 mt-3" (click)="clearSearch()">
+                        Clear Search
+                    </button>
                 </div>
-                <h5 class="text-gray-400">No authors found</h5>
-                <p class="text-gray-400 small">Try adjusting your search or filters</p>
-                <button class="btn btn-primary rounded-pill px-4 mt-3" (click)="clearSearch()">
-                    Clear Search
-                </button>
-            </div>
-        }
-
+            }
+    
+        </div>
+    
+        <div style="height: 5rem;"></div>
+    
+        <app-mobile-footer selected="none"></app-mobile-footer>
     </div>
-
-    <div style="height: 5rem;"></div>
-
-    <app-mobile-footer selected="none"></app-mobile-footer>
 
 </div>
