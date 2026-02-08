@@ -216,6 +216,69 @@
                     </div>
                 </div>
 
+                <!-- Translation Card (only show if translation needed) -->
+                <div id="translationCard" class="card mt-3 shadow d-none">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-translate"></i> Traducción AI
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <small>
+                                <strong>Traducción detectada:</strong> 
+                                <span id="translationInfo"></span>
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold">Instrucciones para la AI:</label>
+                            <textarea id="translationInstructions" class="form-control" rows="5" placeholder="Instrucciones para la traducción...">
+Eres un traductor profesional especializado en literatura. Tu tarea es traducir el siguiente texto manteniendo:
+
+1. El tono y estilo del autor original
+2. Los matices culturales y expresiones idiomáticas adaptadas al idioma de destino
+3. La estructura narrativa y los párrafos originales
+4. Los nombres propios (no los traduzcas a menos que sea común hacerlo)
+
+Traduce de manera fluida y natural, como si el texto hubiera sido escrito originalmente en el idioma de destino. Evita traducciones literales que suenen artificiales.
+
+                        </textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold">Texto a traducir:</label>
+                            <textarea id="textToTranslate" class="form-control conversion-textarea" rows="10" placeholder="Pega aquí el texto que deseas traducir..."></textarea>
+                            <small class="text-muted">Caracteres: <span id="charCount">0</span></small>
+                        </div>
+
+                        <button class="btn btn-warning w-100 mb-2" onclick="translateText()">
+                            <i class="bi bi-translate"></i> Traducir con AI
+                        </button>
+
+                        <div id="translationStatus" class="alert alert-info mt-3 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>Traduciendo...</span>
+                        </div>
+
+                        <div id="translationResult" class="d-none">
+                            <label class="fw-bold">Resultado de la traducción:</label>
+                            <div class="bg-light border rounded p-3" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;">
+                                <div id="translatedText"></div>
+                            </div>
+                            <div class="d-flex gap-2 mt-2">
+                                <button class="btn btn-sm btn-primary" onclick="copyTranslation()">
+                                    <i class="bi bi-clipboard"></i> Copiar
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="useTranslationForConversion()">
+                                    <i class="bi bi-arrow-right"></i> Usar para conversión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Convierte a MP3 -->
                 <div class="mt-3 card shadow">
                     <div class="card-header bg-primary text-light">
@@ -381,6 +444,18 @@
 
             document.getElementById('detailSourceLanguage').textContent = getLanguageName(currentAudiobook.sourceLanguage);
             document.getElementById('detailTargetLanguage').textContent = getLanguageName(currentAudiobook.targetLanguage);
+            
+            // Show translation card if languages are different
+            const translationCard = document.getElementById('translationCard');
+            if (currentAudiobook.sourceLanguage && currentAudiobook.targetLanguage && 
+                currentAudiobook.sourceLanguage !== currentAudiobook.targetLanguage) {
+                translationCard.classList.remove('d-none');
+                document.getElementById('translationInfo').textContent = 
+                    `${getLanguageName(currentAudiobook.sourceLanguage)} → ${getLanguageName(currentAudiobook.targetLanguage)}`;
+            } else {
+                translationCard.classList.add('d-none');
+            }
+            
             document.getElementById('detailVoiceId').textContent = currentAudiobook.voiceId || 'N/D';
             document.getElementById('detailVoiceName').textContent = currentAudiobook.voiceName || 'N/D';
             document.getElementById('detailUseExpression').textContent = currentAudiobook.useExpression ? 'Sí' : 'No';
@@ -468,129 +543,6 @@
 
         }
 
-        async function loadPDF(url) {
-            try {
-                pdfjsLib.GlobalWorkerOptions.workerSrc =
-                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                
-                const loadingTask = pdfjsLib.getDocument(url);
-                pdfDoc = await loadingTask.promise;
-                
-                document.getElementById('totalPages').textContent = pdfDoc.numPages;
-                currentPdfPage = 1;
-                renderPDFPage(currentPdfPage);
-            } catch (error) {
-                console.error('Error loading PDF:', error);
-                alert('Error al cargar el archivo PDF');
-            }
-        }
-
-        async function renderPDFPage(pageNum) {
-            try {
-                const page = await pdfDoc.getPage(pageNum);
-                const canvas = document.getElementById('pdfCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                const viewport = page.getViewport({ scale: 1.5 });
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                
-                const renderContext = {
-                    canvasContext: ctx,
-                    viewport: viewport
-                };
-                
-                await page.render(renderContext).promise;
-                document.getElementById('currentPage').textContent = pageNum;
-                
-                const textContent = await page.getTextContent();
-
-                const textLayerDiv = document.getElementById('pdfTextLayer');
-                textLayerDiv.innerHTML = '';
-                textLayerDiv.style.width = canvas.width + 'px';
-                textLayerDiv.style.height = canvas.height + 'px';
-
-                pdfjsLib.renderTextLayer({
-                    textContent,
-                    container: textLayerDiv,
-                    viewport,
-                    textDivs: []
-                });
-                
-                document.getElementById('manualTextInput').placeholder =
-                    'El texto del PDF no puede seleccionarse directamente. Copia el texto del visor o pégalo aquí...';
-                
-            } catch (error) {
-                console.error('Error rendering PDF page:', error);
-            }
-        }
-
-        function previousPage() {
-            if (currentPdfPage > 1) {
-                currentPdfPage--;
-                renderPDFPage(currentPdfPage);
-            }
-        }
-
-        function nextPage() {
-            if (currentPdfPage < pdfDoc.numPages) {
-                currentPdfPage++;
-                renderPDFPage(currentPdfPage);
-            }
-        }
-
-        async function loadTXT(url) {
-            try {
-                const response = await fetch(url);
-                const text = await response.text();
-                
-                txtPages = text.split('\f');
-                if (txtPages.length === 1) {
-                    const charsPerPage = 3000;
-                    txtPages = [];
-                    for (let i = 0; i < text.length; i += charsPerPage) {
-                        txtPages.push(text.substring(i, i + charsPerPage));
-                    }
-                }
-                
-                document.getElementById('totalTxtPages').textContent = txtPages.length;
-                currentTxtPage = 0;
-                renderTxtPage(currentTxtPage);
-            } catch (error) {
-                console.error('Error loading TXT:', error);
-                alert('Error al cargar el archivo TXT');
-            }
-        }
-
-        function renderTxtPage(pageIndex) {
-            if (pageIndex >= 0 && pageIndex < txtPages.length) {
-                document.getElementById('txtContent').textContent = txtPages[pageIndex];
-                document.getElementById('currentTxtPage').textContent = pageIndex + 1;
-                currentTxtPage = pageIndex;
-            }
-        }
-
-        function previousTxtPage() {
-            if (currentTxtPage > 0) {
-                renderTxtPage(currentTxtPage - 1);
-            }
-        }
-
-        function nextTxtPage() {
-            if (currentTxtPage < txtPages.length - 1) {
-                renderTxtPage(currentTxtPage + 1);
-            }
-        }
-
-        async function convertSelectedText() {
-            if (!selectedText || !currentAudiobook) return;
-
-            const chapterNum = prompt('Introduce el número de capítulo para este texto:');
-            if (!chapterNum) return;
-
-            await convertToMP3(selectedText, parseInt(chapterNum));
-        }
-
         async function convertManualText() {
             const text = document.getElementById('manualTextInput').value.trim();
             const chapterNum = document.getElementById('chapterNumber').value;
@@ -605,6 +557,87 @@
             }
 
             await convertToMP3(text, parseInt(chapterNum));
+        }
+
+        // Character counter for translation
+        document.addEventListener('DOMContentLoaded', () => {
+            const textArea = document.getElementById('textToTranslate');
+            if (textArea) {
+                textArea.addEventListener('input', () => {
+                    document.getElementById('charCount').textContent = textArea.value.length;
+                });
+            }
+        });
+
+        async function translateText() {
+            if (!currentAudiobook) return;
+
+            const instructions = document.getElementById('translationInstructions').value.trim();
+            const textToTranslate = document.getElementById('textToTranslate').value.trim();
+
+            if (!textToTranslate) {
+                alert('Por favor ingresa el texto a traducir');
+                return;
+            }
+
+            const statusDiv = document.getElementById('translationStatus');
+            const resultDiv = document.getElementById('translationResult');
+            
+            statusDiv.classList.remove('d-none');
+            resultDiv.classList.add('d-none');
+
+            try {
+                const response = await fetch('/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'AudiobookTranslate',
+                        data: {
+                            audiobookId: currentAudiobook._id,
+                            sourceLanguage: currentAudiobook.sourceLanguage,
+                            targetLanguage: currentAudiobook.targetLanguage,
+                            instructions: instructions,
+                            text: textToTranslate,
+                            password: 'car0lina'
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                statusDiv.classList.add('d-none');
+
+                if (data.success) {
+                    document.getElementById('translatedText').textContent = data.translation;
+                    resultDiv.classList.remove('d-none');
+                } else {
+                    alert('Error en la traducción: ' + (data.message || 'Error desconocido'));
+                }
+
+            } catch (error) {
+                console.error('Error translating:', error);
+                statusDiv.classList.add('d-none');
+                alert('Error al traducir el texto');
+            }
+        }
+
+        function copyTranslation() {
+            const translatedText = document.getElementById('translatedText').textContent;
+            navigator.clipboard.writeText(translatedText).then(() => {
+                // alert('Traducción copiada al portapapeles');
+            }).catch(err => {
+                console.error('Error copying:', err);
+                alert('Error al copiar');
+            });
+        }
+
+        function useTranslationForConversion() {
+            const translatedText = document.getElementById('translatedText').textContent;
+            document.getElementById('manualTextInput').value = translatedText;
+            
+            // Scroll to conversion area
+            document.getElementById('manualTextInput').scrollIntoView({ behavior: 'smooth' });
+            
+            alert('Traducción copiada al área de conversión');
         }
 
         async function playChapter(chapterNumber) {
