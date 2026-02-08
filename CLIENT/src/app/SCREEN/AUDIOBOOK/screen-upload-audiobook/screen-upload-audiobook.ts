@@ -25,7 +25,7 @@ export class ScreenUploadAudiobook implements OnInit {
     promoCodes = signal<PromoCodeModel[]>([]);
 
     //  Steps of the process
-    currentStep = 1;
+    currentStep = signal<number>(1);
     steps = [
         { number: 1, label: 'Pricing' },
         { number: 2, label: 'Upload' },
@@ -378,12 +378,12 @@ export class ScreenUploadAudiobook implements OnInit {
 
     // Progress calculation
     getProgressPercent(): number {
-        return ((this.currentStep - 1) / (this.steps.length - 1)) * 100;
+        return ((this.currentStep() - 1) / (this.steps.length - 1)) * 100;
     }
 
     // Step navigation
     nextStep() {
-        if (this.currentStep == 1) {
+        if (this.currentStep() == 1) {
             //  Validate a PROMO CODE or pricing
             const referralCode = this.referralCode();
             const referralValid = this.referralValid();
@@ -401,18 +401,14 @@ export class ScreenUploadAudiobook implements OnInit {
                 }
             })
         }
-        //  Next Step 2
-        if (this.currentStep == 2) {
-
-        }
-        if (this.currentStep < 5) {
-            this.currentStep++;
+        if (this.currentStep() < 5) {
+            this.currentStep.set(this.currentStep() + 1);
         }
     }
 
     prevStep() {
-        if (this.currentStep > 1) {
-            this.currentStep--;
+        if (this.currentStep() > 1) {
+            this.currentStep.set(this.currentStep() -1);
         }
     }
 
@@ -530,9 +526,14 @@ export class ScreenUploadAudiobook implements OnInit {
     }
 
     calculateTotalPrice(): number {        
+        let total = 0;
         
-        let total = this.calculateBasePrice();
+        // Only add base price if no valid referral code
+        if (!this.referralValid()) {
+            total += this.calculateBasePrice();
+        }
         
+        // Always add premium features cost, even with referral
         if (this.bookConfig.useExpression) {
             total += 15;
         }
@@ -624,7 +625,7 @@ export class ScreenUploadAudiobook implements OnInit {
 
         // Simulate API call
         setTimeout(() => {
-            this.currentStep = 5; // Success step
+            this.currentStep.set(5); // Success step
         }, 1000);
     }
 
@@ -635,7 +636,7 @@ export class ScreenUploadAudiobook implements OnInit {
 
     uploadAnother() {
         // Reset form
-        this.currentStep = 1;
+        this.currentStep.set(1);
         this.referralCode.set(null);
         this.referralValid.set(false);
         this.uploadMethod = null;

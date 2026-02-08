@@ -26,16 +26,16 @@
             @for (step of steps; track step.number; let idx = $index) {
                 <div class="text-center position-relative" style="z-index: 1;">
                     <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center fw-bold"
-                         [class.bg-primary]="currentStep >= step.number"
-                         [class.bg-secondary]="currentStep < step.number"
+                         [class.bg-primary]="currentStep() >= step.number"
+                         [class.bg-secondary]="currentStep() < step.number"
                          style="width: 40px; height: 40px; border: 3px solid var(--color-bg-main);">
-                        @if (currentStep > step.number) {
+                        @if (currentStep() > step.number) {
                             <i class="bi bi-check-lg"></i>
                         } @else {
                             {{ step.number }}
                         }
                     </div>
-                    <div class="small" [class.text-primary]="currentStep === step.number" [class.text-gray-400]="currentStep !== step.number">
+                    <div class="small" [class.text-primary]="currentStep() === step.number" [class.text-gray-400]="currentStep() !== step.number">
                         {{ step.label }}
                     </div>
                 </div>
@@ -59,7 +59,7 @@
     <div class="px-4 pb-5">
 
         <!-- STEP 1: PRICING & REFERRAL -->
-        @if (currentStep === 1) {
+        @if (currentStep() === 1) {
             <div class="mt-4 fade-in-up">
                 
                 @if (!showPricingOptions()) {
@@ -168,7 +168,7 @@
         }
 
         <!-- STEP 2: UPLOAD METHOD -->
-        @if (currentStep === 2) {
+        @if (currentStep() === 2) {
             <div class="mt-4 fade-in-up">
                 <h5 class="fw-bold mb-4">
                     How would you like to submit your book?
@@ -325,7 +325,7 @@
         }
 
         <!-- STEP 3: BOOK DETAILS & VOICE CONFIGURATION -->
-        @if (currentStep === 3) {
+        @if (currentStep() === 3) {
             <div class="mt-4 fade-in-up">                
                 <h3 class="fw-bold mb-4">
                     Configure Your Audiobook
@@ -656,7 +656,7 @@
         }
 
         <!-- STEP 4: REVIEW & SUBMIT -->
-        @if (currentStep === 4) {
+        @if (currentStep() === 4) {
             <div class="mt-4 fade-in-up">
                 <h3 class="fw-bold mb-4">
                     Review Your Submission
@@ -756,9 +756,15 @@
                     <h3 class="fw-bold mb-2">
                         Total Cost
                     </h3>
-                    @if (referralValid()) {
+                    @if (referralValid() && calculateTotalPrice() === 0) {
                         <div class="text-success" style="font-size: 3rem; font-weight: 700;">FREE</div>
                         <div class="small text-gray-400">Referral code applied</div>
+                    } @else if (referralValid() && calculateTotalPrice() > 0) {
+                        <div class="text-warning" style="font-size: 3rem; font-weight: 700;">${{ calculateTotalPrice() }}</div>
+                        <div class="small text-gray-400">
+                            <div class="text-success mb-1">Base price: FREE (Referral applied)</div>
+                            <div>Premium features: ${{ calculateTotalPrice() }}</div>
+                        </div>
                     } @else {
                         <div class="text-primary" style="font-size: 3rem; font-weight: 700;">${{ calculateTotalPrice() }}</div>
                         <div class="small text-gray-400">One-time payment</div>
@@ -795,7 +801,7 @@
         }
 
         <!-- SUCCESS STATE -->
-        @if (currentStep === 5) {
+        @if (currentStep() === 5) {
             <div class="mt-5 text-center fade-in-up">
                 <div class="mb-4" style="font-size: 5rem;">✅</div>
                 <h3 class="fw-bold mb-3">Thank You!</h3>
