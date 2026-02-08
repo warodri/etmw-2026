@@ -6,6 +6,7 @@ const GetAllCategories = require("./tasks/category_get");
 const AudiobookAdd = require("./tasks/audiobook_add");
 const AudiobookCreateStripeCheckout = require("./tasks/audiobook_create_stripe_checkout");
 const AudiobookCheckPaymentStatus = require("./tasks/audiobook_check_payment_status");
+const AudiobooksGetAdmin = require("./tasks/audiobook_get_admin");
 
 //
 //  VOICES
@@ -41,6 +42,7 @@ const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const TasksRegistry = {
 
     //  AUDIOBOOK
+    AudiobooksGetAdmin,
     AudiobookCheckPaymentStatus,
     AudiobookCreateStripeCheckout,
     AudiobookAdd,

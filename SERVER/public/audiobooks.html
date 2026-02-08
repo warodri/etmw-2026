@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audiobook Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        .audiobook-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .audiobook-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .audiobook-card.priority {
+            border-left: 4px solid #198754;
+        }
+        #pdfCanvas {
+            border: 1px solid #dee2e6;
+            max-width: 100%;
+            height: auto;
+        }
+        .text-viewer {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .text-viewer::selection {
+            background: #ffc107;
+            color: #000;
+        }
+        .selected-text-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .chapter-item {
+            background: #e7f5ff;
+            border-left: 3px solid #0d6efd;
+        }
+        .conversion-textarea {
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="bi bi-book-half"></i> Audiobook Management
+                </h1>
+            </div>
+        </div>
+
+        <!-- Audiobooks List -->
+        <div id="audiobooksList" class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3>Uploaded Audiobooks</h3>
+                    <button class="btn btn-primary" onclick="loadAudiobooks()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+                <div id="audiobooksContainer"></div>
+            </div>
+        </div>
+
+        <!-- Audiobook Detail View -->
+        <div id="audiobookDetail" class="row d-none">
+            <div class="col-12 mb-3">
+                <button class="btn btn-secondary" onclick="backToList()">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </button>
+            </div>
+
+            <!-- Important Info Card -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Important Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="fw-bold">Title:</label>
+                            <div id="detailTitle"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Author:</label>
+                            <div id="detailAuthor"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Payment Date:</label>
+                            <div id="detailPaymentDate"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Total Price:</label>
+                            <div id="detailTotalPrice"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Total Pages:</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="detailTotalPages" placeholder="Enter total pages">
+                                <button class="btn btn-success" onclick="updateTotalPages()">
+                                    <i class="bi bi-check-lg"></i> Update
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Description:</label>
+                            <div id="detailDescription" class="text-muted"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Categories:</label>
+                            <div id="detailCategories"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversion Settings -->
+                <div class="card mt-3 shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-gear"></i> Conversion Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="fw-bold">Source Language:</label>
+                            <span id="detailSourceLanguage"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Target Language:</label>
+                            <span id="detailTargetLanguage"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Voice ID:</label>
+                            <span id="detailVoiceId" class="font-monospace"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Voice Name:</label>
+                            <span id="detailVoiceName"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Use Expression:</label>
+                            <span id="detailUseExpression"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Speech Rate:</label>
+                            <span id="detailSpeechRate"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Stability:</label>
+                            <span id="detailStability"></span>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Clarity:</label>
+                            <span id="detailClarity"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Chapters -->
+                <div class="card mt-3 shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-music-note-list"></i> Completed Chapters (<span id="completedCount">0</span>)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="completedChapters" class="list-group"></div>
+                    </div>
+                </div>
+
+                <!-- Additional Details (Collapsed) -->
+                <div class="card mt-3 shadow">
+                    <div class="card-header">
+                        <a class="text-decoration-none text-dark d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#additionalDetails">
+                            <span><i class="bi bi-list-ul"></i> Additional Details</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </a>
+                    </div>
+                    <div class="collapse" id="additionalDetails">
+                        <div class="card-body">
+                            <pre id="detailsJson" class="bg-light p-3 rounded" style="font-size: 12px; max-height: 400px; overflow-y: auto;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Viewer & Converter -->
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">
+                            <i class="bi bi-file-earmark-text"></i> File Viewer & Converter
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- PDF Viewer -->
+                        <div id="pdfViewer" class="d-none">
+                            <div class="d-flex justify-content-between mb-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="previousPage()">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </button>
+                                <span>Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="nextPage()">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            <canvas id="pdfCanvas" class="w-100 mb-3"></canvas>
+                        </div>
+
+                        <!-- TXT Viewer -->
+                        <div id="txtViewer" class="d-none">
+                            <div class="d-flex justify-content-between mb-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="previousTxtPage()">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </button>
+                                <span>Page <span id="currentTxtPage">1</span> of <span id="totalTxtPages">1</span></span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="nextTxtPage()">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div id="txtContent" class="text-viewer"></div>
+                        </div>
+
+                        <!-- Selected Text Display -->
+                        <div class="mt-3">
+                            <label class="fw-bold">Selected Text:</label>
+                            <div id="selectedTextDisplay" class="selected-text-box mb-3">
+                                <em class="text-muted">Select text above to convert to MP3</em>
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="convertSelectedText()" id="convertSelectedBtn" disabled>
+                                <i class="bi bi-file-earmark-music"></i> Convert Selected Text to MP3
+                            </button>
+                        </div>
+
+                        <hr>
+
+                        <!-- Manual Text Input -->
+                        <div>
+                            <label class="fw-bold">Or Paste Text to Convert:</label>
+                            <textarea id="manualTextInput" class="form-control conversion-textarea mb-3" rows="8" placeholder="Paste text here to convert to MP3..."></textarea>
+                            <div class="mb-3">
+                                <label class="fw-bold">Chapter Number:</label>
+                                <input type="number" id="chapterNumber" class="form-control" placeholder="e.g., 1, 2, 3..." min="1">
+                            </div>
+                            <button class="btn btn-success w-100" onclick="convertManualText()">
+                                <i class="bi bi-file-earmark-music"></i> Convert Manual Text to MP3
+                            </button>
+                        </div>
+
+                        <!-- Conversion Status -->
+                        <div id="conversionStatus" class="alert alert-info mt-3 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span id="conversionStatusText">Converting...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let audiobooks = [];
+        let currentAudiobook = null;
+        let pdfDoc = null;
+        let currentPdfPage = 1;
+        let txtPages = [];
+        let currentTxtPage = 0;
+        let selectedText = '';
+
+        // Language mapping
+        const LANGUAGE_MAP = {
+            'en': 'English',
+            'es': 'Spanish',
+            'fr': 'French',
+            'de': 'German',
+            'it': 'Italian',
+            'pt': 'Portuguese',
+            'pl': 'Polish',
+            'nl': 'Dutch',
+            'hi': 'Hindi',
+            'ja': 'Japanese',
+            'zh': 'Chinese',
+            'ko': 'Korean',
+            'ar': 'Arabic',
+            'ru': 'Russian'
+        };
+
+        function getLanguageName(code) {
+            return LANGUAGE_MAP[code] || code;
+        }
+
+        // Load audiobooks on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAudiobooks();
+            setupTextSelection();
+        });
+
+        async function loadAudiobooks() {
+            try {
+                const response = await fetch('/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'AudiobooksGetAdmin' })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    audiobooks = data.audiobooks;
+                    
+                    // Sort: paymentCompleted + digital first
+                    audiobooks.sort((a, b) => {
+                        const aPriority = (a.paymentCompleted && a.uploadMethod === 'digital') ? 1 : 0;
+                        const bPriority = (b.paymentCompleted && b.uploadMethod === 'digital') ? 1 : 0;
+                        return bPriority - aPriority;
+                    });
+                    
+                    displayAudiobooks();
+                }
+            } catch (error) {
+                console.error('Error loading audiobooks:', error);
+                alert('Error loading audiobooks');
+            }
+        }
+
+        function displayAudiobooks() {
+            const container = document.getElementById('audiobooksContainer');
+            if (audiobooks.length === 0) {
+                container.innerHTML = '<p class="text-muted">No audiobooks found</p>';
+                return;
+            }
+
+            let html = '<div class="row">';
+            audiobooks.forEach(book => {
+                const isPriority = book.paymentCompleted && book.uploadMethod === 'digital';
+                const chapterCount = book.audioFiles ? book.audioFiles.length : 0;
+                
+                html += `
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card audiobook-card ${isPriority ? 'priority' : ''}" onclick="viewAudiobook('${book._id}')">
+                            <div class="card-body">
+                                ${isPriority ? '<span class="badge bg-success mb-2">Ready to Convert</span>' : ''}
+                                <h6 class="card-title">${book.title || 'Untitled'}</h6>
+                                <p class="card-text text-muted small mb-2">${book.authorName || 'Unknown Author'}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-music-note"></i> ${chapterCount} chapters
+                                    </small>
+                                    <small class="text-muted">${book.uploadMethod || 'N/A'}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function viewAudiobook(id) {
+            currentAudiobook = audiobooks.find(b => b._id === id);
+            if (!currentAudiobook) return;
+
+            // Hide list, show detail
+            document.getElementById('audiobooksList').classList.add('d-none');
+            document.getElementById('audiobookDetail').classList.remove('d-none');
+
+            // Populate important fields
+            document.getElementById('detailTitle').textContent = currentAudiobook.title || 'N/A';
+            document.getElementById('detailAuthor').textContent = currentAudiobook.authorName || 'N/A';
+            document.getElementById('detailPaymentDate').textContent = currentAudiobook.paymentDate 
+                ? new Date(currentAudiobook.paymentDate).toLocaleString()
+                : 'N/A';
+            document.getElementById('detailTotalPrice').textContent = currentAudiobook.totalPrice 
+                ? `$${currentAudiobook.totalPrice}` 
+                : 'N/A';
+            document.getElementById('detailTotalPages').value = currentAudiobook.totalPages || '';
+            document.getElementById('detailDescription').textContent = currentAudiobook.description || 'No description';
+            
+            // Categories
+            const categories = Array.isArray(currentAudiobook.categories) ? currentAudiobook.categories : [];
+            document.getElementById('detailCategories').innerHTML = categories.length 
+                ? categories.map(cat => `<span class="badge bg-secondary me-1">${cat}</span>`).join('')
+                : '<span class="text-muted">None</span>';
+
+            // Conversion settings
+            document.getElementById('detailSourceLanguage').textContent = getLanguageName(currentAudiobook.sourceLanguage);
+            document.getElementById('detailTargetLanguage').textContent = getLanguageName(currentAudiobook.targetLanguage);
+            document.getElementById('detailVoiceId').textContent = currentAudiobook.voiceId || 'N/A';
+            document.getElementById('detailVoiceName').textContent = currentAudiobook.voiceName || 'N/A';
+            document.getElementById('detailUseExpression').textContent = currentAudiobook.useExpression ? 'Yes' : 'No';
+            document.getElementById('detailSpeechRate').textContent = currentAudiobook.speechRate || '1.0';
+            document.getElementById('detailStability').textContent = currentAudiobook.stability || '0.5';
+            document.getElementById('detailClarity').textContent = currentAudiobook.clarity || '0.75';
+
+            // Completed chapters
+            const audioFiles = currentAudiobook.audioFiles || [];
+            document.getElementById('completedCount').textContent = audioFiles.length;
+            const chaptersHtml = audioFiles.length > 0
+                ? audioFiles.map(file => `
+                    <div class="list-group-item chapter-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>Chapter ${file.chapter}</strong></span>
+                            <small class="text-muted">${file.durationSec ? Math.round(file.durationSec / 60) + ' min' : 'N/A'}</small>
+                        </div>
+                        <small class="text-muted d-block">${file.url}</small>
+                    </div>
+                `).join('')
+                : '<p class="text-muted">No chapters converted yet</p>';
+            document.getElementById('completedChapters').innerHTML = chaptersHtml;
+
+            // Additional details JSON
+            document.getElementById('detailsJson').textContent = JSON.stringify(currentAudiobook, null, 2);
+
+            // Load file viewer
+            loadFileViewer();
+        }
+
+        function backToList() {
+            document.getElementById('audiobooksList').classList.remove('d-none');
+            document.getElementById('audiobookDetail').classList.add('d-none');
+            currentAudiobook = null;
+            pdfDoc = null;
+            txtPages = [];
+            selectedText = '';
+        }
+
+        async function updateTotalPages() {
+            const totalPages = document.getElementById('detailTotalPages').value;
+            if (!totalPages || !currentAudiobook) return;
+
+            try {
+                const response = await fetch('/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'UpdateAudiobookTotalPages',
+                        audiobookId: currentAudiobook._id,
+                        totalPages: parseInt(totalPages)
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Total pages updated successfully!');
+                    currentAudiobook.totalPages = parseInt(totalPages);
+                } else {
+                    alert('Error updating total pages');
+                }
+            } catch (error) {
+                console.error('Error updating total pages:', error);
+                alert('Error updating total pages');
+            }
+        }
+
+        async function loadFileViewer() {
+            if (!currentAudiobook || !currentAudiobook.file) {
+                return;
+            }
+
+            const file = currentAudiobook.file;
+            const filename = file.filename;
+            const mimetype = file.mimetype;
+            // URL-safe base64
+            const encodedMime = btoa(mimetype);
+            const filePath = `/file/${filename}/${encodedMime}`;
+
+            if (file.mimetype === 'application/pdf') {
+                document.getElementById('pdfViewer').classList.remove('d-none');
+                document.getElementById('txtViewer').classList.add('d-none');
+                await loadPDF(filePath);
+            } else if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
+                document.getElementById('txtViewer').classList.remove('d-none');
+                document.getElementById('pdfViewer').classList.add('d-none');
+                await loadTXT(filePath);
+            }
+        }
+
+        async function loadPDF(url) {
+            try {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                
+                const loadingTask = pdfjsLib.getDocument(url);
+                pdfDoc = await loadingTask.promise;
+                
+                document.getElementById('totalPages').textContent = pdfDoc.numPages;
+                currentPdfPage = 1;
+                renderPDFPage(currentPdfPage);
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Error loading PDF file');
+            }
+        }
+
+        async function renderPDFPage(pageNum) {
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const canvas = document.getElementById('pdfCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                const viewport = page.getViewport({ scale: 1.5 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                await page.render(renderContext).promise;
+                document.getElementById('currentPage').textContent = pageNum;
+                
+                // Extract text from page
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                
+                // Make text selectable (we'll use manual text input for PDF)
+                document.getElementById('manualTextInput').placeholder = 'PDF text cannot be directly selected. Copy text from PDF viewer or paste here...';
+                
+            } catch (error) {
+                console.error('Error rendering PDF page:', error);
+            }
+        }
+
+        function previousPage() {
+            if (currentPdfPage > 1) {
+                currentPdfPage--;
+                renderPDFPage(currentPdfPage);
+            }
+        }
+
+        function nextPage() {
+            if (currentPdfPage < pdfDoc.numPages) {
+                currentPdfPage++;
+                renderPDFPage(currentPdfPage);
+            }
+        }
+
+        async function loadTXT(url) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                // Split by form feed character (page break)
+                txtPages = text.split('\f');
+                if (txtPages.length === 1) {
+                    // If no page breaks, split by character count (~3000 chars per page)
+                    const charsPerPage = 3000;
+                    txtPages = [];
+                    for (let i = 0; i < text.length; i += charsPerPage) {
+                        txtPages.push(text.substring(i, i + charsPerPage));
+                    }
+                }
+                
+                document.getElementById('totalTxtPages').textContent = txtPages.length;
+                currentTxtPage = 0;
+                renderTxtPage(currentTxtPage);
+            } catch (error) {
+                console.error('Error loading TXT:', error);
+                alert('Error loading TXT file');
+            }
+        }
+
+        function renderTxtPage(pageIndex) {
+            if (pageIndex >= 0 && pageIndex < txtPages.length) {
+                document.getElementById('txtContent').textContent = txtPages[pageIndex];
+                document.getElementById('currentTxtPage').textContent = pageIndex + 1;
+                currentTxtPage = pageIndex;
+            }
+        }
+
+        function previousTxtPage() {
+            if (currentTxtPage > 0) {
+                renderTxtPage(currentTxtPage - 1);
+            }
+        }
+
+        function nextTxtPage() {
+            if (currentTxtPage < txtPages.length - 1) {
+                renderTxtPage(currentTxtPage + 1);
+            }
+        }
+
+        function setupTextSelection() {
+            document.addEventListener('mouseup', () => {
+                const selection = window.getSelection();
+                const text = selection.toString().trim();
+                
+                if (text.length > 0) {
+                    selectedText = text;
+                    document.getElementById('selectedTextDisplay').innerHTML = `<div class="small">${text.substring(0, 200)}${text.length > 200 ? '...' : ''}</div><div class="small text-muted mt-2">${text.length} characters</div>`;
+                    document.getElementById('convertSelectedBtn').disabled = false;
+                }
+            });
+        }
+
+        async function convertSelectedText() {
+            if (!selectedText || !currentAudiobook) return;
+
+            const chapterNum = prompt('Enter chapter number for this text:');
+            if (!chapterNum) return;
+
+            await convertToMP3(selectedText, parseInt(chapterNum));
+        }
+
+        async function convertManualText() {
+            const text = document.getElementById('manualTextInput').value.trim();
+            const chapterNum = document.getElementById('chapterNumber').value;
+            
+            if (!text) {
+                alert('Please enter text to convert');
+                return;
+            }
+            if (!chapterNum) {
+                alert('Please enter chapter number');
+                return;
+            }
+
+            await convertToMP3(text, parseInt(chapterNum));
+        }
+
+        async function convertToMP3(text, chapterNumber) {
+            if (!currentAudiobook) return;
+
+            const statusDiv = document.getElementById('conversionStatus');
+            const statusText = document.getElementById('conversionStatusText');
+            statusDiv.classList.remove('d-none');
+            statusText.textContent = 'Converting to MP3...';
+
+            try {
+                const response = await fetch('/api/v1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'ConvertToMP3',
+                        audiobookId: currentAudiobook._id,
+                        params: {
+                            voiceId: currentAudiobook.voiceId,
+                            text: text,
+                            modelId: 'eleven_turbo_v2',
+                            stability: parseFloat(currentAudiobook.stability) || 0.5,
+                            similarity: parseFloat(currentAudiobook.clarity) || 0.75,
+                            style: currentAudiobook.useExpression ? 0.5 : 0,
+                            speakerBoost: true,
+                            outputFormat: 'mp3_44100_128',
+                            chapterNumber: chapterNumber
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusText.textContent = 'Conversion successful!';
+                    statusDiv.classList.remove('alert-info');
+                    statusDiv.classList.add('alert-success');
+                    
+                    // Clear inputs
+                    selectedText = '';
+                    document.getElementById('selectedTextDisplay').innerHTML = '<em class="text-muted">Select text above to convert to MP3</em>';
+                    document.getElementById('convertSelectedBtn').disabled = true;
+                    document.getElementById('manualTextInput').value = '';
+                    document.getElementById('chapterNumber').value = '';
+                    
+                    // Reload audiobook to show updated chapters
+                    setTimeout(() => {
+                        statusDiv.classList.add('d-none');
+                        viewAudiobook(currentAudiobook._id);
+                    }, 2000);
+                } else {
+                    statusText.textContent = 'Conversion failed: ' + (data.message || 'Unknown error');
+                    statusDiv.classList.remove('alert-info');
+                    statusDiv.classList.add('alert-danger');
+                }
+            } catch (error) {
+                console.error('Error converting to MP3:', error);
+                statusText.textContent = 'Error: ' + error.message;
+                statusDiv.classList.remove('alert-info');
+                statusDiv.classList.add('alert-danger');
+            }
+        }
+    
+    </script>
+</body>
+</html>

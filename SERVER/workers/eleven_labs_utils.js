@@ -439,6 +439,7 @@ async function textToSpeech(params) {
 
         const arrayBuffer = await response.arrayBuffer();
         return Buffer.from(arrayBuffer);
+        
     } catch (error) {
         console.error('Error generating speech:', error);
         throw error;

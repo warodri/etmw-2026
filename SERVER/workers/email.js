@@ -340,9 +340,11 @@ function getTemplate(title, html, unsuscribeUrl = 'Reply to this Email if you wa
 
 const informAdmins = (subject, text) => {
     try {
-        sendEmail(config.EMAIL.admin, subject, text, () => {
-            console.log('EMAIL ENVIADO A ADMIN')
-        });
+        for (let email of config.ADMIN.emails) {
+            sendEmail(email, subject, text, () => {
+                console.log('EMAIL ENVIADO A ADMIN')
+            });
+        }
     } catch (ex) {
         console.log(ex);
     }

@@ -1,3 +1,5 @@
+const { informAdmins } = require('../workers/email');
+
 async function run(data, req, res) {
     try {
         const {
@@ -109,6 +111,20 @@ async function run(data, req, res) {
         ab.publishedAt = Date.now();
         const newAudiobook = await ab.save();
 
+        //  Tell Admins
+        const mainConfig = require('../config');
+        const SERVER = mainConfig.dev ? mainConfig.SERVER.local : mainConfig.SERVER.remote;
+        const SUBJECT = 'ETMW - Un usuario acaba de subir un libro';
+        const BODY = `
+            <h5><b>Todavia no esta pagado</b></h5>
+            Titulo: <b>${title}</b> <br>
+            Descripcion: <b>${description}</b> <br>
+            <hr />
+            Accede aqui: ${SERVER}/audiobooks.html
+        `
+        informAdmins(SUBJECT, BODY);
+
+        //  Respond
         return res.status(200).json({
             success: true,
             audiobook: newAudiobook
