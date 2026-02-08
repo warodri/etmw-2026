@@ -36,6 +36,7 @@ export class ScreenUploadAudiobook implements OnInit {
     // Step 1: Referral & Pricing
     referralCode = signal<string | null>(null);
     referralValid = signal<boolean>(false);
+    referralChecked = signal<boolean>(false);
     showPricingOptions = signal<boolean>(false);
     selectedPricing = signal<number | null>(null);
 
@@ -89,6 +90,7 @@ export class ScreenUploadAudiobook implements OnInit {
         sourceLanguage: '',
         targetLanguage: '',
         voiceId: '',
+        voiceName: '',
         useExpression: false,
         speechRate: '1.0',
         stability: 50,
@@ -143,6 +145,19 @@ export class ScreenUploadAudiobook implements OnInit {
         global: 9,
     }
     SELECTED_PREMIUM_VOICE_COST = signal<number>(0);
+    
+    voiceExpression: {
+        latam: number,
+        us: number,
+        uk: number,
+        global: number,
+    } = {
+        latam: 3,
+        us: 9,
+        uk: 9,
+        global: 9,
+    }
+    SELECTED_VOICE_EXPRESSION_COST = signal<number>(0);
 
     availableCategories = [
         'Literary Fiction',
@@ -165,10 +180,39 @@ export class ScreenUploadAudiobook implements OnInit {
     showPremiumVoices = signal<boolean>(false);
     premiumVoicesShowMore = signal<boolean>(false);
 
+    sendBookAddress: {
+        UK: {
+            name: string,
+            address: string,
+            postcode: string,
+            country: string
+        }, 
+        ARGENTINA: {
+            name: string,
+            address: string,
+            postcode: string,
+            country: string
+        }
+    } = {
+        UK: {
+            name: 'ETMW Publishing',
+            address: '55 Kings Wood Park',
+            postcode: 'CM16 6FA Epping, Essex',
+            country: 'United Kingdom'
+        }, 
+        ARGENTINA: {
+            name: 'ETMW Publishing',
+            address: 'Colon 210',
+            postcode: '3100 Paran, Entre Rios',
+            country: 'Argentina'
+        }
+    }
+
     // Flags
     working = signal<boolean>(true);
     showInstructionsStep1 = signal<boolean>(true);
     private audio?: HTMLAudioElement;
+    sendingBook = signal<boolean>(false);
 
     constructor(
         private iUser: InternetUserService,
@@ -182,12 +226,15 @@ export class ScreenUploadAudiobook implements OnInit {
     ngOnInit(): void {
         this.getAppConfig(() => {
             this.calculatePremiumVoiceCost();
+            this.calculateVoiceExpressionCost();
             this.loadMyUser(() => {
                 this.getPromoCodes(() => {
                     this.populatePartnersArray();
                     this.detectRegion();
                     this.checkShowInstructionsStep1();
-                    this.working.set(false);
+                    this.getAllCategories(() => {
+                        this.working.set(false);
+                    })
                 });
             })
         })
@@ -200,8 +247,23 @@ export class ScreenUploadAudiobook implements OnInit {
                 this.standardPricing = response.standardPricing
                 this.translation = response.translation;
                 this.premiumVoiceCost = response.premiumVoiceCost;
+                this.sendBookAddress = response.sendBookAddress;
                 callback();
             }
+        })
+    }
+    
+    getAllCategories(callback: any) {
+        this.iAudiobook.getAllCategories((response: any) => {
+            console.log('getAllCategories', response);
+            if (response && response.success) {
+                const a = [];
+                for (let item of response.categories) {
+                    a.push(item.name)
+                }
+                this.availableCategories = a;
+            }
+            callback();
         })
     }
 
@@ -218,6 +280,23 @@ export class ScreenUploadAudiobook implements OnInit {
                 this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.uk);
             } else {
                 this.SELECTED_PREMIUM_VOICE_COST.set(this.premiumVoiceCost.global);
+            }            
+        }
+    }
+
+    calculateVoiceExpressionCost() {
+        const regionDetected = this.regionDetected();
+        if (regionDetected && this.voiceExpression) {
+            if (regionDetected == 'latam') {
+                this.SELECTED_VOICE_EXPRESSION_COST.set(this.voiceExpression.latam)
+            }
+            else if (regionDetected == 'us') {
+                this.SELECTED_VOICE_EXPRESSION_COST.set(this.voiceExpression.us);
+            }
+            else if (regionDetected == 'uk') {
+                this.SELECTED_VOICE_EXPRESSION_COST.set(this.voiceExpression.uk);
+            } else {
+                this.SELECTED_VOICE_EXPRESSION_COST.set(this.voiceExpression.global);
             }            
         }
     }
@@ -345,6 +424,7 @@ export class ScreenUploadAudiobook implements OnInit {
         this.internet.validatePromoCode(promoCode, (response: any) => {
             this.working.set(false);
             console.log('validatePromoCode', response);
+            this.referralChecked.set(true);
             if (response && response.success) {
                 this.referralValid.set(true);
                 this.nextStep();
@@ -409,8 +489,9 @@ export class ScreenUploadAudiobook implements OnInit {
     }
 
     // Step 3: Configuration
-    selectVoice(voiceId: string, isPro: boolean) {
+    selectVoice(voiceId: string, voiceName: string, isPro: boolean) {
         this.bookConfig.voiceId = voiceId;
+        this.bookConfig.voiceName = voiceName;
         this.isVoiceProfessional.set(isPro);
     }
 
@@ -563,6 +644,7 @@ export class ScreenUploadAudiobook implements OnInit {
             sourceLanguage: '',
             targetLanguage: '',
             voiceId: '',
+            voiceName: '',
             useExpression: false,
             speechRate: '1.0',
             stability: 50,
@@ -593,6 +675,12 @@ export class ScreenUploadAudiobook implements OnInit {
  
     toggleShowMorePremiumVouces() {
         this.premiumVoicesShowMore.set(!this.premiumVoicesShowMore())
+    }
+
+    showAllCategories = signal<boolean>(false);
+
+    toggleShowAllCategories() {
+        this.showAllCategories.set(!this.showAllCategories())
     }
 
 }

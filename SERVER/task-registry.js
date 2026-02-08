@@ -1,5 +1,10 @@
 
 //
+//  AUDIOBOOK
+//  
+const GetAllCategories = require("./tasks/category_get");
+
+//
 //  VOICES
 //  
 const GetVoicesByTier = require("./tasks/voices_get_by_tear");
@@ -31,6 +36,9 @@ const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 
 
 const TasksRegistry = {
+
+    //  AUDIOBOOK
+    GetAllCategories,
 
     //  VOICES
     GetVoicesByTier,

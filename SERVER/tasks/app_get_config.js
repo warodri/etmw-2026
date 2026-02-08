@@ -56,11 +56,35 @@ async function run(data, req, res) {
             global: 9,
         }
 
+        let voiceExpression = {
+            latam: 3,
+            us: 9,
+            uk: 9,
+            global: 9,
+        }
+
+        let sendBookAddress = {
+            UK: {
+                name: 'ETMW Publishing',
+                address: '55 Kings Wood Park',
+                postcode: 'CM16 6FA Epping, Essex',
+                country: 'United Kingdom'
+            }, 
+            ARGENTINA: {
+                name: 'ETMW Publishing',
+                address: 'Colon 210',
+                postcode: '3100 Paran, Entre Rios',
+                country: 'Argentina'
+            }
+        }
+
         return res.status(200).json({
             success: true,
             standardPricing,
             translation,
-            premiumVoiceCost
+            premiumVoiceCost,
+            voiceExpression,
+            sendBookAddress
         })
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)

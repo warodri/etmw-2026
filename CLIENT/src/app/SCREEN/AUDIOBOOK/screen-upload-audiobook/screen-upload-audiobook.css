@@ -2,3 +2,8 @@
     max-height: 400px;
     overflow: hidden;
 }
+
+.included-category-limit {
+    max-height: 200px;
+    overflow: hidden;
+}
