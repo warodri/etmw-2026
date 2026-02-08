@@ -35,6 +35,9 @@ import { AuthInterceptor } from './utils/auth.interceptor';
 import { ToastComponent } from './COMPONENTS/SYSTEM/toast/toast.component';
 import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audiobook/screen-upload-audiobook';
 import { TermsText } from './COMPONENTS/SYSTEM/terms-text/terms-text';
+import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/screen-payment-success';
+import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
+import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
 
 @NgModule({
     declarations: [
@@ -64,7 +67,10 @@ import { TermsText } from './COMPONENTS/SYSTEM/terms-text/terms-text';
         FirstRun,
         ToastComponent,
         ScreenUploadAudiobook,
-        TermsText
+        TermsText,
+        ScreenPaymentSuccess,
+        ScreenPaymentFailed,
+        ScreenPaymentCencelled
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

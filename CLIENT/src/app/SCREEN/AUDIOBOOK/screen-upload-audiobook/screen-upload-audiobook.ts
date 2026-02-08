@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { UserModel } from '../../../models/user';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetService } from '../../../SERVICES/internet.service';
@@ -16,7 +16,7 @@ import { Config } from '../../../utils/config';
     templateUrl: './screen-upload-audiobook.html',
     styleUrl: './screen-upload-audiobook.css',
 })
-export class ScreenUploadAudiobook implements OnInit {
+export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     
     //  My logged user (mandatory)
     myUser = signal<UserModel | null>(null);
@@ -176,6 +176,11 @@ export class ScreenUploadAudiobook implements OnInit {
     acceptedTerms = false;
     showTermsModal = false;
     showPartnersModal = signal<boolean>(false);
+    
+    // Payment & Polling
+    audiobookId = signal<string | null>(null);
+    paymentPollingInterval: any = null;
+    showPaymentWaiting = signal<boolean>(false);
     includedVoicesShowMore = signal<boolean>(false);
     showPremiumVoices = signal<boolean>(false);
     premiumVoicesShowMore = signal<boolean>(false);
@@ -238,6 +243,10 @@ export class ScreenUploadAudiobook implements OnInit {
                 });
             })
         })
+    }
+
+    ngOnDestroy(): void {
+        this.stopPaymentPolling();
     }
 
     getAppConfig(callback: any) {
@@ -614,24 +623,112 @@ export class ScreenUploadAudiobook implements OnInit {
     }
 
     submitUpload() {
+        //  Validate
         if (!this.acceptedTerms) return;
-        
-        console.log('Submitting upload:', {
-            uploadMethod: this.uploadMethod,
-            file: this.uploadedFile,
-            config: this.bookConfig,
-            referral: this.referralCode
-        });
+        if (this.working()) return;
 
-        // Simulate API call
-        setTimeout(() => {
-            this.currentStep.set(5); // Success step
-        }, 1000);
+        //  Working
+        this.working.set(true);
+
+        //  Send data
+        const formData = new FormData();
+        if (this.uploadedFile) {
+            formData.append('file', this.uploadedFile);
+        }
+        formData.append('uploadMethod', this.uploadMethod || '');
+        formData.append('config', JSON.stringify(this.bookConfig));
+        formData.append('referralCode', this.referralCode() || '');
+        formData.append('totalPrice', this.calculateTotalPrice().toString());
+        formData.append('basePrice', this.calculateBasePrice().toString());
+        formData.append('hasReferral', this.referralValid().toString());
+        
+        // Create audiobook record
+        this.iAudiobook.createAudiobookUpload(formData, (response: any) => {
+            this.working.set(false);
+            console.log('createAudiobookUpload', response);
+            
+            if (response && response.success) {
+                const audiobookId = response.audiobook._id;
+                this.audiobookId.set(audiobookId);
+                
+                //  Price to pay                
+                const totalPrice = this.calculateTotalPrice();                
+                if (totalPrice > 0) {
+                    // Need payment - open Stripe and start polling
+                    this.openStripePayment(audiobookId, totalPrice);
+                } else {
+                    // Free - go directly to success
+                    this.currentStep.set(5);
+                }
+            } else {
+                this.toast.show('Error creating audiobook upload');
+            }
+        });
+    }
+    
+    openStripePayment(audiobookId: string, amount: number) {
+        //  Get currency
+        const currency = this.selectedCurrency();
+        // Get Stripe checkout URL from server
+        this.working.set(true);
+        this.iAudiobook.createStripeCheckout(audiobookId, currency, amount, (response: any) => {
+            this.working.set(false);
+            console.log('createStripeCheckout', response);
+            
+            if (response && response.success && response.checkoutUrl) {
+                // Show waiting message
+                this.showPaymentWaiting.set(true);
+                
+                // Open Stripe in new window
+                window.open(response.checkoutUrl, '_blank');
+                
+                // Start polling for payment confirmation
+                this.startPaymentPolling(audiobookId);
+            } else {
+                this.toast.show('Error creating payment session');
+            }
+        });
+    }
+    
+    startPaymentPolling(audiobookId: string) {
+        // Poll every 3 seconds
+        this.paymentPollingInterval = setInterval(() => {
+            this.checkPaymentStatus(audiobookId);
+        }, 3000);
+    }
+    
+    checkPaymentStatus(audiobookId: string) {
+        this.iAudiobook.checkAudiobookPaymentStatus(audiobookId, (response: any) => {
+            console.log('checkPaymentStatus', response);
+            
+            if (response && response.success && response.paymentCompleted) {
+                // Payment confirmed!
+                this.stopPaymentPolling();
+                this.showPaymentWaiting.set(false);
+                this.currentStep.set(5);
+            }
+        });
+    }
+    
+    stopPaymentPolling() {
+        if (this.paymentPollingInterval) {
+            clearInterval(this.paymentPollingInterval);
+            this.paymentPollingInterval = null;
+        }
+    }
+    
+    cancelPaymentWaiting() {
+        this.stopPaymentPolling();
+        this.showPaymentWaiting.set(false);
+        this.toast.show('Payment cancelled. You can try again.');
     }
 
     // Success actions
     goToMyBooks() {
-        console.log('Navigate to my books');
+        const myUser = this.myUser();
+        if (myUser) {
+            this.router.navigate(['app/user-profile', myUser._id])
+        }
     }
 
     uploadAnother() {

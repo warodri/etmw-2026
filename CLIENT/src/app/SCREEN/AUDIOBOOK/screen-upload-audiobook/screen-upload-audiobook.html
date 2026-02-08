@@ -919,4 +919,29 @@
     </div>
 }
 
+<!-- 
+    PAYMENT WAITING MODAL
+-->
+@if (showPaymentWaiting()) {
+    <div class="modal fade show d-block px-4" style="background-color: rgba(0,0,0,0.9);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-secondary">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-primary mb-4" role="status" style="width: 4rem; height: 4rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h4 class="fw-bold mb-3 text-light">Waiting for Payment</h4>
+                    <p class="text-gray-400 mb-4">
+                        Please complete your payment in the Stripe window.<br>
+                        This page will automatically update when payment is confirmed.
+                    </p>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelPaymentWaiting()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <div style="height: 5rem;"></div>

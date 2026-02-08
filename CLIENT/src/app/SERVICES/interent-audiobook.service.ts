@@ -34,6 +34,37 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
+    createAudiobookUpload(formData: FormData, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        formData.append('action', 'AudiobookAdd');
+        formData.append('lang', lang);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
+    }
+
+    checkAudiobookPaymentStatus(audiobookId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookCheckPaymentStatus',
+            lang,
+            data: {
+                audiobookId
+            }
+        }, callback);
+    }
+
+    createStripeCheckout(audiobookId: string, currency: string, amount: number, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookCreateStripeCheckout',
+            lang,
+            data: {
+                audiobookId,
+                currency,
+                amount
+            }
+        }, callback);
+    }
+
     
 
 }

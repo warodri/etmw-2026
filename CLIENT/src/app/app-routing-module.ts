@@ -10,6 +10,9 @@ import { ScreenDebates } from './SCREEN/DEBATES/screen-debates/screen-debates';
 import { ScreenAuthors } from './SCREEN/AUTHOR/screen-authors/screen-authors';
 import { ScreenPartners } from './SCREEN/PARTNERS/screen-partners/screen-partners';
 import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audiobook/screen-upload-audiobook';
+import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/screen-payment-success';
+import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
+import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -22,6 +25,10 @@ const routes: Routes = [
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
     { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
+    //  Payment
+    { path: 'payment/success', component: ScreenPaymentSuccess },
+    { path: 'payment/failed', component: ScreenPaymentFailed },
+    { path: 'payment/cancelled', component: ScreenPaymentCencelled },
 ];
 
 @NgModule({

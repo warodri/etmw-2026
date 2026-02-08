@@ -3,43 +3,99 @@ const Schema = mongoose.Schema;
 
 const model = new Schema({
 
+    file: {
+        type: Object
+    },
+    uploadMethod: {
+        type: String,
+        required: true
+    },
+    referralCode: {
+        type: String,
+    },
+    totalPrice: {
+        type: Number,
+    },
+    basePrice: {
+        type: Number,
+    },
+    hasReferral: {
+        type: Boolean,
+    },
+
     authorId: {
         type: Schema.Types.ObjectId,
         ref: "etmw2026_authors",
         index: true,
         required: true
     },
-
+    sourceLanguage: {
+        type: String,
+        index: true
+    },
+    targetLanguage: {
+        type: String,
+        index: true
+    },
+    voiceId: {
+        type: String,
+        required: true
+    },
+    voiceName: {
+        type: String,
+        required: true
+    },
+    useExpression: {
+        type: Boolean,
+        default: false
+    },
+    speechRate: {
+        type: String,
+    },
+    stability: {
+        type: Number,
+    },
+    clarity: {
+        type: Number,
+    },
     title: {
         type: String,
         index: true
     },
-
+    authorName: {
+        type: String,
+    },
     description: {
         type: String
     },
+    categories: {
+        type: Object,
+        default: []
+    },
 
-    language: {
+    /**
+     * PAYMENT INFO
+     */
+    paymentCompleted: {
+        type: Boolean,
+        default: false
+    },
+    paymentId: {
         type: String,
-        index: true
     },
-
-    accent: {
-        type: String
+    paymentAmount: {
+        type: Number,
     },
-
-    categories: [{
-        type: Schema.Types.ObjectId,
-        ref: "etmw2026_categories"
-    }],
-
-    sourceType: {
+    paymentDate: {
+        type: Number,
+    },
+    stripeSessionId: {
         type: String,
-        enum: ['pdf', 'physical_scan', 'text'],
-        required: true
     },
 
-    // ---- OCR + AI PIPELINE ----
+    /**
+     * ONCE THE BOOK IS PUBLISHED
+     */
     pipelineStatus: {
         type: String,
         enum: [
@@ -54,38 +110,36 @@ const model = new Schema({
         default: 'uploaded',
         index: true
     },
-
     totalPages: {
         type: Number
     },
-
     totalAudioDurationSec: {
         type: Number
     },
-
     audioFiles: [{
         chapter: Number,
         url: String,
         durationSec: Number
     }],
-
     published: {
         type: Boolean,
         default: false,
         index: true
     },
-
     publishedAt: {
         type: Number,
         index: true
     },
 
+    enabled: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Number,
         default: Date.now,
         index: true
     },
-
     updatedAt: {
         type: Number,
         default: Date.now,

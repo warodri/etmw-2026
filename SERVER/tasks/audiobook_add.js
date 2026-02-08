@@ -1,40 +1,119 @@
-const Author = require('../models/author');
-
 async function run(data, req, res) {
     try {
         const {
-            penName,
-            bio,
-            languages,
-            country
-        } = data;
+            uploadMethod,
+            config,
+            referralCode,
+            totalPrice,
+            basePrice,
+            hasReferral,
+        } = req.body;
+
+        const file = req.file || null;
         const userId = req.userId || null;
 
-        if (!userId) {
+        if (!userId || !uploadMethod || !config || !basePrice) {
             return res.status(200).json({
                 success: false,
                 message: 'invalid data'
             })
         }
 
-        const now = Date.now();
-        const author = new Author({
-            userId,
-            penName,
-            bio,
-            languages,
-            country,
-            enabled: true,
-            createdAt: now,
-            updatedAt: now
-        });
+        const c = JSON.parse(config);
+        const {
+            sourceLanguage,
+            targetLanguage,
+            voiceId,
+            voiceName,
+            useExpression,
+            speechRate,
+            stability,
+            clarity,
+            title,
+            authorName,
+            description,
+            categories,
+        } = c
 
-        await author.save();
+
+        //  Find this user
+        const User = require('../models/user');
+        const u = await User.findOne({
+            _id: userId,
+            enabled: true
+        })
+        if (!u) {
+            return res.status(200).json({
+                success: false,
+                message: 'invalid user'
+            })
+        }
+
+        //  Create author if doesn't exist
+        const Author = require('../models/author');
+        let a = await Author.findOne({
+            userId,
+            enabled: true
+        })
+        if (!a) {
+            //  Create new author
+            const doc = new Author();
+            doc.userId = userId;
+            doc.penName = authorName;
+            doc.bio = '';
+            doc.languages = u.languages;
+            doc.country = u.country;
+            doc.totalAudiobooks = 1;
+            doc.totalCompletions = 0;
+            a = await doc.save();
+        }
+        if (!a) {
+            return res.status(200).json({
+                success: false,
+                message: 'invalid author'
+            })
+        }
+
+        //  Add audiobook
+        const AudioBook = require('../models/audiobook');
+        const ab = new AudioBook();
+        ab.file = file;
+        ab.uploadMethod = uploadMethod;
+        ab.referralCode = referralCode;
+        ab.totalPrice = totalPrice;
+        ab.basePrice = basePrice;
+        ab.hasReferral = hasReferral;
+        
+        console.log('voiceId', voiceId)
+        console.log('voiceName', voiceName)
+
+        ab.authorId = a._id;
+        ab.sourceLanguage = sourceLanguage;
+        ab.targetLanguage = targetLanguage;
+        ab.voiceId = voiceId;
+        ab.voiceName = voiceName;
+        ab.useExpression = useExpression;
+        ab.speechRate = speechRate;
+        ab.stability = stability;
+        ab.clarity = clarity;
+        ab.title = title;
+        ab.authorName = authorName;
+        ab.description = description;
+        ab.categories = categories;
+        
+        ab.pipelineStatus = 'uploaded';
+        ab.totalPages = 0;
+        ab.totalAudioDurationSec = 0;
+        ab.audioFiles = [];
+        ab.published = false;
+        ab.publishedAt = Date.now();
+        const newAudiobook = await ab.save();
 
         return res.status(200).json({
             success: true,
-            data: author
+            audiobook: newAudiobook
         })
+
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)
