@@ -104,13 +104,13 @@
                     
                     <!-- Horizontal scrolling cards -->
                     <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                        <div class="flex-shrink-0" style="width: 400px;">
+                        <div class="flex-shrink-0" style="width: 450px;">
                             <app-item template="md"></app-item>
                         </div>
-                        <div class="flex-shrink-0" style="width: 400px;">
+                        <div class="flex-shrink-0" style="width: 450px;">
                             <app-item template="md"></app-item>
                         </div>
-                        <div class="flex-shrink-0" style="width: 400px;">
+                        <div class="flex-shrink-0" style="width: 450px;">
                             <app-item template="md"></app-item>
                         </div>
                     </div>
@@ -129,9 +129,9 @@
     
                 <!-- Enhanced category cards -->
                 <div class="row g-3">
-                    @for (category of categories; track category.name) {
+                    @for (category of categoryCards(); track category.name) {
                         <div class="col-6 col-md-4 col-lg-3">
-                            <div class="bg-secondary rounded-4 p-4 text-center pointer position-relative overflow-hidden" 
+                            <div class="bg-secondary rounded-4 p-4 text-center pointer position-relative overflow-hidden category-card" 
                                  style="transition: all 0.3s ease; min-height: 140px;"
                                  (click)="selectCategory(category.name)">
                                 
@@ -140,12 +140,29 @@
                                      [style.background]="category.gradient"></div>
                                 
                                 <!-- Content -->
-                                <div class="position-relative">
+                                <div class="position-relative category-card-content">
                                     <div class="mb-2" style="font-size: 2.5rem;">
                                         {{ category.icon }}
                                     </div>
-                                    <div class="fw-bold mb-1">{{ category.name }}</div>
-                                    <div class="small text-gray-400">{{ category.count }} audiobooks</div>
+                                    <div class="fw-bold text-primary mb-1 d-flex justify-content-center align-items-center gap-2">
+                                        {{ category.name }}
+                                        <!-- <div class="small bg-primary rounded-pill px-2">
+                                            {{ category.count || 0 }}
+                                        </div> -->
+                                    </div>
+                                    
+                                    @if (category.children.length > 0) {
+                                        <div class="d-flex flex-wrap justify-content-center gap-1 mt-2">
+                                            @for (child of category.children; track child.name) {
+                                                <div class="badge bg-slate-800 px-2 py-1"(click)="selectCategory(child.name); $event.stopPropagation()">
+                                                    {{ child.name }}  &nbsp;
+                                                    <span class="small bg-light text-dark rounded-pill px-1">
+                                                        {{ (child.count || 0) ? ('' + (child.count || 0)) : '0' }}
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
                                 </div>
                                 
                                 <!-- Hover effect -->
@@ -244,4 +261,3 @@
     </div>
 
 </div>
-

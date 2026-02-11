@@ -22,10 +22,6 @@ const model = new Schema({
     city: { 
         type: String
     },
-    languages: {
-        type: Object,
-        default: []
-    },
     country: { 
         type: String
     },
@@ -41,6 +37,10 @@ const model = new Schema({
     },
     bio: { 
         type: String
+    },
+    languages: {
+        type: Object,
+        default: []
     },
     lastIp: { 
         type: String

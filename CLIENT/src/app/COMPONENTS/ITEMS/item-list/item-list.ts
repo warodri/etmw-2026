@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { CategoryModel } from '../../../models/categories';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 
 @Component({
     selector: 'app-item-list',
@@ -7,86 +9,29 @@ import { Router } from '@angular/router';
     templateUrl: './item-list.html',
     styleUrl: './item-list.css',
 })
-export class ItemList {
+export class ItemList implements OnInit {
 
     searchQuery = '';
     searchResultCount = 12;
     activeFilters: string[] = [];
 
-    categories = [
-        {
-            name: 'Literary Fiction',
-            icon: '📚',
-            count: 342,
-            gradient: 'linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%)'
-        },
-        {
-            name: 'Science Fiction',
-            icon: '🚀',
-            count: 289,
-            gradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(168, 85, 247, 0.1) 100%)'
-        },
-        {
-            name: 'Fantasy',
-            icon: '🐉',
-            count: 421,
-            gradient: 'linear-gradient(135deg, rgba(234, 88, 12, 0.3) 0%, rgba(234, 88, 12, 0.1) 100%)'
-        },
-        {
-            name: 'Historical Fiction',
-            icon: '🏛️',
-            count: 198,
-            gradient: 'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.1) 100%)'
-        },
-        {
-            name: 'Short Stories',
-            icon: '📖',
-            count: 567,
-            gradient: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.1) 100%)'
-        },
-        {
-            name: 'Non-Fiction',
-            icon: '🎓',
-            count: 445,
-            gradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(6, 182, 212, 0.1) 100%)'
-        },
-        {
-            name: 'Biography',
-            icon: '👤',
-            count: 234,
-            gradient: 'linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0.1) 100%)'
-        },
-        {
-            name: 'Autobiography',
-            icon: '✍️',
-            count: 178,
-            gradient: 'linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%)'
-        },
-        {
-            name: 'Memoir',
-            icon: '💭',
-            count: 156,
-            gradient: 'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0.1) 100%)'
-        },
-        {
-            name: 'Essays',
-            icon: '📝',
-            count: 289,
-            gradient: 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(14, 165, 233, 0.1) 100%)'
-        },
-        {
-            name: 'Mystery',
-            icon: '🔍',
-            count: 334,
-            gradient: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.1) 100%)'
-        },
-        {
-            name: 'Thriller',
-            icon: '🎭',
-            count: 401,
-            gradient: 'linear-gradient(135deg, rgba(220, 38, 38, 0.3) 0%, rgba(220, 38, 38, 0.1) 100%)'
-        }
-    ];
+    gradients: Array<string> = [
+        'linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(168, 85, 247, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(234, 88, 12, 0.3) 0%, rgba(234, 88, 12, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(6, 182, 212, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(14, 165, 233, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.1) 100%)',
+        'linear-gradient(135deg, rgba(220, 38, 38, 0.3) 0%, rgba(220, 38, 38, 0.1) 100%)',
+    ]
+
+    categories = signal<Array<CategoryModel>>([]);
+    categoryCards = signal<Array<CategoryModel & { children: CategoryModel[] }>>([]);
 
     contentSections = [
         {
@@ -125,8 +70,52 @@ export class ItemList {
     ];
 
     constructor(
-        private router: Router
+        private router: Router,
+        private iAudiobook: InternetAudiobookService
     ) {}
+
+    ngOnInit(): void {
+        this.getCategories();
+    }
+
+    getCategories() {
+        this.iAudiobook.getAllCategories((response: any) => {
+            if (response && response.success) {
+                const rawCategories: CategoryModel[] = response.categories || [];
+                const normalized = rawCategories.map((cat, idx) => ({
+                    ...cat,
+                    gradient: cat.gradient || this.gradients[idx % this.gradients.length]
+                }));
+
+                this.categories.set(normalized);
+                this.categoryCards.set(this.buildCategoryCards(normalized));
+            }
+        })
+    }
+
+    buildCategoryCards(categories: Array<CategoryModel>): Array<CategoryModel & { children: CategoryModel[] }> {
+        const childrenByParent = new Map<string, CategoryModel[]>();
+        const parents: Array<CategoryModel> = [];
+
+        categories.forEach((category) => {
+            const parentId = typeof category.parentId === 'string'
+                ? category.parentId
+                : category.parentId?._id;
+
+            if (parentId) {
+                const list = childrenByParent.get(parentId) || [];
+                list.push(category);
+                childrenByParent.set(parentId, list);
+            } else if (category.icon) {
+                parents.push(category);
+            }
+        });
+
+        return parents.map((parent) => ({
+            ...parent,
+            children: childrenByParent.get(parent._id) || []
+        }));
+    }
 
     selectCategory(categoryName: string) {
         console.log('Selected category:', categoryName);

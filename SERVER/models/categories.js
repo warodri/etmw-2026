@@ -9,6 +9,10 @@ const model = new Schema({
         unique: true
     },
 
+    icon: {
+        type: String,
+    },
+
     parentId: {
         type: Schema.Types.ObjectId,
         ref: "etmw2026_categories",

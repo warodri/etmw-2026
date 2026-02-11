@@ -4,12 +4,13 @@ export interface UserModel {
     email: string,
     firstName: string,
     lastName: string,
-    bio: string,
     city: string,
     country: string,
     profilePicture: string,
     coverPicture: string,
     isAuthor: boolean,
+    bio: string,
+    languages: Array<string>,
     lastIp: string,
     lastBrowserAgent: string,
     connected: boolean,
@@ -23,7 +24,6 @@ export interface UserModel {
     lastCheckTime: number,
     lastUnreadMessages: number,
 
-    languages: Array<string>,
 
     createdAt: number,
     updatedAt: number,

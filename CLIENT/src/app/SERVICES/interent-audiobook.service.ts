@@ -75,6 +75,63 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    
+    audiobookFindById(audiobookId: string, callback: any) {
+        const query = null;
+        const authorIds= null;
+        const categories = null;
+        const latest = true;
+        const myAudiobooks = false;
+        const published = null;
+        const pipelineStatus = null;
+        const limit = 1;
+        const skip = 0
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindById',
+            lang,
+            data: {
+                audiobookId,
+                query,
+                authorIds,
+                categories,
+                latest,
+                myAudiobooks,
+                published,
+                pipelineStatus,
+                limit,
+                skip
+            }
+        }, callback);
+    }
+    audiobookFind(
+        audiobookId: string, 
+        query: string, 
+        authorIds: string[],
+        categories: string[],
+        latest: boolean,
+        myAudiobooks: boolean,
+        published: boolean,
+        pipelineStatus: string[],
+        limit: number,
+        skip: number,
+        callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFind',
+            lang,
+            data: {
+                audiobookId,
+                query,
+                authorIds,
+                categories,
+                latest,
+                myAudiobooks,
+                published,
+                pipelineStatus,
+                limit,
+                skip
+            }
+        }, callback);
+    }
 
 }

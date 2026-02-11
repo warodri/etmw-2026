@@ -18,9 +18,28 @@ async function run(data, req, res) {
             enabled: true
         }).populate('parentId');
 
+        const Audiobook = require('../models/audiobook');
+        const categoryCounts = await Audiobook.aggregate([
+            { $match: { enabled: true } },
+            { $unwind: '$categories' },
+            { $group: { _id: '$categories', count: { $sum: 1 } } }
+        ]);
+
+        const countsByName = new Map(
+            categoryCounts.map((item) => [String(item._id), item.count])
+        );
+
+        const categoriesWithCounts = categories.map((cat) => {
+            const obj = cat.toObject ? cat.toObject() : cat;
+            return {
+                ...obj,
+                count: countsByName.get(String(obj.name)) || 0
+            };
+        });
+
         return res.status(200).json({
             success: true,
-            categories
+            categories: categoriesWithCounts
         })
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)

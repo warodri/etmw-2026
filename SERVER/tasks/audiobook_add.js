@@ -51,6 +51,10 @@ async function run(data, req, res) {
             })
         }
 
+        //  Define this user as an author now
+        u.isAuthor = true;
+        await u.save();
+
         //  Create author if doesn't exist
         const Author = require('../models/author');
         let a = await Author.findOne({

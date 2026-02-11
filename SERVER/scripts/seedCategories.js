@@ -7,6 +7,7 @@ const Category = require('../models/categories');
 const CATEGORIES = [
     {
         name: 'Fiction',
+        icon: '📚',
         subs: [
             'Literary Fiction',
             'Science Fiction',
@@ -17,6 +18,7 @@ const CATEGORIES = [
     },
     {
         name: 'Non-Fiction',
+        icon: '🎓',
         subs: [
             'Biography',
             'Autobiography',
@@ -27,6 +29,7 @@ const CATEGORIES = [
     },
     {
         name: 'Poetry',
+        icon: '📜',
         subs: [
             'Free Verse',
             'Haiku',
@@ -36,6 +39,7 @@ const CATEGORIES = [
     },
     {
         name: 'Philosophy',
+        icon: '🏛️',
         subs: [
             'Ethics',
             'Existentialism',
@@ -45,6 +49,7 @@ const CATEGORIES = [
     },
     {
         name: 'Science & Technology',
+        icon: '🤖',
         subs: [
             'Computer Science',
             'Artificial Intelligence',
@@ -54,6 +59,7 @@ const CATEGORIES = [
     },
     {
         name: 'Social Sciences',
+        icon: '🧑‍🤝‍🧑',
         subs: [
             'Sociology',
             'Psychology',
@@ -63,6 +69,7 @@ const CATEGORIES = [
     },
     {
         name: 'Education',
+        icon: '📘',
         subs: [
             'Academic Papers',
             'Study Guides',
@@ -71,6 +78,7 @@ const CATEGORIES = [
     },
     {
         name: 'Health & Wellbeing',
+        icon: '👨‍⚕️',
         subs: [
           'Mental Health',
           'Public Health',
@@ -88,6 +96,7 @@ async function seedCategories() {
         // 1. Upsert parent category
         const parent = await Category.findOneAndUpdate(
             { name: category.name },
+            { icon: category.icon },
             { name: category.name, parentId: null, enabled: true },
             { upsert: true, new: true }
         );

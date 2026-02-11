@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AudiobookModel } from '../../../models/audiobook';
 
 @Component({
     selector: 'app-item',
@@ -8,6 +9,7 @@ import { Component, Input } from '@angular/core';
 })
 export class Item {
 
+    @Input() audiobook: AudiobookModel | null = null;
     @Input() template: 'default' | 'md' | 'large' | 'detail' = 'default';
 
 }
