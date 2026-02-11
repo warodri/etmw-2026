@@ -67,7 +67,7 @@
     </style>
 </head>
 <body class="bg-light">
-    <div class="container-fluid py-4">
+    <div class="container py-4">
         <div class="row">
             <div class="col-12">
                 <h1 class="mb-4 fw-bold">
@@ -161,6 +161,10 @@
             <!-- Visor de Archivo -->
             <div class="col-md-8">
 
+                <div class="p-3" id="openBookLink">
+                    <!-- Dinamicamente mostrar el enlace para abrir el archivo -->
+                </div>
+
                 <!-- Capítulos Completados -->
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
@@ -218,7 +222,7 @@
 
                 <!-- Translation Card (only show if translation needed) -->
                 <div id="translationCard" class="card mt-3 shadow d-none">
-                    <div class="card-header bg-warning text-dark">
+                    <div class="card-header bg-primary text-light">
                         <h5 class="mb-0">
                             <i class="bi bi-translate"></i> Traducción AI
                         </h5>
@@ -234,7 +238,7 @@
 
                         <div class="mb-3">
                             <label class="fw-bold">Instrucciones para la AI:</label>
-                            <textarea id="translationInstructions" class="form-control" rows="5" placeholder="Instrucciones para la traducción...">
+                            <textarea id="translationInstructions" class="form-control" rows="12" placeholder="Instrucciones para la traducción...">
 Eres un traductor profesional especializado en literatura. Tu tarea es traducir el siguiente texto manteniendo:
 
 1. El tono y estilo del autor original
@@ -253,7 +257,7 @@ Traduce de manera fluida y natural, como si el texto hubiera sido escrito origin
                             <small class="text-muted">Caracteres: <span id="charCount">0</span></small>
                         </div>
 
-                        <button class="btn btn-warning w-100 mb-2" onclick="translateText()">
+                        <button class="btn btn-primary w-100 mb-2" onclick="translateText()">
                             <i class="bi bi-translate"></i> Traducir con AI
                         </button>
 
@@ -287,11 +291,6 @@ Traduce de manera fluida y natural, como si el texto hubiera sido escrito origin
                         </h5>
                     </div>
                     <div class="card-body">
-
-                        <div class="p-3" id="openBookLink">
-                            <!-- Dinamicamente mostrar el enlace para abrir el archivo -->
-                        </div>
-
                         <!-- Entrada Manual -->
                         <div>
                             <label class="fw-bold">Pega el texto seleccionado para convertir</label>

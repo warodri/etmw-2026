@@ -38,6 +38,7 @@ import { TermsText } from './COMPONENTS/SYSTEM/terms-text/terms-text';
 import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/screen-payment-success';
 import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
+import { Pricing } from './COMPONENTS/SYSTEM/pricing/pricing';
 
 @NgModule({
     declarations: [
@@ -70,7 +71,8 @@ import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelle
         TermsText,
         ScreenPaymentSuccess,
         ScreenPaymentFailed,
-        ScreenPaymentCencelled
+        ScreenPaymentCencelled,
+        Pricing
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

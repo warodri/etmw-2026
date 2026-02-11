@@ -227,45 +227,52 @@
                     -->
                     @if (uploadMethod === 'mail') {
                         <div class="bg-slate-800 rounded-4 p-4 mb-3">
-                            <h3 class="fw-bold mb-3">
-                                Mailing Addresses
-                            </h3>
-                            
-                            <div class="mb-3">
-                                <div class="d-flex align-items-start gap-2 mb-2">
-                                    <span class="rounded-3 bg-primary px-2 py-1">
-                                        🇦🇷 Argentina
-                                    </span>
+                            @if(!showMailingAddress()) {
+                                <div class="text-center">
+                                    Sorry. Mailing physical copies is not enabled right now.
                                 </div>
-                                <div class="mt-3 bg-secondary rounded-3 p-3">
-                                    <div class="small">
-                                        <strong>
-                                            {{ sendBookAddress.ARGENTINA.name }}
-                                        </strong><br>
-                                        {{ sendBookAddress.ARGENTINA.address }}<br>
-                                        {{ sendBookAddress.ARGENTINA.postcode }}<br>
-                                        {{ sendBookAddress.ARGENTINA.country }}
+                            } @else {
+
+                                <h3 class="fw-bold mb-3">
+                                    Mailing Addresses
+                                </h3>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                        <span class="rounded-3 bg-primary px-2 py-1">
+                                            🇦🇷 Argentina
+                                        </span>
+                                    </div>
+                                    <div class="mt-3 bg-secondary rounded-3 p-3">
+                                        <div class="small">
+                                            <strong>
+                                                {{ sendBookAddress.ARGENTINA.name }}
+                                            </strong><br>
+                                            {{ sendBookAddress.ARGENTINA.address }}<br>
+                                            {{ sendBookAddress.ARGENTINA.postcode }}<br>
+                                            {{ sendBookAddress.ARGENTINA.country }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-    
-                            <div>
-                                <div class="d-flex align-items-start gap-2 mb-2">
-                                    <span class="rounded-3 bg-primary px-2 py-1">
-                                        🇬🇧 United Kingdom
-                                    </span>
-                                </div>
-                                <div class="mt-3 bg-secondary rounded-3 p-3">
-                                    <div class="small">
-                                        <strong>
-                                            {{ sendBookAddress.UK.name }}
-                                        </strong><br>
-                                        {{ sendBookAddress.UK.address }}<br>
-                                        {{ sendBookAddress.UK.postcode }}<br>
-                                        {{ sendBookAddress.UK.country }}
+        
+                                <div>
+                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                        <span class="rounded-3 bg-primary px-2 py-1">
+                                            🇬🇧 United Kingdom
+                                        </span>
+                                    </div>
+                                    <div class="mt-3 bg-secondary rounded-3 p-3">
+                                        <div class="small">
+                                            <strong>
+                                                {{ sendBookAddress.UK.name }}
+                                            </strong><br>
+                                            {{ sendBookAddress.UK.address }}<br>
+                                            {{ sendBookAddress.UK.postcode }}<br>
+                                            {{ sendBookAddress.UK.country }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
     
                             <div class="alert bg-slate-900 border border-warning text-warning mt-3 mb-0" role="alert">
                                 <i class="bi bi-exclamation-triangle-fill"></i>

@@ -84,13 +84,6 @@ export class ScreenHome implements OnInit {
         rating: 4.6
     }])
 
-    selectedRegion = signal<'latam' | 'us' | 'uk' | 'global'>('global');
-    currency = signal<string>('€');
-    prices = signal({
-        explorer: '6.49',
-        reader: '9.99',
-        unlimited: '14.99'
-    });
 
     constructor(
         private router: Router
@@ -103,40 +96,16 @@ export class ScreenHome implements OnInit {
     private detectRegion() {
         const regionInfo = UtilClass.detectRegion();        
         if (regionInfo.region == 'latam') {
-            this.selectedRegion.set('latam');
-            this.currency.set('$');
-            this.prices.set({
-                explorer: '3.49',
-                reader: '4.99',
-                unlimited: '8.49'
-            });
+
         }        
         else if (regionInfo.region == 'us') {
-            this.selectedRegion.set('us');
-            this.currency.set('$');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+
         } 
         else if (regionInfo.region == 'uk') {
-            this.selectedRegion.set('uk');
-            this.currency.set('£');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+
         } 
         else {
-            this.selectedRegion.set('global');
-            this.currency.set('€');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+
         }
     }
 

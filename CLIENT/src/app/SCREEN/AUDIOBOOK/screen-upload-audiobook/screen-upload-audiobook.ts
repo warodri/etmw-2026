@@ -201,14 +201,14 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     } = {
         UK: {
             name: 'ETMW Publishing',
-            address: '55 Kings Wood Park',
-            postcode: 'CM16 6FA Epping, Essex',
+            address: '',
+            postcode: '',
             country: 'United Kingdom'
         }, 
         ARGENTINA: {
             name: 'ETMW Publishing',
-            address: 'Colon 210',
-            postcode: '3100 Paran, Entre Rios',
+            address: '',
+            postcode: '',
             country: 'Argentina'
         }
     }
@@ -218,6 +218,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     showInstructionsStep1 = signal<boolean>(true);
     private audio?: HTMLAudioElement;
     sendingBook = signal<boolean>(false);
+    showMailingAddress = signal<boolean>(false);
 
     constructor(
         private iUser: InternetUserService,
