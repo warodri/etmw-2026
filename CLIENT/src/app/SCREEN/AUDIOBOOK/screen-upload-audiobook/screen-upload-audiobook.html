@@ -332,8 +332,60 @@
                 </div>
             }
     
-            <!-- STEP 3: BOOK DETAILS & VOICE CONFIGURATION -->
+            <!-- STEP 3: BOOK COVER -->
             @if (currentStep() === 3) {
+                <div class="mt-4 fade-in-up">
+                    <h5 class="fw-bold mb-4">
+                        Upload Your Book Cover
+                    </h5>
+                    <div class="bg-slate-800 rounded-4 p-4 text-center mb-3">
+                        @if (!coverFile) {
+                            <div class="py-4">
+                                <div class="mb-3" style="font-size: 3rem;">🖼️</div>
+                                <h6 class="fw-bold mb-2">Add a Cover Image</h6>
+                                <p class="small text-gray-400 mb-3">
+                                    Supported formats: JPG, PNG (Recommended 1400x1400)
+                                </p>
+                                <input type="file"
+                                       #coverInput
+                                       accept="image/*"
+                                       (change)="onCoverSelected($event)"
+                                       style="display: none;">
+                                <button class="btn btn-primary rounded-pill px-5" (click)="coverInput.click()">
+                                    <i class="bi bi-upload"></i> Choose Cover
+                                </button>
+                            </div>
+                        } @else {
+                            <div class="bg-secondary rounded-3 p-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <i class="bi bi-image-fill text-primary" style="font-size: 2rem;"></i>
+                                    <div class="flex-grow-1 text-start">
+                                        <div class="fw-semibold">{{ coverFile.name }}</div>
+                                        <div class="small text-gray-400">{{ formatFileSize(coverFile.size) }}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-secondary rounded-circle" (click)="removeCoverFile()">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                        <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1"
+                                [disabled]="!canProceedFromStep3()"
+                                (click)="nextStep()">
+                            Continue <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- STEP 4: BOOK DETAILS & VOICE CONFIGURATION -->
+            @if (currentStep() === 4) {
                 <div class="mt-4 fade-in-up">                
                     <h3 class="fw-bold mb-4">
                         Configure Your Audiobook
@@ -656,15 +708,15 @@
                         <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
                             <i class="bi bi-arrow-left"></i> Back
                         </button>
-                        <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" [disabled]="!canProceedFromStep3()" (click)="nextStep()">
+                        <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" [disabled]="!canProceedFromStep4()" (click)="nextStep()">
                             Review <i class="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             }
-    
-            <!-- STEP 4: REVIEW & SUBMIT -->
-            @if (currentStep() === 4) {
+
+            <!-- STEP 5: REVIEW & SUBMIT -->
+            @if (currentStep() === 5) {
                 <div class="mt-4 fade-in-up">
                     <h3 class="fw-bold mb-4">
                         Review Your Submission
@@ -691,6 +743,28 @@
                                     <div class="fw-semibold">Physical Mail</div>
                                     <div class="small text-gray-400">Please send to the provided address</div>
                                 </div>
+                            </div>
+                        }
+                    </div>
+    
+                    <!-- 
+                        Cover Summary 
+                    -->
+                    <div class="bg-secondary rounded-4 p-4 mb-3">
+                        <h3 class="fw-semibold mb-3">
+                            Cover Image
+                        </h3>
+                        @if (coverFile) {
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi bi-image-fill text-primary" style="font-size: 2rem;"></i>
+                                <div>
+                                    <div class="fw-semibold">{{ coverFile.name }}</div>
+                                    <div class="small text-gray-400">{{ formatFileSize(coverFile.size) }}</div>
+                                </div>
+                            </div>
+                        } @else {
+                            <div class="small text-gray-400">
+                                No cover selected
                             </div>
                         }
                     </div>
@@ -807,9 +881,9 @@
                     </div>
                 </div>
             }
-    
+
             <!-- SUCCESS STATE -->
-            @if (currentStep() === 5) {
+            @if (currentStep() === 6) {
                 <div class="mt-5 text-center fade-in-up">
                     <div class="mb-4" style="font-size: 5rem;">✅</div>
                     <h3 class="fw-bold mb-3">Thank You!</h3>
@@ -851,14 +925,17 @@
                         </div>
                     </div>
     
-                    <div class="d-flex gap-3 justify-content-center">
-                        <button class="btn btn-secondary rounded-pill px-5" (click)="goToMyBooks()">
-                            View My Books
-                        </button>
-                        <button class="btn btn-primary rounded-pill px-5" (click)="uploadAnother()">
-                            Upload Another
-                        </button>
-                    </div>
+                    @if (showNextStepsAfterUploadingBook()) {
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button class="btn btn-secondary rounded-pill px-5" (click)="goToMyBooks()">
+                                View My Books
+                            </button>
+                            <button class="btn btn-primary rounded-pill px-5" (click)="uploadAnother()">
+                                Upload Another
+                            </button>
+                        </div>
+                    }
+                    
                 </div>
             }
     

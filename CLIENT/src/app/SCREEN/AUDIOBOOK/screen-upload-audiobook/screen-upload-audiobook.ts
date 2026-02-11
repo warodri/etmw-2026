@@ -29,8 +29,9 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     steps = [
         { number: 1, label: 'Pricing' },
         { number: 2, label: 'Upload' },
-        { number: 3, label: 'Configure' },
-        { number: 4, label: 'Review' }
+        { number: 3, label: 'Cover' },
+        { number: 4, label: 'Configure' },
+        { number: 5, label: 'Review' }
     ];
 
     // Step 1: Referral & Pricing
@@ -50,6 +51,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     // Step 2: Upload Method
     uploadMethod: 'digital' | 'mail' | null = null;
     uploadedFile: File | null = null;
+    coverFile: File | null = null;
     estimatedWordCount = signal<number>(0);
     translation: {
         useFixedPrice: boolean,
@@ -219,6 +221,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     private audio?: HTMLAudioElement;
     sendingBook = signal<boolean>(false);
     showMailingAddress = signal<boolean>(false);
+    showNextStepsAfterUploadingBook = signal<boolean>(false);
 
     constructor(
         private iUser: InternetUserService,
@@ -388,7 +391,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
 
     // Progress calculation
     getProgressPercent(): number {
-        return ((this.currentStep() - 1) / (this.steps.length - 1)) * 100;
+        const percent = ((this.currentStep() - 1) / (this.steps.length - 1)) * 100;
+        return Math.min(100, Math.max(0, percent));
     }
 
     // Step navigation
@@ -411,7 +415,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 }
             })
         }
-        if (this.currentStep() < 5) {
+        if (this.currentStep() < 6) {
             this.currentStep.set(this.currentStep() + 1);
         }
     }
@@ -494,7 +498,23 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         return false;
     }
 
-    // Step 3: Configuration
+    // Step 3: Cover Upload
+    onCoverSelected(event: any) {
+        const file = event.target.files[0];
+        if (file) {
+            this.coverFile = file;
+        }
+    }
+
+    removeCoverFile() {
+        this.coverFile = null;
+    }
+
+    canProceedFromStep3(): boolean {
+        return this.coverFile !== null;
+    }
+
+    // Step 4: Configuration
     selectVoice(voiceId: string, voiceName: string, isPro: boolean) {
         this.bookConfig.voiceId = voiceId;
         this.bookConfig.voiceName = voiceName;
@@ -590,7 +610,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         }
     }
 
-    canProceedFromStep3(): boolean {
+    canProceedFromStep4(): boolean {
         return this.bookConfig.sourceLanguage !== '' &&
                this.bookConfig.voiceId !== '' &&
                this.bookConfig.title !== '' &&
@@ -598,7 +618,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                this.bookConfig.categories.length > 0;
     }
 
-    // Step 4: Review
+    // Step 5: Review
     getLanguageName(code: string): string {
         const lang = this.availableLanguages.find(l => l.code === code);
         return lang ? lang.name : code;
@@ -651,20 +671,36 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
             if (response && response.success) {
                 const audiobookId = response.audiobook._id;
                 this.audiobookId.set(audiobookId);
+
+                this.audiobookUploadCover(audiobookId, () => {
+                    //  Price to pay                
+                    const totalPrice = this.calculateTotalPrice();                
+                    if (totalPrice > 0) {
+                        // Need payment - open Stripe and start polling
+                        this.openStripePayment(audiobookId, totalPrice);
+                    } else {
+                        // Free - go directly to success
+                        this.currentStep.set(6);
+                    }
+                })
                 
-                //  Price to pay                
-                const totalPrice = this.calculateTotalPrice();                
-                if (totalPrice > 0) {
-                    // Need payment - open Stripe and start polling
-                    this.openStripePayment(audiobookId, totalPrice);
-                } else {
-                    // Free - go directly to success
-                    this.currentStep.set(5);
-                }
             } else {
                 this.toast.show('Error creating audiobook upload');
             }
         });
+    }
+
+    //  Upload audiobook cover
+    audiobookUploadCover(audiobookId: string, callback: any) {
+        if (this.coverFile && audiobookId) {
+            this.iAudiobook.audiobookUploadCover(audiobookId, this.coverFile, (response: any) => {
+                if (response && response.success) {
+                    callback()
+                } else {
+                    this.toast.show(this.toast.getMessageErrorUnexpected());
+                }
+            })
+        }
     }
     
     openStripePayment(audiobookId: string, amount: number) {
@@ -706,7 +742,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 // Payment confirmed!
                 this.stopPaymentPolling();
                 this.showPaymentWaiting.set(false);
-                this.currentStep.set(5);
+                this.currentStep.set(6);
             }
         });
     }
@@ -723,6 +759,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         this.showPaymentWaiting.set(false);
         this.toast.show('Payment cancelled. You can try again.');
     }
+
 
     // Success actions
     goToMyBooks() {
@@ -757,7 +794,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     }
 
     goBack() {
-        console.log('Navigate back');
+        this.router.navigate(['app'])
     }
 
     dontHaveReferralCodeSelected() {

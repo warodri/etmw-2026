@@ -41,6 +41,16 @@ export class InternetAudiobookService extends InternetService {
         this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
     }
 
+    audiobookUploadCover(audiobookId: string, file: File, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        const formData = new FormData();
+        formData.append('action', 'AudiobookUploadCover');
+        formData.append('lang', lang);
+        formData.append('audiobookId', audiobookId);
+        formData.append('file', file);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
+    }
+
     checkAudiobookPaymentStatus(audiobookId: string, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {

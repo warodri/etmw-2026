@@ -6,6 +6,12 @@ const model = new Schema({
     file: {
         type: Object
     },
+    coverFile: {
+        type: String,
+    },
+    coverFileMimetype: {
+        type: String,
+    },
     uploadMethod: {
         type: String,
         required: true

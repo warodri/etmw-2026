@@ -11,6 +11,7 @@ const UpdateAudiobookTotalPages = require("./tasks/audiobook_update_total_pages"
 const ConvertToMP3 = require("./tasks/audiobook_convert_to_mp3");
 const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 const AudiobookTranslate = require("./tasks/audiobook_translate");
+const AudiobookUploadCover = require("./tasks/auidobook_upload_cover");
 
 //
 //  VOICES
@@ -46,6 +47,7 @@ const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const TasksRegistry = {
 
     //  AUDIOBOOK
+    AudiobookUploadCover,
     AudiobookTranslate,
     AudiobookGetChapterAudio,
     ConvertToMP3,
