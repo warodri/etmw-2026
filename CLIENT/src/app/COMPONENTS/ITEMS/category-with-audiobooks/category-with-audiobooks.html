@@ -1,0 +1,36 @@
+@if (category) {
+    <div class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="fw-bold m-0">{{ category.icon }} {{ category.name }}</h4>
+            </div>
+            <button class="btn btn-sm btn-dark rounded-pill px-3">
+                See All <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    
+        <!-- Grid layout for larger items -->
+        @if (audiobooks().length > 0) {
+            <div class="row g-3">
+                @for (book of audiobooks(); track book._id) {
+                    <div class="col-12">
+                        <app-item template="md" [audiobook]="book"></app-item>
+                    </div>
+                }
+            </div>
+        } @else {
+            <div class="bg-secondary rounded-4 p-4 text-center text-gray-400">
+                No audiobooks found in this category.
+            </div>
+        }
+    
+        <!-- Show more button -->
+        @if (hasMore()) {
+            <div class="mt-3 text-center">
+                <button class="btn btn-dark rounded-pill px-5 py-2" (click)="loadMore()">
+                    <i class="bi bi-arrow-down-circle"></i> Show More in {{ category.name }}
+                </button>
+            </div>
+        }
+    </div>
+}

@@ -1,3 +1,5 @@
+@let selectedCategoryObj = selectedCategory();
+
 <div class="container p-0">
 
     <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
@@ -10,7 +12,7 @@
                     🔍 &nbsp; Discover
                 </h3>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-secondary rounded-pill px-3">
+                    <button class="btn btn-secondary rounded-pill px-3" (click)="toggleFilters()">
                         <i class="bi bi-sliders"></i>
                     </button>
                     <button class="btn btn-dark rounded-pill" (click)="goHome()">
@@ -24,7 +26,8 @@
                 <input type="text" 
                        class="form-control form-control-lg rounded-pill ps-5 bg-secondary border-0 text-white input-light-placeholder" 
                        placeholder="Search audiobooks, authors, topics..."
-                       [(ngModel)]="searchQuery">
+                       [(ngModel)]="searchQuery"
+                       (ngModelChange)="onSearchChange($event)">
                 <i class="bi bi-search position-absolute text-gray-400" 
                    style="left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.25rem;"></i>
             </div>
@@ -38,6 +41,39 @@
                             <i class="bi bi-x pointer" style="font-size: 1rem;"></i>
                         </span>
                     }
+                </div>
+            }
+
+            @if (showFilters()) {
+                <div class="mt-3 bg-secondary rounded-4 p-3">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="small text-gray-400">Category</label>
+                            <select class="form-select bg-dark text-white border-0"
+                                    [(ngModel)]="filterCategory">
+                                <option value="">All categories</option>
+                                @for (cat of categories(); track cat.name) {
+                                    <option [value]="cat.name">{{ cat.name }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 d-flex align-items-center gap-2">
+                            <input type="checkbox" class="form-check-input" id="filterLatest" [(ngModel)]="filterLatest">
+                            <label class="form-check-label small" for="filterLatest">Latest first</label>
+                        </div>
+                        <div class="col-12 col-md-4 d-flex align-items-center gap-2">
+                            <input type="checkbox" class="form-check-input" id="filterMine" [(ngModel)]="filterMyAudiobooks">
+                            <label class="form-check-label small" for="filterMine">My audiobooks</label>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button class="btn btn-secondary rounded-pill px-4" (click)="clearFilters()">
+                            Clear
+                        </button>
+                        <button class="btn btn-primary rounded-pill px-4" (click)="applyFilters()">
+                            Apply
+                        </button>
+                    </div>
                 </div>
             }
         </div>
@@ -75,17 +111,19 @@
                 </div>
     
                 <!-- Search Results Grid -->
-                <div class="mt-4 row g-3">
-                    <div class="col-12">
-                        <app-item template="md"></app-item>
+                @if (searchResults().length > 0) {
+                    <div class="mt-4 row g-3">
+                        @for (book of searchResults(); track book._id) {
+                            <div class="col-12">
+                                <app-item template="md" [audiobook]="book"></app-item>
+                            </div>
+                        }
                     </div>
-                    <div class="col-12">
-                        <app-item template="md"></app-item>
+                } @else {
+                    <div class="mt-4 bg-secondary rounded-4 p-4 text-center text-gray-400">
+                        No results found.
                     </div>
-                    <div class="col-12">
-                        <app-item template="md"></app-item>
-                    </div>
-                </div>
+                }
             }
     
             <!--
@@ -118,6 +156,16 @@
             }
     
             <!--
+                CATEGORY CONTENT SECTIONS
+            -->
+            @if (selectedCategoryObj) {
+                <app-category-with-audiobooks
+                    [category]="selectedCategoryObj"
+                ></app-category-with-audiobooks>
+            }
+
+
+            <!--
                 CATEGORIES SECTION
             -->
             <div class="mt-5">
@@ -131,13 +179,10 @@
                 <div class="row g-3">
                     @for (category of categoryCards(); track category.name) {
                         <div class="col-6 col-md-4 col-lg-3">
-                            <div class="bg-secondary rounded-4 p-4 text-center pointer position-relative overflow-hidden category-card" 
-                                 style="transition: all 0.3s ease; min-height: 140px;"
-                                 (click)="selectCategory(category.name)">
+                            <div class="bg-secondary rounded-4 p-4 text-center pointer position-relative overflow-hidden category-card"  style="transition: all 0.3s ease; min-height: 140px;" (click)="selectCategory(category)">
                                 
                                 <!-- Gradient overlay -->
-                                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" 
-                                     [style.background]="category.gradient"></div>
+                                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" ></div>
                                 
                                 <!-- Content -->
                                 <div class="position-relative category-card-content">
@@ -146,15 +191,15 @@
                                     </div>
                                     <div class="fw-bold text-primary mb-1 d-flex justify-content-center align-items-center gap-2">
                                         {{ category.name }}
-                                        <!-- <div class="small bg-primary rounded-pill px-2">
+                                        <div class="small bg-light rounded-pill px-2">
                                             {{ category.count || 0 }}
-                                        </div> -->
+                                        </div>
                                     </div>
                                     
                                     @if (category.children.length > 0) {
                                         <div class="d-flex flex-wrap justify-content-center gap-1 mt-2">
                                             @for (child of category.children; track child.name) {
-                                                <div class="badge bg-slate-800 px-2 py-1"(click)="selectCategory(child.name); $event.stopPropagation()">
+                                                <div class="badge bg-slate-800 px-2 py-1">
                                                     {{ child.name }}  &nbsp;
                                                     <span class="small bg-light text-dark rounded-pill px-1">
                                                         {{ (child.count || 0) ? ('' + (child.count || 0)) : '0' }}
@@ -175,85 +220,12 @@
                     }
                 </div>
             </div>
-    
-            <!--
-                CATEGORY CONTENT SECTIONS
-            -->
-            @for (section of contentSections; track section.title) {
-                <div class="mt-5">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h4 class="fw-bold m-0">{{ section.title }}</h4>
-                            <p class="text-gray-400 small mb-0 mt-1">{{ section.description }}</p>
-                        </div>
-                        <button class="btn btn-sm btn-dark rounded-pill px-3">
-                            See All <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-    
-                    <!-- Grid layout for larger items -->
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <app-item template="md"></app-item>
-                        </div>
-                        <div class="col-12">
-                            <app-item template="md"></app-item>
-                        </div>
-                    </div>
-    
-                    <!-- Show more button -->
-                    <div class="mt-3 text-center">
-                        <button class="btn btn-dark rounded-pill px-5 py-2">
-                            <i class="bi bi-arrow-down-circle"></i> Show More in {{ section.title }}
-                        </button>
-                    </div>
-                </div>
-            }
-    
+        
             <!--
                 RECENTLY PLAYED / CONTINUE LISTENING
             -->
-            @if (recentlyPlayed.length > 0) {
-                <div class="mt-5 bg-slate-800 rounded-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold m-0">
-                            <i class="bi bi-clock-history text-primary"></i> &nbsp;Continue Listening
-                        </h5>
-                        <button class="btn btn-sm btn-secondary rounded-pill px-3">
-                            Clear All
-                        </button>
-                    </div>
-                    
-                    <div class="d-flex flex-column gap-3">
-                        @for (item of recentlyPlayed; track item.id) {
-                            <div class="bg-secondary rounded-4 p-3 d-flex align-items-center gap-3">
-                                <img [src]="item.cover" 
-                                     class="rounded-3 flex-shrink-0" 
-                                     style="width: 60px; height: 90px; object-fit: cover;" />
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="fw-bold text-truncate">{{ item.title }}</div>
-                                    <div class="small text-gray-400">{{ item.author }}</div>
-                                    <!-- Progress bar -->
-                                    <div class="mt-2">
-                                        <div class="progress" style="height: 4px; background-color: var(--color-bg-slate-900);">
-                                            <div class="progress-bar bg-primary" 
-                                                 [style.width.%]="item.progress"></div>
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-1">
-                                            <small class="text-gray-400">{{ item.currentTime }}</small>
-                                            <small class="text-gray-400">{{ item.totalTime }}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-primary rounded-circle flex-shrink-0" 
-                                        style="width: 48px; height: 48px;">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
+            <app-continue-listening></app-continue-listening>
+            
     
         </div>
     

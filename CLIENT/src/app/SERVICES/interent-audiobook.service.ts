@@ -104,8 +104,8 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
     audiobookFind(
-        audiobookId: string, 
-        query: string, 
+        audiobookId: string | null, 
+        query: string | null, 
         authorIds: string[],
         categories: string[],
         latest: boolean,

@@ -12,8 +12,17 @@ import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.s
 export class ItemList implements OnInit {
 
     searchQuery = '';
-    searchResultCount = 12;
+    searchResultCount = 0;
     activeFilters: string[] = [];
+    searchResults = signal<Array<any>>([]);
+    private searchDebounce: any = null;
+    showFilters = signal<boolean>(false);
+    filterPublished: boolean | null = true;
+    filterLatest = true;
+    filterMyAudiobooks = false;
+    filterPipelineStatus = '';
+    filterCategory = '';
+    searchLimit = 20;
 
     gradients: Array<string> = [
         'linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%)',
@@ -30,45 +39,13 @@ export class ItemList implements OnInit {
         'linear-gradient(135deg, rgba(220, 38, 38, 0.3) 0%, rgba(220, 38, 38, 0.1) 100%)',
     ]
 
+    //  All categories from the server
     categories = signal<Array<CategoryModel>>([]);
     categoryCards = signal<Array<CategoryModel & { children: CategoryModel[] }>>([]);
-
-    contentSections = [
-        {
-            title: 'Fantasy',
-            description: 'Epic tales of magic, dragons, and adventure'
-        },
-        {
-            title: 'Science Fiction',
-            description: 'Explore the future and beyond'
-        },
-        {
-            title: 'Mystery & Thriller',
-            description: 'Keep you on the edge of your seat'
-        }
-    ];
-
-    recentlyPlayed = [
-        {
-            id: '1',
-            title: 'The Anatomy of a Body',
-            author: 'Mariano E Rodriguez',
-            cover: 'https://images.squarespace-cdn.com/content/v1/624da83e75ca872f189ffa42/aa45e942-f55d-432d-8217-17c7d98105ce/image001.jpg',
-            progress: 45,
-            currentTime: '2:34:12',
-            totalTime: '6:21:00'
-        },
-        {
-            id: '2',
-            title: 'Away',
-            author: 'Sarah Johnson',
-            cover: 'https://images.squarespace-cdn.com/content/v1/624da83e75ca872f189ffa42/aa45e942-f55d-432d-8217-17c7d98105ce/image001.jpg',
-            progress: 12,
-            currentTime: '0:48:30',
-            totalTime: '7:12:00'
-        }
-    ];
-
+    
+    //  User selects a category to show
+    selectedCategory = signal<(CategoryModel & { children: CategoryModel[] }) | null>(null)
+    
     constructor(
         private router: Router,
         private iAudiobook: InternetAudiobookService
@@ -117,9 +94,86 @@ export class ItemList implements OnInit {
         }));
     }
 
-    selectCategory(categoryName: string) {
-        console.log('Selected category:', categoryName);
-        // Navigate to category page or filter content
+    onSearchChange(value: string) {
+        this.searchQuery = value;
+        if (this.searchDebounce) {
+            clearTimeout(this.searchDebounce);
+        }
+        this.searchDebounce = setTimeout(() => {
+            this.performSearch(false);
+        }, 350);
+    }
+
+    toggleFilters() {
+        this.showFilters.set(!this.showFilters());
+    }
+
+    applyFilters() {
+        this.performSearch(true);
+    }
+
+    clearFilters() {
+        this.filterPublished = true;
+        this.filterLatest = true;
+        this.filterMyAudiobooks = false;
+        this.filterPipelineStatus = '';
+        this.filterCategory = '';
+        this.activeFilters = [];
+        this.performSearch(true);
+    }
+
+    performSearch(force: boolean) {
+        const q = (this.searchQuery || '').trim();
+        if (q.length < 2 && !force) {
+            this.searchResults.set([]);
+            this.searchResultCount = 0;
+            return;
+        }
+
+        const audiobookId = null;
+        const query = q.length >= 2 ? q : null;
+        const authorIds: string[] = [];
+        const categories: string[] = this.filterCategory ? [this.filterCategory] : [];
+        const latest = this.filterLatest;
+        const myAudiobooks = this.filterMyAudiobooks;
+        const published = this.filterPublished as any;
+        const pipelineStatus: string[] = this.filterPipelineStatus ? [this.filterPipelineStatus] : [];
+        const limit = this.searchLimit;
+        const skip = 0;
+
+        this.activeFilters = [];
+        if (this.filterCategory) this.activeFilters.push(this.filterCategory);
+        if (this.filterPipelineStatus) this.activeFilters.push(`Status: ${this.filterPipelineStatus}`);
+        if (this.filterMyAudiobooks) this.activeFilters.push('My Audiobooks');
+        if (this.filterPublished === true) this.activeFilters.push('Published');
+        if (this.filterPublished === false) this.activeFilters.push('Unpublished');
+
+        this.iAudiobook.audiobookFind(
+            audiobookId,
+            query,
+            authorIds,
+            categories,
+            latest,
+            myAudiobooks,
+            published,
+            pipelineStatus,
+            limit,
+            skip,
+            (response: any) => {
+                if (response && response.success) {
+                    const list = response.audiobooks || [];
+                    this.searchResults.set(list);
+                    this.searchResultCount = list.length;
+                } else {
+                    this.searchResults.set([]);
+                    this.searchResultCount = 0;
+                }
+            }
+        );
+    }
+
+    selectCategory(category: CategoryModel & { children: CategoryModel[] }) {
+        this.selectedCategory.set(category);
     }
 
     goHome() {

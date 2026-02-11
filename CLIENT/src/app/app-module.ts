@@ -39,6 +39,8 @@ import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/sc
 import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
 import { Pricing } from './COMPONENTS/SYSTEM/pricing/pricing';
+import { ContinueListening } from './COMPONENTS/ITEMS/continue-listening/continue-listening';
+import { CategoryWithAudiobooks } from './COMPONENTS/ITEMS/category-with-audiobooks/category-with-audiobooks';
 
 @NgModule({
     declarations: [
@@ -72,7 +74,9 @@ import { Pricing } from './COMPONENTS/SYSTEM/pricing/pricing';
         ScreenPaymentSuccess,
         ScreenPaymentFailed,
         ScreenPaymentCencelled,
-        Pricing
+        Pricing,
+        ContinueListening,
+        CategoryWithAudiobooks
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [
