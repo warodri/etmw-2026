@@ -3,10 +3,10 @@ const Subscription = require('../models/subscription');
 async function run(data, req, res) {
     try {
         const {
-            id
         } = data;
-        const userId = req.userId || null;
 
+        //  Vaildate user
+        const userId = req.userId || null;
         if (!userId) {
             return res.status(200).json({
                 success: false,
@@ -14,19 +14,24 @@ async function run(data, req, res) {
             })
         }
 
-        const subscription = await Subscription.findById(id).populate('userId');
-
+        //  Find this user's subcription
+        const subscription = await Subscription.findOne({
+            userId,
+            enabled: true
+        }).populate('userId');
         if (!subscription) {
             return res.status(200).json({
                 success: false,
                 message: 'Subscription not found'
             })
         }
-
+        
+        //  Return
         return res.status(200).json({
             success: true,
             data: subscription
         })
+        
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)

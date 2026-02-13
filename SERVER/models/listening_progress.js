@@ -8,13 +8,14 @@ const model = new Schema({
         ref: "etmw2026_users",
         index: true
     },
-
     audiobookId: {
         type: Schema.Types.ObjectId,
         ref: "etmw2026_audiobooks",
         index: true
     },
-
+    chapterNumber: {
+        type: Number
+    },
     progressPercent: {
         type: Number,
         default: 0
@@ -26,6 +27,15 @@ const model = new Schema({
         index: true
     },
 
+
+    enabled: {
+        type: Boolean,
+        default: true
+    },
+    createdAt: {
+        type: Number,
+        default: Date.now
+    },
     updatedAt: {
         type: Number,
         default: Date.now

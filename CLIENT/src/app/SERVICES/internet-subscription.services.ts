@@ -1,0 +1,37 @@
+import { Injectable } from '@angular/core';
+import { LangUtils } from "../utils/lang";
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { InternetService } from './internet.service';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class InternetAudiobookService extends InternetService {
+
+    constructor(
+        httpClient: HttpClient  // Add this
+    ) {
+        super(httpClient)  // Pass to parent
+    }   
+
+    subscriptionGetMine(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'SubscriptionGetMine',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
+
+    subscriptionGenerateStripeUrl(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'SubscriptionGenerateStripeUrl',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
+
+}

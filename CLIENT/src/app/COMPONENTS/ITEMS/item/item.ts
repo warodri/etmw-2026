@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AudiobookModel } from '../../../models/audiobook';
 import { UtilsService } from '../../../utils/utils-service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-item',
@@ -14,7 +15,8 @@ export class Item {
     @Input() template: 'default' | 'md' | 'large' | 'detail' = 'default';
 
     constructor(
-        private utils: UtilsService
+        private utils: UtilsService,
+        private router: Router
     ) {}
 
     getCoverUrl(): string {
@@ -61,6 +63,12 @@ export class Item {
         const title = this.audiobook?.title || 'Audiobook';
         const safeTitle = encodeURIComponent(title);
         return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231e293b'/><stop offset='1' stop-color='%230f172a'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='50%25' fill='%23e2e8f0' font-family='Arial' font-size='18' text-anchor='middle'>${safeTitle}</text></svg>`;
+    }
+
+    viewItem() {
+        if (this.audiobook) {
+            this.router.navigate(['app/audiobook/view', this.audiobook._id])
+        }
     }
 
 }

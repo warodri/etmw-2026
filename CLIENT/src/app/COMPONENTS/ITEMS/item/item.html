@@ -1,5 +1,6 @@
 @if (audiobook) {
     @if (template == 'default') {
+        
         <div class="col-12 col-sm-6 col-lg-3">
             <div class="work-card">
                 <div class="work-content">
@@ -30,7 +31,7 @@
                                     <span>{{ getStatusLabel() }}</span>
                                 </div>
                             </div>
-                            <button class="mt-3 btn btn-sm btn-primary rounded-pill">
+                            <button class="mt-3 btn btn-sm btn-primary rounded-pill" (click)="viewItem()">
                                 View Details
                             </button>
                         </div>
@@ -38,6 +39,7 @@
                 </div>
             </div>
         </div>
+
     } @else if (template == 'md') {
     
         <div class="etmw-bg-lighter rounded-5 px-3 pt-2 pb-4 position-relative">
@@ -51,7 +53,7 @@
             </div>
             <div class="mt-1 d-flex justify-content-start align-items-center gap-3">
                 <div>
-                    <img style="width:70px; height: 120px; object-fit: cover;" class="rounded-3" [src]="getCoverUrl()" />
+                    <img style="width:70px; height: 120px; object-fit: cover;" class="rounded-3" [src]="getCoverUrl()" (click)="viewItem()" />
                 </div>
                 <div>
                     <div class="mt-2 d-flex justify-content-start align-items-center gap-2">

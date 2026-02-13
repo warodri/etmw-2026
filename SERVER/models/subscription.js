@@ -54,6 +54,11 @@ const model = new Schema({
         default: 'stripe'
     },
 
+    enabled: {
+        type: Boolean,
+        default: true
+    },
+
     createdAt: {
         type: Number,
         default: Date.now,

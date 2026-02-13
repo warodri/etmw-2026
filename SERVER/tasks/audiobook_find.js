@@ -46,6 +46,7 @@ async function run(data, req, res) {
             }] don't return "url" because that's for later, when the user is listening.
          */
         const audiobooks = [];
+        let hasMore = false;
 
         const sanitizeAudiobook = (doc) => {
             if (!doc) return doc;
@@ -62,9 +63,6 @@ async function run(data, req, res) {
 
         const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        /**
-         * TODO: I need to build the query, perform the search and return the array.
-         */
         if (audiobookId) {
             const record = await Audiobook.findOne({
                 _id: audiobookId,
@@ -73,20 +71,26 @@ async function run(data, req, res) {
             if (record) {
                 audiobooks.push(sanitizeAudiobook(record));
             }
+            hasMore = false;
         } else {
             const mongoQuery = {
                 enabled: true
             };
 
-            if (published !== undefined) {
+            if (published !== undefined && published !== null) {
                 mongoQuery.published = published;
             }
-            if (pipelineStatus) {
-                mongoQuery.pipelineStatus = pipelineStatus;
+            if (pipelineStatus !== undefined && pipelineStatus !== null) {
+                const pipelineList = (Array.isArray(pipelineStatus) ? pipelineStatus : [pipelineStatus])
+                    .filter((item) => item !== null && item !== undefined && String(item).trim() !== '');
+                if (pipelineList.length > 0) {
+                    mongoQuery.pipelineStatus = { $in: pipelineList };
+                }
             }
 
             if (authorIds) {
-                const authorIdsList = Array.isArray(authorIds) ? authorIds : [authorIds];
+                const authorIdsList = (Array.isArray(authorIds) ? authorIds : [authorIds])
+                    .filter((item) => item !== null && item !== undefined && String(item).trim() !== '');
                 if (authorIdsList.length > 0) {
                     mongoQuery.authorId = { $in: authorIdsList };
                 }
@@ -119,7 +123,8 @@ async function run(data, req, res) {
             }
 
             if (categories) {
-                const categoriesList = Array.isArray(categories) ? categories : [categories];
+                const categoriesList = (Array.isArray(categories) ? categories : [categories])
+                    .filter((item) => item !== null && item !== undefined && String(item).trim() !== '');
                 if (categoriesList.length > 0) {
                     mongoQuery.categories = { $in: categoriesList };
                 }
@@ -144,6 +149,11 @@ async function run(data, req, res) {
                 .skip(parseInt(skip));
 
             records.forEach((record) => audiobooks.push(sanitizeAudiobook(record)));
+
+            const total = await Audiobook.countDocuments(mongoQuery);
+            const parsedLimit = parseInt(limit);
+            const parsedSkip = parseInt(skip);
+            hasMore = (parsedSkip + audiobooks.length) < total;
         }
 
         /**
@@ -151,7 +161,8 @@ async function run(data, req, res) {
          */
         return res.status(200).json({
             success: true,
-            audiobooks
+            audiobooks,
+            hasMore
         })
 
     } catch (ex) {

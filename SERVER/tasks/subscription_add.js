@@ -1,5 +1,9 @@
 const Subscription = require('../models/subscription');
 
+/**
+ * IMPORTANT: DO NOT CALL THIS FROM THE CLIENT.
+ * CALL THIS AFTER THE PAYMENT IS CORRECT FROM STRIPE.
+ */
 async function run(data, req, res) {
     try {
         const {

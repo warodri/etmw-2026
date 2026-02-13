@@ -13,6 +13,7 @@ import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audioboo
 import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/screen-payment-success';
 import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
+import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -20,11 +21,13 @@ const routes: Routes = [
     { path: 'app/inbox', component: ScreenInbox },
     { path: 'app/user-profile/:id', component: ScreenUserProfile },
     { path: 'app/search', component: ScreenSearch },
-    { path: 'app/player', component: ScreenPlayer },
+    { path: 'app/player/:audiobookId/:chapterNumber', component: ScreenPlayer },
     { path: 'app/debate', component: ScreenDebates },
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
     { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
+    //  Audiobook Detail
+    { path: 'app/audiobook/view/:id', component: ScreenItemDetail },
     //  Payment
     { path: 'payment/success', component: ScreenPaymentSuccess },
     { path: 'payment/failed', component: ScreenPaymentFailed },

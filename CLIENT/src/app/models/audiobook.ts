@@ -36,7 +36,7 @@ export interface AudiobookModel {
     totalAudioDurationSec: number,
     audioFiles: Array<{
         chapter: number,
-        url: string,
+        url?: string,
         durationSec: number
     }>,
     published: boolean,

@@ -1,3 +1,8 @@
+//
+//  SUBSCRIPTIONS
+//
+SubscriptionGenerateStripeUrl = require('./tasks/subscription_generate_stripe');
+SubscriptionGetMine = require('./tasks/subscription_get_mine')
 
 //
 //  AUDIOBOOK
@@ -9,11 +14,12 @@ const AudiobookCheckPaymentStatus = require("./tasks/audiobook_check_payment_sta
 const AudiobooksGetAdmin = require("./tasks/audiobook_get_admin");
 const UpdateAudiobookTotalPages = require("./tasks/audiobook_update_total_pages");
 const ConvertToMP3 = require("./tasks/audiobook_convert_to_mp3");
-const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 const AudiobookTranslate = require("./tasks/audiobook_translate");
 const AudiobookUploadCover = require("./tasks/auidobook_upload_cover");
+
 const AudiobookFind = require("./tasks/audiobook_find");
 const AudiobookFindById = require("./tasks/audiobook_find");
+const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 
 //
 //  VOICES
@@ -30,6 +36,11 @@ const GetUserById = require('./tasks/user_get_by_id');
 const UpdateMyProfile = require('./tasks/user_update');
 
 //
+//  USER
+//
+const UserGetListeningHistory = require("./tasks/user_get_listening_history");
+
+//
 //  MISC
 //
 const GetAppConfig = require('./tasks/app_get_config');
@@ -44,10 +55,17 @@ const AddPromoCode = require('./tasks/admin_pormo_code_add');
 const EditPromoCode = require('./tasks/admin_pormo_code_update');
 const GetAdminPromoCodes = require('./tasks/admin_pormo_code_get');
 const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
-
+const AdminAudiobookGetChapterAudio = require("./tasks/admin_audiobook_get_chapter_audio");
 
 const TasksRegistry = {
 
+    //  USER
+    UserGetListeningHistory,
+    
+    //  SUBSCRIPTIONS
+    SubscriptionGenerateStripeUrl,
+    SubscriptionGetMine,
+    
     //  AUDIOBOOK
     AudiobookFindById,
     AudiobookFind,
@@ -83,6 +101,7 @@ const TasksRegistry = {
     EditPromoCode,
     GetAdminPromoCodes,
     DeletePromoCode,
+    AdminAudiobookGetChapterAudio,
 
 };
 

@@ -103,6 +103,7 @@ export class InternetAudiobookService extends InternetService {
             }
         }, callback);
     }
+
     audiobookFind(
         audiobookId: string | null, 
         query: string | null, 
@@ -130,6 +131,18 @@ export class InternetAudiobookService extends InternetService {
                 pipelineStatus,
                 limit,
                 skip
+            }
+        }, callback);
+    }
+
+    audiobookGetChapterAudio(audiobookId: string, chapterNumber: number, callback: (result: ArrayBuffer | null) => void) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPostArrayBuffer(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookGetChapterAudio',
+            lang,
+            data: {
+                audiobookId,
+                chapterNumber
             }
         }, callback);
     }

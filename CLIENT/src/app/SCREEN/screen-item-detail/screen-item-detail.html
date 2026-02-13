@@ -1,1 +1,93 @@
-<p>screen-item-detail works!</p>
+
+<div class="container p-0">
+
+    <div class="col-12 col-md-8 col-lg-8 mx-auto px-3 px-md-0">
+        @if (loading()) {
+            <div class="p-3 text-center text-gray-400">Loading...</div>
+        } @else {
+            @if (audiobook()) {
+                <div class="detail-hero rounded-5 px-4 pt-2 pb-0 mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button class="btn btn-dark text-white rounded-pill" (click)="goBack()">
+                            <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
+                        </button>
+                        <div class="text-center d-flex justify-content-center align-items-center gap-3">
+                            <div class="small text-gray-400"></div>
+                            <div class="fw-bold">Audiobook Details</div>
+                        </div>
+                        <button class="btn btn-link text-white p-0">
+                            <i class="bi bi-bookmark" style="font-size: 1.5rem;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="detail-hero rounded-5 p-4 mt-4">
+
+                    <div class="detail-main">
+                        <div class="detail-cover-wrap">
+                            <img [src]="getCoverUrl()" [alt]="audiobook()?.title" class="detail-cover">
+                        </div>
+                        <div class="detail-info">
+                            <div class="detail-title">{{ audiobook()?.title }}</div>
+                            <div class="detail-author">by {{ audiobook()?.authorName }}</div>
+                            <div class="detail-meta">
+                                <span class="chip chip-primary">{{ getPrimaryCategory() }}</span>
+                                <span class="chip">{{ formatDuration(audiobook()?.totalAudioDurationSec || 0) }}</span>
+                                <span class="chip">{{ getChapters().length }} chapters</span>
+                                <span class="chip">{{ getStatusLabel() }}</span>
+                            </div>
+                            <p class="detail-desc">
+                                {{ audiobook()?.description || 'No description available.' }}
+                            </p>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-primary rounded-pill px-4" (click)="playSelectedChapter()">
+                                    <i class="bi bi-play-fill"></i> Play
+                                </button>
+                                <button class="btn btn-secondary rounded-pill px-4">
+                                    <i class="bi bi-share"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold m-0">Chapters</h4>
+                        <div class="small text-gray-400">
+                            Updated {{ formatDate(audiobook()?.updatedAt) }}
+                        </div>
+                    </div>
+
+                    @if (getChapters().length > 0) {
+                        <div class="chapter-list">
+                            @for (ch of getChapters(); track ch.chapter; let idx = $index) {
+                                <div class="chapter-item"
+                                     [class.active]="selectedChapterIndex() === idx"
+                                     (click)="selectChapter(idx)">
+                                    <div class="chapter-index">
+                                        {{ ch.chapter }}
+                                    </div>
+                                    <div class="chapter-body">
+                                        <div class="chapter-title">Chapter {{ ch.chapter }}</div>
+                                        <div class="chapter-meta">{{ formatDuration(ch.durationSec) }}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-dark rounded-pill" (click)="playChapter(ch.chapter); $event.stopPropagation()">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div class="bg-secondary rounded-4 p-4 text-center text-gray-400">
+                            No chapters available yet.
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="p-3 text-center text-gray-400">Audiobook not found.</div>
+            }
+        }
+    </div>
+
+</div>

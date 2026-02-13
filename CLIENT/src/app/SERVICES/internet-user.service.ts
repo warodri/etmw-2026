@@ -115,4 +115,16 @@ export class InternetUserService extends InternetService {
         }, callback);
     }
 
+    userGetListeningHistory(audiobookId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'UserGetListeningHistory',
+            lang,
+            data: {
+                audiobookId,
+            }
+        }, callback);
+    }
+
+
 }
