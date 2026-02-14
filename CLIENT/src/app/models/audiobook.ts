@@ -5,6 +5,7 @@ export interface AudiobookModel {
     file: any,
     coverFile: string,
     coverFileMimetype: string,
+    coverFileFull: string,
     uploadMethod: string,
     referralCode: string,
     totalPrice: number,

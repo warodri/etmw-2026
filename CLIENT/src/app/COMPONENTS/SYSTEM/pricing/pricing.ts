@@ -16,10 +16,15 @@ export class Pricing implements OnInit {
 
     selectedRegion = signal<'latam' | 'us' | 'uk' | 'global'>('global');
     currency = signal<string>('€');
-    prices = signal({
-        explorer: '6.49',
-        reader: '9.99',
-        unlimited: '14.99'
+    prices = signal<{ 
+        explorer: string, 
+        reader: string, 
+        unlimited: 
+        string 
+    } | null>({
+        explorer: '3.49',
+        reader: '4.99',
+        unlimited: '8.49'
     });
 
     //  Flags
@@ -51,38 +56,38 @@ export class Pricing implements OnInit {
         if (regionInfo.region == 'latam') {
             this.selectedRegion.set('latam');
             this.currency.set('$');
-            this.prices.set({
-                explorer: '3.49',
-                reader: '4.99',
-                unlimited: '8.49'
-            });
+            // this.prices.set({
+            //     explorer: '3.49',
+            //     reader: '4.99',
+            //     unlimited: '8.49'
+            // });
         }        
         else if (regionInfo.region == 'us') {
             this.selectedRegion.set('us');
             this.currency.set('$');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+            // this.prices.set({
+            //     explorer: '6.49',
+            //     reader: '9.99',
+            //     unlimited: '14.99'
+            // });
         } 
         else if (regionInfo.region == 'uk') {
             this.selectedRegion.set('uk');
             this.currency.set('£');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+            // this.prices.set({
+            //     explorer: '6.49',
+            //     reader: '9.99',
+            //     unlimited: '14.99'
+            // });
         } 
         else {
             this.selectedRegion.set('global');
-            this.currency.set('€');
-            this.prices.set({
-                explorer: '6.49',
-                reader: '9.99',
-                unlimited: '14.99'
-            });
+            this.currency.set('$');
+            // this.prices.set({
+            //     explorer: '6.49',
+            //     reader: '9.99',
+            //     unlimited: '14.99'
+            // });
         }
     }
 

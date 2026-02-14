@@ -21,6 +21,16 @@ const model = new Schema({
     },
 
     languages: [{
+        type: Object,
+        default: []
+    }],
+
+    categories: [{
+        type: Object,
+        default: []
+    }],
+
+    languages: [{
         type: String
     }],
 
@@ -37,19 +47,22 @@ const model = new Schema({
         type: Number,
         default: 0
     },
+    isVerified: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
 
     enabled: {
         type: Boolean,
         default: true,
         index: true
     },
-
     createdAt: {
         type: Number,
         default: Date.now,
         index: true
     },
-
     updatedAt: {
         type: Number,
         default: Date.now,

@@ -1,161 +1,33 @@
-<!-- SIMPLE TEMPLATE - Compact card for lists -->
-@if (template === 'simple') {
-    <div class="bg-secondary rounded-4 p-3 pointer" 
-         style="transition: all 0.3s ease;"
-         (click)="viewAuthor()">
-        <div class="d-flex align-items-center gap-3">
-            <!-- Avatar with verified badge -->
-            <div class="position-relative flex-shrink-0">
-                <img [src]="author.profilePicture" 
-                     class="rounded-circle border border-2"
-                     [class.border-primary]="author.isVerified"
-                     style="width: 56px; height: 56px; object-fit: cover;" />
-                @if (author.isVerified) {
-                    <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                         style="bottom: -2px; right: -2px; width: 20px; height: 20px; border: 2px solid var(--color-secondary);">
-                        <i class="bi bi-check-lg text-white" style="font-size: 0.75rem;"></i>
+@if (author) {
+    <!-- SIMPLE TEMPLATE - Compact card for lists -->
+    @if (template === 'simple') {
+        <div class="bg-secondary rounded-4 p-3 pointer" style="transition: all 0.3s ease;" (click)="viewAuthor()">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Avatar with verified badge -->
+                <div class="position-relative flex-shrink-0">
+                    <img [src]="author.userId.coverPicture" class="rounded-circle border border-2"
+                        [class.border-primary]="author.isVerified" style="width: 56px; height: 56px; object-fit: cover;" />
+                    @if (author.isVerified) {
+                        <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                            style="bottom: -2px; right: -2px; width: 20px; height: 20px; border: 2px solid var(--color-secondary);">
+                            <i class="bi bi-check-lg text-white" style="font-size: 0.75rem;"></i>
+                        </div>
+                    }
+                </div>
+    
+                <!-- Info -->
+                <div class="flex-grow-1 min-w-0">
+                    <div class="fw-bold text-truncate">{{ author.penName }}</div>
+                    <div class="small text-gray-400 d-flex align-items-center gap-2">
+                        <span>{{ author.totalAudiobooks }} {{ author.totalAudiobooks === 1 ? 'work' : 'works' }}</span>
+                        <span>•</span>
+                        <span>{{ totalFollowers() }} followers</span>
                     </div>
-                }
-            </div>
-            
-            <!-- Info -->
-            <div class="flex-grow-1 min-w-0">
-                <div class="fw-bold text-truncate">{{ author.penName }}</div>
-                <div class="small text-gray-400 d-flex align-items-center gap-2">
-                    <span>{{ author.totalAudiobooks }} {{ author.totalAudiobooks === 1 ? 'work' : 'works' }}</span>
-                    <span>•</span>
-                    <span>{{ author.totalFollowers }} followers</span>
                 </div>
-            </div>
-            
-            <!-- Action button -->
-            <button class="btn btn-sm btn-primary rounded-pill px-3"
-                    (click)="toggleFollow($event)">
-                @if (author.isFollowing) {
-                    <i class="bi bi-check-lg"></i> Following
-                } @else {
-                    <i class="bi bi-plus-lg"></i> Follow
-                }
-            </button>
-        </div>
-    </div>
-}
-
-<!-- EXTENDED TEMPLATE - Card with more details -->
-@else if (template === 'extended') {
-    <div class="bg-secondary rounded-4 overflow-hidden pointer" 
-         style="transition: all 0.3s ease;"
-         (click)="viewAuthor()">
-        
-        <!-- Cover gradient -->
-        <div class="position-relative" style="height: 80px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
-            <!-- Avatar overlapping -->
-            <div class="position-absolute" style="bottom: -30px; left: 50%; transform: translateX(-50%);">
-                <div class="position-relative">
-                    <img [src]="author.profilePicture" 
-                         class="rounded-circle border border-4"
-                         style="width: 80px; height: 80px; object-fit: cover; border-color: var(--color-secondary) !important;" />
-                    @if (author.isVerified) {
-                        <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                             style="bottom: 2px; right: 2px; width: 24px; height: 24px; border: 3px solid var(--color-secondary);">
-                            <i class="bi bi-check-lg text-white" style="font-size: 0.875rem;"></i>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-        
-        <!-- Content -->
-        <div class="p-3 pt-5 text-center">
-            <h6 class="fw-bold mb-1">{{ author.penName }}</h6>
-            
-            <!-- Languages -->
-            @if (author.languages && author.languages.length > 0) {
-                <div class="d-flex justify-content-center gap-1 mb-2">
-                    @for (lang of author.languages.slice(0, 3); track lang) {
-                        <span class="badge bg-slate-800 text-gray-400 px-2 py-1" style="font-size: 0.7rem;">
-                            {{ lang }}
-                        </span>
-                    }
-                </div>
-            }
-            
-            <!-- Bio preview -->
-            @if (author.bio) {
-                <p class="small text-gray-400 mb-3" 
-                   style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                    {{ author.bio }}
-                </p>
-            }
-            
-            <!-- Stats -->
-            <div class="d-flex justify-content-center gap-4 mb-3">
-                <div class="text-center">
-                    <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
-                    <div class="small text-gray-400">Works</div>
-                </div>
-                <div class="text-center">
-                    <div class="fw-bold text-primary">{{ formatNumber(author.totalFollowers) }}</div>
-                    <div class="small text-gray-400">Followers</div>
-                </div>
-                <div class="text-center">
-                    <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
-                    <div class="small text-gray-400">Listens</div>
-                </div>
-            </div>
-            
-            <!-- Action buttons -->
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary rounded-pill flex-grow-1"
-                        (click)="toggleFollow($event)">
-                    @if (author.isFollowing) {
-                        <i class="bi bi-check-lg"></i> Following
-                    } @else {
-                        <i class="bi bi-plus-lg"></i> Follow
-                    }
-                </button>
-                <button class="btn btn-secondary rounded-pill px-3"
-                        (click)="viewProfile($event)">
-                    <i class="bi bi-person"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- DETAILED TEMPLATE - Full author card with works preview -->
-@else if (template === 'detailed') {
-    <div class="bg-secondary rounded-4 overflow-hidden">
-        
-        <!-- Header with cover -->
-        <div class="position-relative" style="height: 120px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
-            <!-- Cover image if available -->
-            @if (author.coverImage) {
-                <img [src]="author.coverImage" 
-                     class="w-100 h-100" 
-                     style="object-fit: cover; opacity: 0.4;" />
-            }
-            
-            <!-- Avatar overlapping -->
-            <div class="position-absolute" style="bottom: -40px; left: 20px;">
-                <div class="position-relative">
-                    <img [src]="author.profilePicture" 
-                         class="rounded-4 border border-4"
-                         style="width: 100px; height: 100px; object-fit: cover; border-color: var(--color-secondary) !important;" />
-                    @if (author.isVerified) {
-                        <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                             style="bottom: 4px; right: 4px; width: 28px; height: 28px; border: 3px solid var(--color-secondary);">
-                            <i class="bi bi-check-lg text-white"></i>
-                        </div>
-                    }
-                </div>
-            </div>
-            
-            <!-- Follow button -->
-            <div class="position-absolute" style="top: 16px; right: 16px;">
-                <button class="btn btn-primary rounded-pill px-4"
-                        (click)="toggleFollow($event)">
-                    @if (author.isFollowing) {
+    
+                <!-- Action button -->
+                <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="toggleFollow($event)">
+                    @if (isFollowing()) {
                         <i class="bi bi-check-lg"></i> Following
                     } @else {
                         <i class="bi bi-plus-lg"></i> Follow
@@ -163,96 +35,210 @@
                 </button>
             </div>
         </div>
-        
-        <!-- Content -->
-        <div class="p-4 pt-5">
-            <!-- Name and location -->
-            <h5 class="fw-bold mb-1">{{ author.penName }}</h5>
-            @if (author.country) {
-                <div class="small text-gray-400 mb-3">
-                    <i class="bi bi-geo-alt"></i> {{ author.country }}
-                </div>
-            }
-            
-            <!-- Stats row -->
-            <div class="d-flex gap-3 mb-3">
-                <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
-                    <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
-                    <div class="small text-gray-400">Works</div>
-                </div>
-                <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
-                    <div class="fw-bold text-primary">{{ formatNumber(author.totalFollowers) }}</div>
-                    <div class="small text-gray-400">Followers</div>
-                </div>
-                <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
-                    <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
-                    <div class="small text-gray-400">Completions</div>
-                </div>
-            </div>
-            
-            <!-- Bio -->
-            @if (author.bio) {
-                <div class="mb-3">
-                    <h6 class="fw-semibold small mb-2">About</h6>
-                    <p class="text-gray-400 small lh-175 mb-0">{{ author.bio }}</p>
-                </div>
-            }
-            
-            <!-- Languages and categories -->
-            <div class="mb-3">
-                <h6 class="fw-semibold small mb-2">Writes in</h6>
-                <div class="d-flex flex-wrap gap-2">
-                    @if (author.languages && author.languages.length > 0) {
-                        @for (lang of author.languages; track lang) {
-                            <span class="badge bg-slate-800 text-white px-3 py-2">
-                                <i class="bi bi-translate"></i> {{ lang }}
-                            </span>
-                        }
-                    }
-                    @if (author.categories && author.categories.length > 0) {
-                        @for (category of author.categories.slice(0, 3); track category) {
-                            <span class="badge bg-primary px-3 py-2">
-                                {{ category }}
-                            </span>
-                        }
-                    }
-                </div>
-            </div>
-            
-            <!-- Latest works preview -->
-            @if (author.latestWorks && author.latestWorks.length > 0) {
-                <div class="mb-3">
-                    <h6 class="fw-semibold small mb-2">Latest Works</h6>
-                    <div class="d-flex gap-2 overflow-x-auto pb-2">
-                        @for (work of author.latestWorks; track work.id) {
-                            <div class="flex-shrink-0" style="width: 80px;">
-                                <img [src]="work.cover" 
-                                     class="w-100 rounded-3 mb-1" 
-                                     style="aspect-ratio: 2/3; object-fit: cover;" />
-                                <div class="small text-gray-400 text-truncate" style="font-size: 0.7rem;">
-                                    {{ work.title }}
-                                </div>
+    }
+    
+    <!-- EXTENDED TEMPLATE - Card with more details -->
+    @else if (template === 'extended') {
+        <div class="bg-secondary rounded-4 overflow-hidden pointer" style="transition: all 0.3s ease;" (click)="viewAuthor()">
+    
+            <!-- Cover gradient -->
+            <div class="position-relative"
+                style="height: 80px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
+                <!-- Avatar overlapping -->
+                <div class="position-absolute" style="bottom: -30px; left: 50%; transform: translateX(-50%);">
+                    <div class="position-relative">
+                        <img [src]="author.userId.coverPicture" class="rounded-circle border border-4"
+                            style="width: 80px; height: 80px; object-fit: cover; border-color: var(--color-secondary) !important;" />
+                        @if (author.isVerified) {
+                            <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                style="bottom: 2px; right: 2px; width: 24px; height: 24px; border: 3px solid var(--color-secondary);">
+                                <i class="bi bi-check-lg text-white" style="font-size: 0.875rem;"></i>
                             </div>
                         }
                     </div>
                 </div>
-            }
-            
-            <!-- Action buttons -->
-            <div class="d-flex gap-2">
-                <button class="btn btn-secondary rounded-pill flex-grow-1"
-                        (click)="viewProfile($event)">
-                    <i class="bi bi-person"></i> View Profile
-                </button>
-                <button class="btn btn-secondary rounded-pill px-3"
-                        (click)="sendMessage($event)">
-                    <i class="bi bi-chat-dots"></i>
-                </button>
-                <button class="btn btn-secondary rounded-pill px-3"
-                        (click)="shareAuthor($event)">
-                    <i class="bi bi-share"></i>
-                </button>
+            </div>
+    
+            <!-- Content -->
+            <div class="p-3 pt-5 text-center">
+                <h6 class="fw-bold mb-1">{{ author.penName }}</h6>
+    
+                <!-- Languages -->
+                @if (author.languages && author.languages.length > 0) {
+                    <div class="d-flex justify-content-center gap-1 mb-2">
+                        @for (lang of author.languages.slice(0, 3); track lang) {
+                            <span class="badge bg-slate-800 text-gray-400 px-2 py-1" style="font-size: 0.7rem;">
+                                {{ lang }}
+                            </span>
+                        }
+                    </div>
+                }
+    
+                <!-- Bio preview -->
+                @if (author.bio) {
+                    <p class="small text-gray-400 mb-3"
+                        style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ author.bio }}
+                    </p>
+                }
+    
+                <!-- Stats -->
+                <div class="d-flex justify-content-center gap-4 mb-3">
+                    <div class="text-center">
+                        <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
+                        <div class="small text-gray-400">Works</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-primary">{{ formatNumber(totalFollowers()) }}</div>
+                        <div class="small text-gray-400">Followers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
+                        <div class="small text-gray-400">Listens</div>
+                    </div>
+                </div>
+    
+                <!-- Action buttons -->
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary rounded-pill flex-grow-1" (click)="toggleFollow($event)">
+                        @if (isFollowing()) {
+                            <i class="bi bi-check-lg"></i> Following
+                        } @else {
+                            <i class="bi bi-plus-lg"></i> Follow
+                        }
+                    </button>
+                    <button class="btn btn-secondary rounded-pill px-3" (click)="viewProfile($event)">
+                        <i class="bi bi-person"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    
+    <!-- DETAILED TEMPLATE - Full author card with works preview -->
+    @else if (template === 'detailed') {
+        <div class="bg-secondary rounded-4 overflow-hidden">
+    
+            <!-- Header with cover -->
+            <div class="position-relative"
+                style="height: 120px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
+                <!-- Cover image if available -->
+                @if (author.userId.coverPicture) {
+                    <img [src]="author.userId.coverPicture" class="w-100 h-100" style="object-fit: cover; opacity: 0.4;" />
+                }
+    
+                <!-- Avatar overlapping -->
+                <div class="position-absolute" style="bottom: -40px; left: 20px;">
+                    <div class="position-relative">
+                        <img [src]="author.userId.coverPicture" class="rounded-4 border border-4"
+                            style="width: 100px; height: 100px; object-fit: cover; border-color: var(--color-secondary) !important;" />
+                        @if (author.isVerified) {
+                            <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                                style="bottom: 4px; right: 4px; width: 28px; height: 28px; border: 3px solid var(--color-secondary);">
+                                <i class="bi bi-check-lg text-white"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+    
+                <!-- Follow button -->
+                <div class="position-absolute" style="top: 16px; right: 16px;">
+                    <button class="btn btn-primary rounded-pill px-4" (click)="toggleFollow($event)">
+                        @if (isFollowing()) {
+                            <i class="bi bi-check-lg"></i> Following
+                        } @else {
+                            <i class="bi bi-plus-lg"></i> Follow
+                        }
+                    </button>
+                </div>
+            </div>
+    
+            <!-- Content -->
+            <div class="p-4 pt-5">
+                <!-- Name and location -->
+                <h5 class="fw-bold mb-1">{{ author.penName }}</h5>
+                @if (author.country) {
+                    <div class="small text-gray-400 mb-3">
+                        <i class="bi bi-geo-alt"></i> {{ author.country }}
+                    </div>
+                }
+    
+                <!-- Stats row -->
+                <div class="d-flex gap-3 mb-3">
+                    <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
+                        <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
+                        <div class="small text-gray-400">Works</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
+                        <div class="fw-bold text-primary">{{ formatNumber(totalFollowers()) }}</div>
+                        <div class="small text-gray-400">Followers</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
+                        <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
+                        <div class="small text-gray-400">Completions</div>
+                    </div>
+                </div>
+    
+                <!-- Bio -->
+                @if (author.bio) {
+                    <div class="mb-3">
+                        <h6 class="fw-semibold small mb-2">About</h6>
+                        <p class="text-gray-400 small lh-175 mb-0">{{ author.bio }}</p>
+                    </div>
+                }
+    
+                <!-- Languages and categories -->
+                <div class="mb-3">
+                    <h6 class="fw-semibold small mb-2">Writes in</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (author.languages && author.languages.length > 0) {
+                            @for (lang of author.languages; track lang) {
+                                <span class="badge bg-slate-800 text-white px-3 py-2">
+                                    <i class="bi bi-translate"></i> {{ lang }}
+                                </span>
+                            }
+                        }
+                        @if (author.categories && author.categories.length > 0) {
+                            @for (category of author.categories.slice(0, 3); track category) {
+                                <span class="badge bg-primary px-3 py-2">
+                                    {{ category }}
+                                </span>
+                            }
+                        }
+                    </div>
+                </div>
+    
+                <!-- Latest works preview -->
+                @if (latestWork().length > 0) {
+                    <div class="mb-3">
+                        <h6 class="fw-semibold small mb-2">Latest Works</h6>
+                        <div class="d-flex gap-2 overflow-x-auto pb-2">
+                            @for (work of latestWork(); track work) {
+                                <div class="flex-shrink-0" style="width: 80px;">
+                                    <img [src]="work.coverFileFull" class="w-100 rounded-3 mb-1"
+                                        style="aspect-ratio: 2/3; object-fit: cover;" />
+                                    <div class="small text-gray-400 text-truncate" style="font-size: 0.7rem;">
+                                        {{ work.title }}
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+    
+                <!-- Action buttons -->
+                <div class="d-flex gap-2">
+                    <button class="btn btn-secondary rounded-pill flex-grow-1" (click)="viewProfile($event)">
+                        <i class="bi bi-person"></i> View Profile
+                    </button>
+                    <button class="btn btn-secondary rounded-pill px-3" (click)="sendMessage($event)">
+                        <i class="bi bi-chat-dots"></i>
+                    </button>
+                    <button class="btn btn-secondary rounded-pill px-3" (click)="shareAuthor($event)">
+                        <i class="bi bi-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
 }

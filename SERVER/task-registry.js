@@ -57,8 +57,17 @@ const GetAdminPromoCodes = require('./tasks/admin_pormo_code_get');
 const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const AdminAudiobookGetChapterAudio = require("./tasks/admin_audiobook_get_chapter_audio");
 
+
+//
+//  AUTHOR
+//
+const FindAuthor = require('./tasks/author_find');
+
 const TasksRegistry = {
 
+    //  AUTHOR
+    FindAuthor,
+    
     //  USER
     UserGetListeningHistory,
     

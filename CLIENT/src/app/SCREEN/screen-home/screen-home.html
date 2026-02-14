@@ -9,10 +9,10 @@
                         Enter To My World
                     </div>
                     <div class="d-none d-lg-flex align-items-center gap-3">
-                        <button class="btn btn-dark rounded-pill">Features</button>
-                        <button class="btn btn-dark rounded-pill">Pricing</button>
-                        <button class="btn btn-dark rounded-pill">Debates</button>
-                        <button class="btn btn-dark rounded-pill">Contact</button>
+                        <button class="btn btn-dark rounded-pill" (click)="scrollToId('listener')">Features</button>
+                        <button class="btn btn-dark rounded-pill" (click)="scrollToId('debate')">Debates</button>
+                        <button class="btn btn-dark rounded-pill" (click)="scrollToId('pricing')">Pricing</button>
+                        <button class="btn btn-dark rounded-pill" (click)="scrollToId('contact')">Contact</button>
                         <button class="btn btn-primary rounded-pill" (click)="gotoApp()">
                             Get Started
                         </button>
@@ -29,7 +29,7 @@
             
             <div class="text-center py-4 py-md-5">
                 <h1 class="hero-title">
-                    We Give Voice to Your Work
+                    Where <span class="text-primary">Authors</span> Meet <span class="text-primary">Listeners</span>
                 </h1>
                 <h4 class=" mt-3">
                     The first platform exclusively for <span class="text-primary">independent authors</span>
@@ -42,11 +42,11 @@
                 <div class="col-12 col-lg-6">
                     
                     <h2 class="section-heading text-center text-lg-start mb-4">
-                        Where <span class="text-primary">Authors Meet Listeners</span>
+                        We Give Voice to Your Work
                     </h2>
             
                     <div class="content-card">
-                        <p class="content-text">
+                        <p class="content-text text-light">
                             We empower independent authors who haven't been picked up by traditional 
                             publishers. Transform your written work into professional audiobooks and 
                             reach listeners of today
@@ -75,11 +75,11 @@
                     </div>
 
                     <div class="cta-buttons justify-content-between pt-3 mt-4">
-                        <button class="btn btn-primary btn-lg rounded-3 w-100 pt-3 pb-3">
+                        <button class="btn btn-primary btn-lg rounded-3 w-100 pt-3 pb-3" (click)="scrollToId('authors')">
                             <i class="bi bi-book text-2xl"></i>&nbsp;&nbsp;
                             I'm an Author
                         </button>
-                        <button class="btn btn-secondary btn-lg w-100  mt-3 mt-md-0 pt-3 pb-3">
+                        <button class="btn btn-secondary btn-lg w-100  mt-3 mt-md-0 pt-3 pb-3" (click)="scrollToId('listener')">
                             <i class="bi bi-play-circle text-2xl"></i>&nbsp;&nbsp;
                             I'm a Listener
                         </button>
@@ -97,6 +97,7 @@
     </div>
 
     <!-- How it works -->
+    <div class="pt-5" id="authors"></div>
     <div class="how-it-works-section px-4">
         <div class="container py-5">
             
@@ -156,6 +157,18 @@
 
             </div>
 
+            <div class="mt-5 text-center mb-5">
+                <h2 class="section-title">
+                    How You Get Paid
+                </h2>
+                <h5 class="mt-3 text-gray-400">
+                    We share a percentage of all subscription revenue with authors
+                </h5>
+                <h5 class="text-primary fw-bold mt-3">
+                    Each month, earnings are distributed based on how many listeners complete your audiobook
+                </h5>
+            </div>
+
             <!-- Latest Authors -->
             <div class="mt-5">
 
@@ -172,12 +185,15 @@
                         @for (item of latestAuthors(); track item ) {
                             <div class="mt-4 d-flex justify-content-start align-items-center gap-3" style="width: 280px;">
                                 <div>
-                                    <img [src]="item.userPhoto" style="width:70px; height:70px; object-fit:cover" class="rounded-circle shadow overflow-hidden" />
+                                    <img [src]="item.userId.coverPicture" style="width:70px; height:70px; object-fit:cover" class="rounded-circle shadow overflow-hidden" />
                                 </div>
                                 <div>
-                                    <h5><b>{{ item.name }}</b></h5>
+                                    <h5><b>
+                                        {{ item.userId.firstName }} 
+                                        {{ item.userId.lastName }}
+                                    </b></h5>
                                     <div class="mt-1 text-gray-400">
-                                        {{ item.lastUpload }}
+                                        {{ item.userId.updatedAt | date }}
                                     </div>
                                 </div>
                             </div>
@@ -191,6 +207,7 @@
     </div>
 
     <!-- Features -->
+    <div class="pt-3" id="listener"></div>
     <div class="features-section px-4">
         <div class="container py-5">
             
@@ -208,8 +225,8 @@
                         <div class="feature-card-icon">📚</div>
                         <h3 class="feature-card-title fw-bold">Flexible Listening Schedule</h3>
                         <p class="feature-card-text text-lg">
-                            Listeners choose their pace: receive one chapter every X days. 
-                            Perfect for those who want to consume books gradually and thoughtfully.
+                            Listeners keep their pace: receive one chapter every day. 
+                            Consume books gradually and thoughtfully.
                         </p>
                     </div>
                 </div>
@@ -264,46 +281,18 @@
             </div>
 
             <div class="row g-4">
-                @for (work of latestWorks(); track work.title) {
+                @for (item of latestAudiobooks(); track item) {
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="work-card">
-                            <div class="work-cover-container">
-                                <img [src]="work.cover" [alt]="work.title" class="work-cover">
-                                <div class="work-overlay">
-                                    <button class="btn btn-primary rounded-pill px-4">
-                                        <i class="bi bi-play-fill"></i> Listen Now
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="work-content">
-                                <div class="work-category">{{ work.category }}</div>
-                                <h4 class="work-title">{{ work.title }}</h4>
-                                <div class="work-author">by {{ work.author }}</div>
-                                <div class="work-meta">
-                                    <div class="work-meta-item">
-                                        <i class="bi bi-clock"></i>
-                                        <span>{{ work.duration }}</span>
-                                    </div>
-                                    <div class="work-meta-item">
-                                        <i class="bi bi-book"></i>
-                                        <span>{{ work.chapters }} chapters</span>
-                                    </div>
-                                    <div class="work-meta-item">
-                                        <i class="bi bi-star-fill text-warning"></i>
-                                        <span>{{ work.rating }}</span>
-                                    </div>
-                                </div>
-                                <button class="btn btn-secondary w-100 mt-3 rounded-pill">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
+                        <app-item
+                            [audiobook]="item"
+                            template="large"
+                        ></app-item>
                     </div>
                 }
             </div>
 
             <div class="text-center mt-5">
-                <button class="btn btn-primary btn-lg rounded-pill px-5">
+                <button class="btn btn-primary btn-lg rounded-pill px-5" (click)="gotoExploreAllAudiobooks()">
                     Explore All Audiobooks
                 </button>
             </div>
@@ -312,7 +301,7 @@
     </div>
 
     <!-- Debate the Book -->
-    <div class="debate-section px-4">
+    <div class="debate-section px-4" id="debate">
         <div class="container py-5">
             
             <div class="text-center mb-5">
@@ -489,11 +478,9 @@
 
 
     <!-- Pricing Section -->
-    <div class="pricing-section px-4">
-        <div class="container py-5">
-            
+    <div class="pricing-section px-4" id="pricing">
+        <div class="container py-5">            
             <app-pricing></app-pricing>
-
         </div>
     </div>
 
@@ -502,7 +489,7 @@
     <div class="contact-section px-4">
         <div class="container py-5">
             
-            <div class="row g-5 align-items-center">
+            <div class="row g-5 align-items-center" id="contact">
                 
                 <!-- Left Side - Info -->
                 <div class="col-12 col-lg-5">

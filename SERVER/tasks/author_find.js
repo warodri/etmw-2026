@@ -3,6 +3,7 @@ const Author = require('../models/author');
 async function run(data, req, res) {
     try {
         const {
+            showLatest,
             penName,
             country,
             language,
@@ -10,20 +11,22 @@ async function run(data, req, res) {
             limit = 50,
             skip = 0
         } = data;
+
         const userId = req.userId || null;
 
-        if (!userId) {
-            return res.status(200).json({
-                success: false,
-                message: 'invalid data'
-            })
-        }
-
         const query = {};
-        if (penName) query.penName = { $regex: penName, $options: 'i' };
-        if (country) query.country = country;
-        if (language) query.languages = language;
-        if (enabled !== undefined) query.enabled = enabled;
+        if (showLatest) {
+            if (enabled !== undefined) {
+                query.enabled = enabled;
+            } else {
+                query.enabled = true;
+            }
+        } else {
+            if (penName) query.penName = { $regex: penName, $options: 'i' };
+            if (country) query.country = country;
+            if (language) query.languages = language;
+            if (enabled !== undefined) query.enabled = enabled;
+        }
 
         const authors = await Author.find(query)
             .populate('userId')
@@ -35,7 +38,7 @@ async function run(data, req, res) {
 
         return res.status(200).json({
             success: true,
-            data: authors,
+            authors,
             total
         })
     } catch (ex) {

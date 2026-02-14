@@ -81,5 +81,42 @@
                 </div>
             </div>
         </div>
+    } @else if (template == 'large') {
+        <div class="work-card">
+            <div class="work-cover-container">
+                <img [src]="getCoverUrl()" [alt]="audiobook.title" class="work-cover">
+                <div class="work-overlay">
+                    <button class="btn btn-primary rounded-pill px-4" (click)="viewItem()">
+                        <i class="bi bi-play-fill"></i> Listen Now
+                    </button>
+                </div>
+            </div>
+            <div class="work-content">
+                <div class="d-flex flex-wrap justify-content-start align-items-center gap-2">
+                    @for (item of audiobook.categories; track item) {
+                        <div class="work-category">{{ item }}</div>
+                    }
+                </div>
+                <h4 class="work-title">{{ audiobook.title }}</h4>
+                <div class="work-author">by {{ audiobook.authorName }}</div>
+                <div class="work-meta">
+                    <div class="work-meta-item">
+                        <i class="bi bi-clock"></i>
+                        <span>{{ audiobook.totalAudioDurationSec }}</span>
+                    </div>
+                    <div class="work-meta-item">
+                        <i class="bi bi-book"></i>
+                        <span>{{ audiobook.audioFiles.length }} chapters</span>
+                    </div>
+                    <!-- <div class="work-meta-item">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span>{{ audiobook.rating }}</span>
+                    </div> -->
+                </div>
+                <button class="btn btn-secondary w-100 mt-3 rounded-pill" (click)="viewItem()">
+                    View Details
+                </button>
+            </div>
+        </div>
     }
 }
