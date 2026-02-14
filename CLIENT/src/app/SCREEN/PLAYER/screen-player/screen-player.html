@@ -1,4 +1,9 @@
 <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
+    @if (!loading() && !subscription()) {
+        <div class="p-5">
+            <app-pricing></app-pricing>
+        </div>
+    }
     <app-etmw-player></app-etmw-player>
     <app-spotify-player></app-spotify-player>
 </div>

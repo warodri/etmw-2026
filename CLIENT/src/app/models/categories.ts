@@ -1,3 +1,5 @@
+import { AuthorModel } from "./author";
+
 export interface CategoryModel {
     
     _id: string,
@@ -5,6 +7,8 @@ export interface CategoryModel {
     icon?: string,
     parentId?: string | { _id: string, name: string } | null,
     count?: number,
+    authorCount?: number,
+    authors?: AuthorModel[],
     gradient: string,
 
 }

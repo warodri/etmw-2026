@@ -6,7 +6,7 @@ import { InternetService } from './internet.service';
 @Injectable({
     providedIn: 'root'
 })
-export class InternetAudiobookService extends InternetService {
+export class InternetSubscriptionService extends InternetService {
 
     constructor(
         httpClient: HttpClient  // Add this

@@ -63,7 +63,7 @@ const model = new Schema({
         type: Number,
         default: 0
     },
-    totlaFollowing: {
+    totalFollowing: {
         type: Number,
         default: 0
     },

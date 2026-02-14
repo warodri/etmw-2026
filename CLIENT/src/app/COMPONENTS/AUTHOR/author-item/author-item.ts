@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
 import { AuthorModel } from '../../../models/author';
+import { UserModel } from '../../../models/user';
 import { AudiobookModel } from '../../../models/audiobook';
 
 @Component({
@@ -12,7 +13,7 @@ export class AuthorItem implements OnInit {
 
     @Input() template: 'simple' | 'extended' | 'detailed' = 'simple';
 
-    @Input() author: AuthorModel | null = null;
+    @Input() author: AuthorModel | UserModel | null = null;
 
     @Output() onFollow = new EventEmitter<string>();
     @Output() onView = new EventEmitter<string>();
@@ -26,7 +27,10 @@ export class AuthorItem implements OnInit {
     constructor() {}
 
     ngOnInit(): void {
-        
+        const followers = this.getTotalFollowers();
+        if (followers !== null) {
+            this.totalFollowers.set(followers);
+        }
     }
 
     formatNumber(num: number): string {
@@ -39,12 +43,13 @@ export class AuthorItem implements OnInit {
     }
 
     toggleFollow(event: Event) {
-        if (this.author) {
+        const id = this.getId();
+        if (id) {
             event.stopPropagation();
             this.isFollowing.set(!this.isFollowing());
             if (this.isFollowing()) {
                 this.totalFollowers.set( this.totalFollowers() + 1);
-                this.onFollow.emit(this.author._id);
+                this.onFollow.emit(id);
             } else {
                 this.totalFollowers.set( this.totalFollowers() - 1);
             }
@@ -52,30 +57,94 @@ export class AuthorItem implements OnInit {
     }
 
     viewAuthor() {
-        if (this.author) {
-            this.onView.emit(this.author._id);
+        const id = this.getId();
+        if (id) {
+            this.onView.emit(id);
         }
     }
 
     viewProfile(event: Event) {
-        if (this.author) {
+        const id = this.getId();
+        if (id) {
             event.stopPropagation();
-            this.onView.emit(this.author._id);
+            this.onView.emit(id);
         }
     }
 
     sendMessage(event: Event) {
-        if (this.author) {
+        const id = this.getId();
+        if (id) {
             event.stopPropagation();
-            this.onMessage.emit(this.author._id);
+            this.onMessage.emit(id);
         }
     }
 
     shareAuthor(event: Event) {
-        if (this.author) {
+        const id = this.getId();
+        if (id) {
             event.stopPropagation();
-            console.log('Share author:', this.author._id);
+            console.log('Share author:', id);
         }
     }
 
+    getId(): string | null {
+        const a: any = this.author;
+        if (!a) return null;
+        return a._id || a.userId?._id || null;
+    }
+
+    getDisplayName(): string {
+        const a: any = this.author;
+        if (!a) return '';
+        if (a.penName) return a.penName;
+        const first = a.firstName || a.userId?.firstName || '';
+        const last = a.lastName || a.userId?.lastName || '';
+        return `${first} ${last}`.trim();
+    }
+
+    getProfilePicture(): string {
+        const a: any = this.author;
+        return a?.profilePicture || a?.userId?.profilePicture || a?.userId?.coverPicture || a?.coverPicture || '';
+    }
+
+    getCoverPicture(): string {
+        const a: any = this.author;
+        return a?.coverPicture || a?.userId?.coverPicture || a?.profilePicture || a?.userId?.profilePicture || '';
+    }
+
+    getBio(): string {
+        const a: any = this.author;
+        return a?.bio || a?.userId?.bio || '';
+    }
+
+    getLanguages(): string[] {
+        const a: any = this.author;
+        return a?.languages || a?.userId?.languages || [];
+    }
+
+    getTotalAudiobooks(): number {
+        const a: any = this.author;
+        return a?.totalAudiobooks || 0;
+    }
+
+    getTotalCompletions(): number {
+        const a: any = this.author;
+        return a?.totalCompletions || 0;
+    }
+
+    getTotalFollowers(): number | null {
+        const a: any = this.author;
+        const value = a?.totalFollowers ?? a?.userId?.totalFollowers;
+        return typeof value === 'number' ? value : null;
+    }
+
+    getCountry(): string {
+        const a: any = this.author;
+        return a?.country || a?.userId?.country || '';
+    }
+
+    isVerified(): boolean {
+        const a: any = this.author;
+        return !!(a?.isVerified || a?.userId?.isVerified);
+    }
 }

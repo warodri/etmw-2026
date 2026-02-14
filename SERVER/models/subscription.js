@@ -58,13 +58,11 @@ const model = new Schema({
         type: Boolean,
         default: true
     },
-
     createdAt: {
         type: Number,
         default: Date.now,
         index: true
     },
-
     updatedAt: {
         type: Number,
         default: Date.now

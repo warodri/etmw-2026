@@ -41,4 +41,8 @@ export class ScreenMobileMain implements OnInit {
         this.router.navigate(['app/audiobooks/upload'])
     }
 
+    gotoSeeAllAuthors() {
+        this.router.navigate(['app/authors'])
+    }
+
 }

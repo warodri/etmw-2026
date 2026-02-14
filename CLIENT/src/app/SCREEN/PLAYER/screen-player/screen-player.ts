@@ -6,6 +6,8 @@ import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { ToastService } from '../../../SERVICES/toast';
 import { UtilsService } from '../../../utils/utils-service';
+import { SubscriptionModel } from '../../../models/subscription';
+import { InternetSubscriptionService } from '../../../SERVICES/internet-subscription.services';
 
 @Component({
     selector: 'app-screen-player',
@@ -16,6 +18,7 @@ import { UtilsService } from '../../../utils/utils-service';
 export class ScreenPlayer implements OnInit, OnDestroy {
 
     //  Basic information
+    subscription = signal<SubscriptionModel | null>(null);
     audiobookId = signal<string | null>(null);
     chapterNumber = signal<number>(1);
     audiobook = signal<AudiobookModel | null>(null);
@@ -39,13 +42,15 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     playbackSpeed = 1.0;
 
     // Chapter info
-    currentChapter = 'Lovingkindness';
-    totalChapters = 12;
+    currentChapter = -1;
+    totalChapters = 0;
 
     // Waveform visualization
     waveformBars: { height: number }[] = [];
     currentBarIndex = signal<number>(0);
 
+    //  Audio playing
+    selectedChapterIndex = signal<number>(0);
     private intervalId: any;
     private audioElement: HTMLAudioElement | null = null;
     private audioUrl: string | null = null;
@@ -53,14 +58,16 @@ export class ScreenPlayer implements OnInit, OnDestroy {
 
     //  Flags 
     loading = signal<boolean>(true);
+    audioLoaded = signal<boolean>(false);
 
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private iAudiobook: InternetAudiobookService,
-        private iUser: InternetUserService,
         private toast: ToastService,
         private utils: UtilsService,
+        private iAudiobook: InternetAudiobookService,
+        private iUser: InternetUserService,
+        private iSubcription: InternetSubscriptionService,
     ) {}
 
     ngOnInit() {
@@ -76,9 +83,11 @@ export class ScreenPlayer implements OnInit, OnDestroy {
             }
             this.getAudiobookById(() => {
                 this.getListeningProgress(() => {
-                    this.generateWaveform();
-                    this.startPlayback();            
-                    this.loading.set(false);
+                    this.subscriptionGetMine(() => {
+                        this.generateWaveform();
+                        this.startPlayback();            
+                        this.loading.set(false);
+                    })
                 })
             })
         })
@@ -115,7 +124,6 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231e293b'/><stop offset='1' stop-color='%230f172a'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='50%25' fill='%23e2e8f0' font-family='Arial' font-size='18' text-anchor='middle'>${safeTitle}</text></svg>`;
     }
 
-
     getAudiobookById(callback: any) {
         const audiobookId = this.audiobookId();
         if (audiobookId) {
@@ -141,6 +149,15 @@ export class ScreenPlayer implements OnInit, OnDestroy {
                 callback()
             })
         }
+    }
+    
+    subscriptionGetMine(callback: any) {
+        this.iSubcription.subscriptionGetMine((response: any) => {
+            if (response && response.success) {
+                this.subscription.set(response.subscription)
+            }
+            callback()
+        })
     }
 
     goBack() {
@@ -184,6 +201,29 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         const progress = this.totalSeconds > 0 ? (this.currentSeconds / this.totalSeconds) : 0;
         const clamped = Math.max(0, Math.min(1, progress));
         this.currentBarIndex.set(Math.floor(clamped * totalBars));
+    }
+
+    getChapters(): Array<{ chapter: number, durationSec: number }> {
+        const book = this.audiobook();
+        if (!book || !Array.isArray(book.audioFiles)) return [];
+        return book.audioFiles.map((c: any) => ({
+            chapter: c.chapter,
+            durationSec: c.durationSec || 0
+        }));
+    }
+
+    selectChapter(index: number) {
+        this.selectedChapterIndex.set(index);
+    }
+
+    formatDuration(totalSeconds: number | undefined): string {
+        const seconds = Math.max(0, Math.floor(totalSeconds || 0));
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        }
+        return `${minutes}m`;
     }
 
     togglePlay() {

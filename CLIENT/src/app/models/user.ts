@@ -18,7 +18,7 @@ export interface UserModel {
 
     //  Social
     totalFollowers: number,
-    totlaFollowing: number,
+    totalFollowing: number,
 
     //  Notifications
     lastCheckTime: number,

@@ -29,7 +29,7 @@ async function run(data, req, res) {
         //  Return
         return res.status(200).json({
             success: true,
-            data: subscription
+            subscription
         })
         
     } catch (ex) {

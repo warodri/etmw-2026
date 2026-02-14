@@ -5,9 +5,9 @@
             <div class="d-flex align-items-center gap-3">
                 <!-- Avatar with verified badge -->
                 <div class="position-relative flex-shrink-0">
-                    <img [src]="author.userId.coverPicture" class="rounded-circle border border-2"
-                        [class.border-primary]="author.isVerified" style="width: 56px; height: 56px; object-fit: cover;" />
-                    @if (author.isVerified) {
+                    <img [src]="getProfilePicture()" class="rounded-circle border border-2"
+                        [class.border-primary]="isVerified()" style="width: 56px; height: 56px; object-fit: cover;" />
+                    @if (isVerified()) {
                         <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
                             style="bottom: -2px; right: -2px; width: 20px; height: 20px; border: 2px solid var(--color-secondary);">
                             <i class="bi bi-check-lg text-white" style="font-size: 0.75rem;"></i>
@@ -17,9 +17,9 @@
     
                 <!-- Info -->
                 <div class="flex-grow-1 min-w-0">
-                    <div class="fw-bold text-truncate">{{ author.penName }}</div>
+                    <div class="fw-bold text-truncate">{{ getDisplayName() }}</div>
                     <div class="small text-gray-400 d-flex align-items-center gap-2">
-                        <span>{{ author.totalAudiobooks }} {{ author.totalAudiobooks === 1 ? 'work' : 'works' }}</span>
+                        <span>{{ getTotalAudiobooks() }} {{ getTotalAudiobooks() === 1 ? 'work' : 'works' }}</span>
                         <span>•</span>
                         <span>{{ totalFollowers() }} followers</span>
                     </div>
@@ -47,9 +47,9 @@
                 <!-- Avatar overlapping -->
                 <div class="position-absolute" style="bottom: -30px; left: 50%; transform: translateX(-50%);">
                     <div class="position-relative">
-                        <img [src]="author.userId.coverPicture" class="rounded-circle border border-4"
+                        <img [src]="getProfilePicture()" class="rounded-circle border border-4"
                             style="width: 80px; height: 80px; object-fit: cover; border-color: var(--color-secondary) !important;" />
-                        @if (author.isVerified) {
+                        @if (isVerified()) {
                             <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
                                 style="bottom: 2px; right: 2px; width: 24px; height: 24px; border: 3px solid var(--color-secondary);">
                                 <i class="bi bi-check-lg text-white" style="font-size: 0.875rem;"></i>
@@ -61,12 +61,12 @@
     
             <!-- Content -->
             <div class="p-3 pt-5 text-center">
-                <h6 class="fw-bold mb-1">{{ author.penName }}</h6>
+                <h6 class="fw-bold mb-1">{{ getDisplayName() }}</h6>
     
                 <!-- Languages -->
-                @if (author.languages && author.languages.length > 0) {
+                @if (getLanguages().length > 0) {
                     <div class="d-flex justify-content-center gap-1 mb-2">
-                        @for (lang of author.languages.slice(0, 3); track lang) {
+                        @for (lang of getLanguages().slice(0, 3); track lang) {
                             <span class="badge bg-slate-800 text-gray-400 px-2 py-1" style="font-size: 0.7rem;">
                                 {{ lang }}
                             </span>
@@ -75,17 +75,17 @@
                 }
     
                 <!-- Bio preview -->
-                @if (author.bio) {
+                @if (getBio()) {
                     <p class="small text-gray-400 mb-3"
                         style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                        {{ author.bio }}
+                        {{ getBio() }}
                     </p>
                 }
     
                 <!-- Stats -->
                 <div class="d-flex justify-content-center gap-4 mb-3">
                     <div class="text-center">
-                        <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
+                        <div class="fw-bold text-primary">{{ getTotalAudiobooks() }}</div>
                         <div class="small text-gray-400">Works</div>
                     </div>
                     <div class="text-center">
@@ -93,7 +93,7 @@
                         <div class="small text-gray-400">Followers</div>
                     </div>
                     <div class="text-center">
-                        <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
+                        <div class="fw-bold text-primary">{{ formatNumber(getTotalCompletions()) }}</div>
                         <div class="small text-gray-400">Listens</div>
                     </div>
                 </div>
@@ -123,16 +123,16 @@
             <div class="position-relative"
                 style="height: 120px; background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%);">
                 <!-- Cover image if available -->
-                @if (author.userId.coverPicture) {
-                    <img [src]="author.userId.coverPicture" class="w-100 h-100" style="object-fit: cover; opacity: 0.4;" />
+                @if (getCoverPicture()) {
+                    <img [src]="getCoverPicture()" class="w-100 h-100" style="object-fit: cover; opacity: 0.4;" />
                 }
     
                 <!-- Avatar overlapping -->
                 <div class="position-absolute" style="bottom: -40px; left: 20px;">
                     <div class="position-relative">
-                        <img [src]="author.userId.coverPicture" class="rounded-4 border border-4"
+                        <img [src]="getProfilePicture()" class="rounded-4 border border-4"
                             style="width: 100px; height: 100px; object-fit: cover; border-color: var(--color-secondary) !important;" />
-                        @if (author.isVerified) {
+                        @if (isVerified()) {
                             <div class="position-absolute bg-primary rounded-circle d-flex align-items-center justify-content-center"
                                 style="bottom: 4px; right: 4px; width: 28px; height: 28px; border: 3px solid var(--color-secondary);">
                                 <i class="bi bi-check-lg text-white"></i>
@@ -156,17 +156,17 @@
             <!-- Content -->
             <div class="p-4 pt-5">
                 <!-- Name and location -->
-                <h5 class="fw-bold mb-1">{{ author.penName }}</h5>
-                @if (author.country) {
+                <h5 class="fw-bold mb-1">{{ getDisplayName() }}</h5>
+                @if (getCountry()) {
                     <div class="small text-gray-400 mb-3">
-                        <i class="bi bi-geo-alt"></i> {{ author.country }}
+                        <i class="bi bi-geo-alt"></i> {{ getCountry() }}
                     </div>
                 }
     
                 <!-- Stats row -->
                 <div class="d-flex gap-3 mb-3">
                     <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
-                        <div class="fw-bold text-primary">{{ author.totalAudiobooks }}</div>
+                        <div class="fw-bold text-primary">{{ getTotalAudiobooks() }}</div>
                         <div class="small text-gray-400">Works</div>
                     </div>
                     <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
@@ -174,16 +174,16 @@
                         <div class="small text-gray-400">Followers</div>
                     </div>
                     <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
-                        <div class="fw-bold text-primary">{{ formatNumber(author.totalCompletions) }}</div>
+                        <div class="fw-bold text-primary">{{ formatNumber(getTotalCompletions()) }}</div>
                         <div class="small text-gray-400">Completions</div>
                     </div>
                 </div>
     
                 <!-- Bio -->
-                @if (author.bio) {
+                @if (getBio()) {
                     <div class="mb-3">
                         <h6 class="fw-semibold small mb-2">About</h6>
-                        <p class="text-gray-400 small lh-175 mb-0">{{ author.bio }}</p>
+                        <p class="text-gray-400 small lh-175 mb-0">{{ getBio() }}</p>
                     </div>
                 }
     
@@ -191,8 +191,8 @@
                 <div class="mb-3">
                     <h6 class="fw-semibold small mb-2">Writes in</h6>
                     <div class="d-flex flex-wrap gap-2">
-                        @if (author.languages && author.languages.length > 0) {
-                            @for (lang of author.languages; track lang) {
+                        @if (getLanguages().length > 0) {
+                            @for (lang of getLanguages(); track lang) {
                                 <span class="badge bg-slate-800 text-white px-3 py-2">
                                     <i class="bi bi-translate"></i> {{ lang }}
                                 </span>

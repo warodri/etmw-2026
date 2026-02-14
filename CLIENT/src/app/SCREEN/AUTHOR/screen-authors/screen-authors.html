@@ -1,3 +1,5 @@
+@let selectedCategoryObj = selectedCategory();
+
 <div class="container-fluid">
 
     <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
@@ -26,7 +28,7 @@
                        (input)="onSearch()">
                 <i class="bi bi-search position-absolute text-gray-400" 
                    style="left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.25rem;"></i>
-                @if (searchQuery) {
+                @if (searchQuery()) {
                     <button class="btn btn-link position-absolute text-gray-400" 
                             style="right: 10px; top: 50%; transform: translateY(-50%);"
                             (click)="clearSearch()">
@@ -38,21 +40,21 @@
             <!-- View Mode Toggle -->
             <div class="d-flex gap-2">
                 <button class="btn btn-sm rounded-pill flex-grow-1" 
-                        [class.btn-primary]="viewMode === 'grid'"
-                        [class.btn-secondary]="viewMode !== 'grid'"
-                        (click)="viewMode = 'grid'">
+                        [class.btn-primary]="viewMode() === 'grid'"
+                        [class.btn-secondary]="viewMode() !== 'grid'"
+                        (click)="setViewMode('grid')">
                     <i class="bi bi-grid-3x3-gap"></i> Grid
                 </button>
                 <button class="btn btn-sm rounded-pill flex-grow-1" 
-                        [class.btn-primary]="viewMode === 'list'"
-                        [class.btn-secondary]="viewMode !== 'list'"
-                        (click)="viewMode = 'list'">
+                        [class.btn-primary]="viewMode() === 'list'"
+                        [class.btn-secondary]="viewMode() !== 'list'"
+                        (click)="setViewMode('list')">
                     <i class="bi bi-list-ul"></i> List
                 </button>
                 <button class="btn btn-sm rounded-pill flex-grow-1" 
-                        [class.btn-primary]="viewMode === 'category'"
-                        [class.btn-secondary]="viewMode !== 'category'"
-                        (click)="viewMode = 'category'">
+                        [class.btn-primary]="viewMode() === 'category'"
+                        [class.btn-secondary]="viewMode() !== 'category'"
+                        (click)="setViewMode('category')">
                     <i class="bi bi-tag"></i> Categories
                 </button>
             </div>
@@ -76,7 +78,7 @@
             }
     
             <!-- FEATURED AUTHORS SECTION -->
-            @if (!searchQuery && viewMode !== 'category') {
+            @if (!searchQuery() && viewMode() !== 'category') {
                 <div class="mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold m-0">
@@ -85,7 +87,7 @@
                     </div>
                     
                     <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                        @for (author of featuredAuthors; track author._id) {
+                        @for (author of featuredAuthors(); track author) {
                             <div class="flex-shrink-0" style="width: 260px;">
                                 <app-author-item [author]="author" 
                                                template="extended"
@@ -98,11 +100,11 @@
             }
     
             <!-- GRID VIEW -->
-            @if (viewMode === 'grid' && !searchQuery) {
+            @if (viewMode() === 'grid' && !searchQuery()) {
                 <div class="mt-4">
                     <h5 class="fw-bold mb-3">All Authors</h5>
                     <div class="row g-3">
-                        @for (author of allAuthors; track author._id) {
+                        @for (author of allAuthors(); track author) {
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                                 <app-author-item [author]="author" 
                                                template="extended"
@@ -115,18 +117,18 @@
             }
     
             <!-- LIST VIEW -->
-            @if (viewMode === 'list') {
+            @if (viewMode() === 'list') {
                 <div class="mt-4">
-                    @if (searchQuery) {
+                    @if (searchQuery()) {
                         <div class="mb-3">
                             <span class="text-gray-400">Results for</span> 
-                            <span class="fw-bold text-primary">"{{ searchQuery }}"</span>
-                            <span class="badge bg-slate-800 ms-2">{{ searchResults.length }} found</span>
+                            <span class="fw-bold text-primary">"{{ searchQuery() }}"</span>
+                            <span class="badge bg-slate-800 ms-2">{{ searchResults().length }} found</span>
                         </div>
                     }
                     
                     <div class="d-flex flex-column gap-3">
-                        @for (author of searchQuery ? searchResults : allAuthors; track author._id) {
+                        @for (author of searchQuery() ? searchResults() : allAuthors(); track author._id) {
                             <app-author-item [author]="author" 
                                            template="simple"
                                            (onView)="viewAuthorProfile($event)"
@@ -137,45 +139,45 @@
             }
     
             <!-- CATEGORY VIEW -->
-            @if (viewMode === 'category') {
+            @if (viewMode() === 'category') {
                 <div class="mt-4">
                     
                     <!-- Category Navigation Tabs -->
                     <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4">
                         <button class="btn rounded-pill flex-shrink-0"
-                                [class.btn-primary]="!selectedCategory"
-                                [class.btn-secondary]="selectedCategory"
+                                [class.btn-primary]="!selectedCategoryObj"
+                                [class.btn-secondary]="selectedCategoryObj"
                                 (click)="selectCategory(null)">
                             All Categories
                         </button>
-                        @for (category of categories; track category.name) {
+                        @for (category of categories(); track category) {
                             <button class="btn rounded-pill flex-shrink-0"
-                                    [class.btn-primary]="selectedCategory === category.name"
-                                    [class.btn-secondary]="selectedCategory !== category.name"
-                                    (click)="selectCategory(category.name)">
-                                {{ category.icon }} {{ category.name }} ({{ category.authorCount }})
+                                    [class.btn-primary]="selectedCategoryObj?.name === category.name"
+                                    [class.btn-secondary]="selectedCategoryObj?.name !== category.name"
+                                    (click)="selectCategory(category)">
+                                {{ category.icon }} {{ category.name }} ({{ category.authorCount || 0 }})
                             </button>
                         }
                     </div>
     
                     <!-- Category Content -->
-                    @if (!selectedCategory) {
+                    @if (!selectedCategoryObj) {
                         <!-- Show all categories with top authors -->
-                        @for (category of categories; track category.name) {
+                        @for (category of categories(); track category) {
                             <div class="mb-5">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5 class="fw-bold m-0">
                                         {{ category.icon }} {{ category.name }}
                                     </h5>
                                     <button class="btn btn-sm btn-secondary rounded-pill px-3"
-                                            (click)="selectCategory(category.name)">
+                                            (click)="selectCategory(category)">
                                         View All <i class="bi bi-chevron-right"></i>
                                     </button>
                                 </div>
                                 
                                 <!-- Horizontal scroll of authors -->
                                 <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                                    @for (author of getCategoryAuthors(category.name).slice(0, 6); track author._id) {
+                                    @for (author of category.authors; track author) {
                                         <div class="flex-shrink-0" style="width: 260px;">
                                             <app-author-item [author]="author" 
                                                            template="extended"
@@ -188,29 +190,31 @@
                         }
                     } @else {
                         <!-- Show selected category authors in grid -->
-                        <div class="mb-3">
-                            <h5 class="fw-bold">
-                                {{ getCategoryIcon(selectedCategory) }} {{ selectedCategory }} Authors
-                            </h5>
-                            <p class="text-gray-400 small">{{ getCategoryAuthors(selectedCategory).length }} authors writing in {{ selectedCategory }}</p>
-                        </div>
-                        
-                        <div class="row g-3">
-                            @for (author of getCategoryAuthors(selectedCategory); track author._id) {
-                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                    <app-author-item [author]="author" 
-                                                   template="extended"
-                                                   (onView)="viewAuthorProfile($event)"
-                                                   (onFollow)="handleFollow($event)"></app-author-item>
-                                </div>
-                            }
-                        </div>
+                         @if (selectedCategoryObj) {
+                             <div class="mb-3">
+                                 <h5 class="fw-bold">
+                                     {{ selectedCategoryObj.name }} Authors
+                                 </h5>
+                                 <p class="text-gray-400 small">{{ selectedCategoryObj.authorCount }} authors writing in {{ selectedCategoryObj.name }}</p>
+                             </div>
+                             
+                             <div class="row g-3">
+                                 @for (author of selectedCategoryObj.authors; track author) {
+                                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                         <app-author-item [author]="author" 
+                                                        template="extended"
+                                                        (onView)="viewAuthorProfile($event)"
+                                                        (onFollow)="handleFollow($event)"></app-author-item>
+                                     </div>
+                                 }
+                             </div>
+                         }
                     }
                 </div>
             }
     
             <!-- TRENDING AUTHORS -->
-            @if (!searchQuery && viewMode !== 'category') {
+            @if (!searchQuery() && viewMode() !== 'category') {
                 <div class="mt-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold m-0">
@@ -219,7 +223,7 @@
                     </div>
                     
                     <div class="d-flex flex-column gap-3">
-                        @for (author of trendingAuthors; track author._id; let idx = $index) {
+                        @for (author of trendingAuthors(); track author; let idx = $index) {
                             <div class="bg-secondary rounded-4 p-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <!-- Ranking badge -->
@@ -243,7 +247,7 @@
             }
     
             <!-- NEW AUTHORS -->
-            @if (!searchQuery && viewMode !== 'category') {
+            @if (!searchQuery() && viewMode() !== 'category') {
                 <div class="mt-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold m-0">
@@ -252,7 +256,7 @@
                     </div>
                     
                     <div class="row g-3">
-                        @for (author of newAuthors; track author._id) {
+                        @for (author of newAuthors(); track author._id) {
                             <div class="col-12 col-sm-6 col-md-4">
                                 <app-author-item [author]="author" 
                                                template="extended"
@@ -274,7 +278,7 @@
             }
     
             <!-- Empty State -->
-            @if (searchQuery && searchResults.length === 0) {
+            @if (searchQuery() && searchResults().length === 0) {
                 <div class="text-center py-5 mt-5">
                     <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
                         🔍
@@ -291,7 +295,6 @@
     
         <div style="height: 5rem;"></div>
     
-        <app-mobile-footer selected="none"></app-mobile-footer>
     </div>
 
 </div>

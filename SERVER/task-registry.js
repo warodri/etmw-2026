@@ -5,9 +5,13 @@ SubscriptionGenerateStripeUrl = require('./tasks/subscription_generate_stripe');
 SubscriptionGetMine = require('./tasks/subscription_get_mine')
 
 //
+//  CATEGORIES
+//
+const GetAllCategories = require("./tasks/category_get");
+
+//
 //  AUDIOBOOK
 //  
-const GetAllCategories = require("./tasks/category_get");
 const AudiobookAdd = require("./tasks/audiobook_add");
 const AudiobookCreateStripeCheckout = require("./tasks/audiobook_create_stripe_checkout");
 const AudiobookCheckPaymentStatus = require("./tasks/audiobook_check_payment_status");
@@ -56,7 +60,6 @@ const EditPromoCode = require('./tasks/admin_pormo_code_update');
 const GetAdminPromoCodes = require('./tasks/admin_pormo_code_get');
 const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const AdminAudiobookGetChapterAudio = require("./tasks/admin_audiobook_get_chapter_audio");
-
 
 //
 //  AUTHOR

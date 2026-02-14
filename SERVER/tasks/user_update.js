@@ -15,7 +15,7 @@ async function run(data, req, res) {
             connected,
             forceStatus,
             totalFollowers,
-            totlaFollowing,
+            totalFollowing,
             lastCheckTime,
             lastUnreadMessages,
         } = data;
@@ -42,7 +42,7 @@ async function run(data, req, res) {
         if (connected !== undefined) updateData.connected = connected;
         if (forceStatus !== undefined) updateData.forceStatus = forceStatus;
         if (totalFollowers !== undefined) updateData.totalFollowers = totalFollowers;
-        if (totlaFollowing !== undefined) updateData.totlaFollowing = totlaFollowing;
+        if (totalFollowing !== undefined) updateData.totalFollowing = totalFollowing;
         if (lastCheckTime !== undefined) updateData.lastCheckTime = lastCheckTime;
         if (lastUnreadMessages !== undefined) updateData.lastUnreadMessages = lastUnreadMessages;
 

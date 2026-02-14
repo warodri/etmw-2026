@@ -104,6 +104,10 @@ export class ScreenHome implements OnInit {
     gotoExploreAllAudiobooks() {
         this.router.navigate(['app/search'])
     }
+   
+    gotoSeeAllAuthors() {
+        this.router.navigate(['app/authors'])
+    }
 
 
 }

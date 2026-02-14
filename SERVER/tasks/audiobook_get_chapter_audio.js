@@ -35,36 +35,36 @@ async function run(data, req, res) {
         } 
 
         //  IS THIS AUDIOBOOK AVAILABE FOR THIS USER?
-        // const AudioBooksAvailable = require('../models/user_audiobooks_available');        
-        // const available = await AudioBooksAvailable.findOne({
-        //     userId,
-        //     audiobookId,
-        //     enabled: true
-        // })
-        // if (!available) {
-        //     return res.status(200).json({
-        //         success: false,
-        //         message: 'Audiobook not available for your account'
-        //     })
-        // }
+        const AudioBooksAvailable = require('../models/user_audiobooks_available');        
+        const available = await AudioBooksAvailable.findOne({
+            userId,
+            audiobookId,
+            enabled: true
+        })
+        if (!available) {
+            return res.status(200).json({
+                success: false,
+                message: 'Audiobook not available for your account'
+            })
+        }
 
         //  What chapter to search?
         const number = chapterNumber && chapterNumber > 0 ? chapterNumber : 1;
 
         //  IS THIS CHAPTER AVAILABLE FOR THE USER?
-        // const AudioBooksChapterAvailable = require('../models/user_chapter_available');        
-        // const chapterAvailable = await AudioBooksChapterAvailable.findOne({
-        //     userId,
-        //     audiobookId,
-        //     chapterNumber: number,
-        //     enabled: true
-        // })
-        // if (!chapterAvailable) {
-        //     return res.status(200).json({
-        //         success: false,
-        //         message: 'Chapter not available for your account'
-        //     })
-        // } 
+        const AudioBooksChapterAvailable = require('../models/user_chapter_available');        
+        const chapterAvailable = await AudioBooksChapterAvailable.findOne({
+            userId,
+            audiobookId,
+            chapterNumber: number,
+            enabled: true
+        })
+        if (!chapterAvailable) {
+            return res.status(200).json({
+                success: false,
+                message: 'Chapter not available for your account'
+            })
+        } 
 
         /*  Chapters: [{
                 chapter: Number,
