@@ -1,4 +1,3 @@
-@let myUserObj = myUser();
 @let pricesObj = prices();
 
 @if (pricesObj) {
@@ -27,11 +26,11 @@
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
-                        <span class="pricing-amount">{{ pricesObj.explorer }}</span>
+                        <span class="pricing-amount">{{ pricesObj.explorer.price }}</span>
                         <span class="pricing-period">/month</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>3 books</strong> per month
+                        <strong>{{ pricesObj.reader.booksPerMonth }} books</strong> per month
                     </div>
                     <ul class="pricing-features">
                         <li>
@@ -58,7 +57,7 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         We deliver 1 chapter of each book daily
                     </div>
-                    <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4">
+                    <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Explorer')">
                         Start listening
                     </button>
                 </div>
@@ -78,11 +77,11 @@
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
-                        <span class="pricing-amount">{{ pricesObj.reader }}</span>
+                        <span class="pricing-amount">{{ pricesObj.reader.price }}</span>
                         <span class="pricing-period">/month</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>6 books</strong> per month
+                        <strong>{{ pricesObj.reader.booksPerMonth }} books</strong> per month
                     </div>
                     <ul class="pricing-features">
                         <li>
@@ -109,7 +108,7 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         We deliver 1 chapter of each book daily
                     </div>
-                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4">
+                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Reader')">
                         Start listening
                     </button>
                 </div>
@@ -126,7 +125,7 @@
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
-                        <span class="pricing-amount">{{ pricesObj.unlimited }}</span>
+                        <span class="pricing-amount">{{ pricesObj.unlimited.price }}</span>
                         <span class="pricing-period">/month</span>
                     </div>
                     <div class="pricing-feature-main">
@@ -157,7 +156,7 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         You have access to all the chapters
                     </div>
-                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4">
+                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Unlimited')">
                         Go unlimited
                     </button>
                 </div>

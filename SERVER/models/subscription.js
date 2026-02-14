@@ -21,12 +21,12 @@ const model = new Schema({
         // null or 0 means unlimited
     },
 
-    periodStart: {
+    monthStart: {
         type: Number,
         index: true
     },
 
-    periodEnd: {
+    yearStart: {
         type: Number,
         index: true
     },
@@ -52,6 +52,26 @@ const model = new Schema({
     provider: {
         type: String,  // stripe, mercadopago, etc.
         default: 'stripe'
+    },
+    
+    /**
+     * PAYMENT INFO
+     */
+    paymentCompleted: {
+        type: Boolean,
+        default: false
+    },
+    paymentId: {
+        type: String,
+    },
+    paymentAmount: {
+        type: Number,
+    },
+    paymentDate: {
+        type: Number,
+    },
+    stripeSessionId: {
+        type: String,
     },
 
     enabled: {

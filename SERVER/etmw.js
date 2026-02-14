@@ -101,8 +101,15 @@ SharedMongoose.initMongoose( async () => {
      * STRIPE SUCCESS
      */
     app.get('/api/stripe-success', apiLimiter, async (req, res) => {
-        const StripeResult = require('./tasks/audiobook_stripe_result');
-        await StripeResult.handleStripeSuccess(req, res);
+        const { session_id, audiobook_id, user_id } = req.query;
+        if (audiobook_id) {
+            const StripeResult = require('./tasks/audiobook_stripe_result');
+            await StripeResult.handleStripeSuccess(req, res);
+        } else if (user_id) {
+            const StripeResult = require('./tasks/subscription_stripe_result');
+            await StripeResult.handleStripeSuccess(req, res);
+        }
+
     })
 
     //  Downloads the content of a file

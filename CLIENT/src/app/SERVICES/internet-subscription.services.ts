@@ -14,6 +14,16 @@ export class InternetSubscriptionService extends InternetService {
         super(httpClient)  // Pass to parent
     }   
 
+    subscriptionGetConfig(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'SubscriptionGetConfig',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
+
     subscriptionGetMine(callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
@@ -24,12 +34,14 @@ export class InternetSubscriptionService extends InternetService {
         }, callback);
     }
 
-    subscriptionGenerateStripeUrl(callback: any) {
+    subscriptionGenerateStripeUrl(plan: 'Unlimited' | 'Reader' | 'Explorer', region: string, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'SubscriptionGenerateStripeUrl',
             lang,
             data: {
+                plan,
+                region
             }
         }, callback);
     }

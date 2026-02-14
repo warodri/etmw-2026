@@ -1,8 +1,9 @@
 //
 //  SUBSCRIPTIONS
 //
+SubscriptionGetConfig = require('./tasks/subscription_get_config');
 SubscriptionGenerateStripeUrl = require('./tasks/subscription_generate_stripe');
-SubscriptionGetMine = require('./tasks/subscription_get_mine')
+SubscriptionGetMine = require('./tasks/subscription_get_mine');
 
 //
 //  CATEGORIES
@@ -75,6 +76,7 @@ const TasksRegistry = {
     UserGetListeningHistory,
     
     //  SUBSCRIPTIONS
+    SubscriptionGetConfig,
     SubscriptionGenerateStripeUrl,
     SubscriptionGetMine,
     

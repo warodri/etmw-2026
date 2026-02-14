@@ -3,6 +3,8 @@ import { UtilClass } from '../../../utils/utils';
 import { Router } from '@angular/router';
 import { UserModel } from '../../../models/user';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { InternetSubscriptionService } from '../../../SERVICES/internet-subscription.services';
+import { ToastService } from '../../../SERVICES/toast';
 
 @Component({
     selector: 'app-pricing',
@@ -15,29 +17,49 @@ export class Pricing implements OnInit {
     myUser = signal<UserModel | null>(null);
 
     selectedRegion = signal<'latam' | 'us' | 'uk' | 'global'>('global');
-    currency = signal<string>('€');
-    prices = signal<{ 
-        explorer: string, 
-        reader: string, 
-        unlimited: 
-        string 
-    } | null>({
-        explorer: '3.49',
-        reader: '4.99',
-        unlimited: '8.49'
-    });
+    currency = signal<string>('$');
+    prices = signal<{
+        unlimited: {
+            productId: string,
+            price: number,
+            booksPerMonth: number
+        },
+        reader: {
+            productId: string,
+            price: number,
+            booksPerMonth: number
+        },
+        explorer: {
+            productId: string,
+            price: number,
+            booksPerMonth: number
+        }
+    } | null>(null);
 
     //  Flags
     showLogin = signal<boolean>(false);
 
     constructor(
         private router: Router,
-        private iUser: InternetUserService
+        private iUser: InternetUserService,
+        private iSubscription: InternetSubscriptionService,
+        private toast: ToastService
     ) {}
 
     ngOnInit() {
-        this.loadMyUser(() => {
-            this.detectRegion();        
+        this.getSubscriptionConfig(() => {
+            this.loadMyUser(() => {
+                this.detectRegion();        
+            })
+        })
+    }
+
+    getSubscriptionConfig(callback: any) {
+        this.iSubscription.subscriptionGetConfig((response: any) => {
+            if (response && response.success) {
+                this.prices.set(response.config)
+                callback();
+            }
         })
     }
 
@@ -55,7 +77,7 @@ export class Pricing implements OnInit {
         const regionInfo = UtilClass.detectRegion();        
         if (regionInfo.region == 'latam') {
             this.selectedRegion.set('latam');
-            this.currency.set('$');
+            // this.currency.set('$');
             // this.prices.set({
             //     explorer: '3.49',
             //     reader: '4.99',
@@ -64,7 +86,7 @@ export class Pricing implements OnInit {
         }        
         else if (regionInfo.region == 'us') {
             this.selectedRegion.set('us');
-            this.currency.set('$');
+            // this.currency.set('$');
             // this.prices.set({
             //     explorer: '6.49',
             //     reader: '9.99',
@@ -73,7 +95,7 @@ export class Pricing implements OnInit {
         } 
         else if (regionInfo.region == 'uk') {
             this.selectedRegion.set('uk');
-            this.currency.set('£');
+            // this.currency.set('£');
             // this.prices.set({
             //     explorer: '6.49',
             //     reader: '9.99',
@@ -82,7 +104,7 @@ export class Pricing implements OnInit {
         } 
         else {
             this.selectedRegion.set('global');
-            this.currency.set('$');
+            // this.currency.set('$');
             // this.prices.set({
             //     explorer: '6.49',
             //     reader: '9.99',
@@ -93,6 +115,20 @@ export class Pricing implements OnInit {
 
     toggleShowLogin() {
         this.showLogin.set(!this.showLogin());
+    }
+
+    getStripeUrl(plan: 'Unlimited' | 'Reader' | 'Explorer') {
+        const selectedRegion = this.selectedRegion();
+        if (selectedRegion) {
+            this.iSubscription.subscriptionGenerateStripeUrl(plan, selectedRegion, (response: any) => {
+                if (response && response.success && response.checkoutUrl) {
+                    // Open Stripe 
+                    location.href = response.checkoutUrl;
+                } else {
+                    this.toast.show(this.toast.getMessageErrorUnexpected());
+                }
+            })
+        }
     }
     
 }
