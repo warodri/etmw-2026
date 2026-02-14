@@ -25,7 +25,8 @@ export class ScreenAuthors implements OnInit {
     filterCountry = signal<string>('');
     filterLanguage = signal<string>('');
 
-    categories = signal<CategoryModel[]>([])
+    categories = signal<CategoryModel[]>([]);
+    parentCategories = signal<CategoryModel[]>([]);
 
     featuredAuthors = signal<AuthorModel[]>([]);
     allAuthors = signal<AuthorModel[]>([]);
@@ -54,7 +55,8 @@ export class ScreenAuthors implements OnInit {
                     const parentId = typeof cat.parentId === 'string' ? cat.parentId : cat.parentId?._id;
                     return !parentId;
                 });
-                this.categories.set(topLevel);
+                this.categories.set(all);
+                this.parentCategories.set(topLevel);
             }
         })
     }
@@ -80,6 +82,13 @@ export class ScreenAuthors implements OnInit {
 
     setViewMode(mode: 'grid' | 'list' | 'category') {
         this.viewMode.set(mode);
+    }
+
+    getChildCategories(parentId: string): CategoryModel[] {
+        return this.categories().filter((cat) => {
+            const pid = typeof cat.parentId === 'string' ? cat.parentId : cat.parentId?._id;
+            return pid === parentId;
+        });
     }
 
     getCategoryIcon(categoryName: string): string {
@@ -198,7 +207,6 @@ export class ScreenAuthors implements OnInit {
     }
 
 }
-
 
 
 
