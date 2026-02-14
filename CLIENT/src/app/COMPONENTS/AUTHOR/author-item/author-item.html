@@ -198,8 +198,8 @@
                                 </span>
                             }
                         }
-                        @if (author.categories && author.categories.length > 0) {
-                            @for (category of author.categories.slice(0, 3); track category) {
+                        @if (getCategories().length > 0) {
+                            @for (category of getCategories().slice(0, 3); track category) {
                                 <span class="badge bg-primary px-3 py-2">
                                     {{ category }}
                                 </span>

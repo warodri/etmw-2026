@@ -1,4 +1,5 @@
 @let selectedCategoryObj = selectedCategory();
+@let hasMoreObj = hasMore();
 
 <div class="container-fluid">
 
@@ -58,6 +59,36 @@
                     <i class="bi bi-tag"></i> Categories
                 </button>
             </div>
+
+            @if (showFilters()) {
+                <div class="mt-3 bg-secondary rounded-4 p-3">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="small text-gray-400">Name</label>
+                            <input type="text" class="form-control bg-dark text-white border-0"
+                                   [(ngModel)]="filterPenName" placeholder="Author name">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="small text-gray-400">Country</label>
+                            <input type="text" class="form-control bg-dark text-white border-0"
+                                   [(ngModel)]="filterCountry" placeholder="e.g. US, UK, Argentina">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="small text-gray-400">Language</label>
+                            <input type="text" class="form-control bg-dark text-white border-0"
+                                   [(ngModel)]="filterLanguage" placeholder="e.g. en, es">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button class="btn btn-secondary rounded-pill px-4" (click)="clearFilters()">
+                            Clear
+                        </button>
+                        <button class="btn btn-primary rounded-pill px-4" (click)="applyFilters()">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
     
         <div class="px-4 pb-5">
@@ -76,6 +107,37 @@
                     </button>
                 </div>
             }
+
+            <!-- SEARCH RESULTS (always on top) -->
+            @if (searchQuery() && searchResults().length > 0) {
+                <div class="mt-4">
+                    <div class="mb-3">
+                        <span class="text-gray-400">Results for</span>
+                        <span class="fw-bold text-primary">"{{ searchQuery() }}"</span>
+                        <span class="badge bg-slate-800 ms-2">{{ searchResults().length }} found</span>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                        @for (author of searchResults(); track author._id) {
+                            <app-author-item [author]="author"
+                                           template="simple"
+                                           (onView)="viewAuthorProfile($event)"
+                                           (onFollow)="handleFollow($event)"></app-author-item>
+                        }
+                    </div>
+                </div>
+            }
+            @if (searchQuery() && searchResults().length === 0) {
+                <div class="text-center py-5 mt-4">
+                    <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
+                        🔍
+                    </div>
+                    <h5 class="text-gray-400">No authors found</h5>
+                    <p class="text-gray-400 small">Try adjusting your search or filters</p>
+                    <button class="btn btn-primary rounded-pill px-4 mt-3" (click)="clearSearch()">
+                        Clear Search
+                    </button>
+                </div>
+            }
     
             <!-- FEATURED AUTHORS SECTION -->
             @if (!searchQuery() && viewMode() !== 'category') {
@@ -89,10 +151,12 @@
                     <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
                         @for (author of featuredAuthors(); track author) {
                             <div class="flex-shrink-0" style="width: 260px;">
-                                <app-author-item [author]="author" 
-                                               template="extended"
-                                               (onView)="viewAuthorProfile($event)"
-                                               (onFollow)="handleFollow($event)"></app-author-item>
+                                <app-author-item 
+                                    [author]="author" 
+                                    template="extended"
+                                    (onView)="viewAuthorProfile($event)"
+                                    (onFollow)="handleFollow($event)"
+                                ></app-author-item>
                             </div>
                         }
                     </div>
@@ -106,10 +170,12 @@
                     <div class="row g-3">
                         @for (author of allAuthors(); track author) {
                             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                <app-author-item [author]="author" 
-                                               template="extended"
-                                               (onView)="viewAuthorProfile($event)"
-                                               (onFollow)="handleFollow($event)"></app-author-item>
+                                <app-author-item 
+                                    [author]="author" 
+                                    template="extended"
+                                    (onView)="viewAuthorProfile($event)"
+                                    (onFollow)="handleFollow($event)"
+                                ></app-author-item>
                             </div>
                         }
                     </div>
@@ -117,7 +183,7 @@
             }
     
             <!-- LIST VIEW -->
-            @if (viewMode() === 'list') {
+            @if (viewMode() === 'list' && !(searchQuery() && searchResults().length > 0)) {
                 <div class="mt-4">
                     @if (searchQuery()) {
                         <div class="mb-3">
@@ -129,10 +195,12 @@
                     
                     <div class="d-flex flex-column gap-3">
                         @for (author of searchQuery() ? searchResults() : allAuthors(); track author._id) {
-                            <app-author-item [author]="author" 
-                                           template="simple"
-                                           (onView)="viewAuthorProfile($event)"
-                                           (onFollow)="handleFollow($event)"></app-author-item>
+                            <app-author-item 
+                                [author]="author" 
+                                template="simple"
+                                (onView)="viewAuthorProfile($event)"
+                                (onFollow)="handleFollow($event)"
+                            ></app-author-item>
                         }
                     </div>
                 </div>
@@ -143,7 +211,7 @@
                 <div class="mt-4">
                     
                     <!-- Category Navigation Tabs -->
-                    <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4">
+                    <div class="d-flex gap-2 overflow-x-auto pb-3 mb-4 hide-x-scrollbar">
                         <button class="btn rounded-pill flex-shrink-0"
                                 [class.btn-primary]="!selectedCategoryObj"
                                 [class.btn-secondary]="selectedCategoryObj"
@@ -169,8 +237,7 @@
                                     <h5 class="fw-bold m-0">
                                         {{ category.icon }} {{ category.name }}
                                     </h5>
-                                    <button class="btn btn-sm btn-secondary rounded-pill px-3"
-                                            (click)="selectCategory(category)">
+                                    <button class="btn btn-sm btn-secondary rounded-pill px-3" (click)="selectCategory(category)">
                                         View All <i class="bi bi-chevron-right"></i>
                                     </button>
                                 </div>
@@ -179,10 +246,12 @@
                                 <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
                                     @for (author of category.authors; track author) {
                                         <div class="flex-shrink-0" style="width: 260px;">
-                                            <app-author-item [author]="author" 
-                                                           template="extended"
-                                                           (onView)="viewAuthorProfile($event)"
-                                                           (onFollow)="handleFollow($event)"></app-author-item>
+                                            <app-author-item 
+                                                [author]="author" 
+                                                template="extended"
+                                                (onView)="viewAuthorProfile($event)"
+                                                (onFollow)="handleFollow($event)"
+                                            ></app-author-item>
                                         </div>
                                     }
                                 </div>
@@ -195,16 +264,20 @@
                                  <h5 class="fw-bold">
                                      {{ selectedCategoryObj.name }} Authors
                                  </h5>
-                                 <p class="text-gray-400 small">{{ selectedCategoryObj.authorCount }} authors writing in {{ selectedCategoryObj.name }}</p>
+                                 <p class="text-gray-400 small">
+                                    {{ selectedCategoryObj.authorCount }} authors writing in {{ selectedCategoryObj.name }}
+                                </p>
                              </div>
                              
                              <div class="row g-3">
                                  @for (author of selectedCategoryObj.authors; track author) {
                                      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                         <app-author-item [author]="author" 
-                                                        template="extended"
-                                                        (onView)="viewAuthorProfile($event)"
-                                                        (onFollow)="handleFollow($event)"></app-author-item>
+                                         <app-author-item 
+                                            [author]="author" 
+                                            template="extended"
+                                            (onView)="viewAuthorProfile($event)"
+                                            (onFollow)="handleFollow($event)"
+                                        ></app-author-item>
                                      </div>
                                  }
                              </div>
@@ -234,10 +307,12 @@
                                     
                                     <!-- Author info -->
                                     <div class="flex-grow-1">
-                                        <app-author-item [author]="author" 
-                                                       template="simple"
-                                                       (onView)="viewAuthorProfile($event)"
-                                                       (onFollow)="handleFollow($event)"></app-author-item>
+                                        <app-author-item 
+                                            [author]="author" 
+                                            template="simple"
+                                            (onView)="viewAuthorProfile($event)"
+                                            (onFollow)="handleFollow($event)"
+                                        ></app-author-item>
                                     </div>
                                 </div>
                             </div>
@@ -258,10 +333,12 @@
                     <div class="row g-3">
                         @for (author of newAuthors(); track author._id) {
                             <div class="col-12 col-sm-6 col-md-4">
-                                <app-author-item [author]="author" 
-                                               template="extended"
-                                               (onView)="viewAuthorProfile($event)"
-                                               (onFollow)="handleFollow($event)"></app-author-item>
+                                <app-author-item 
+                                    [author]="author" 
+                                    template="extended" 
+                                    (onView)="viewAuthorProfile($event)" 
+                                    (onFollow)="handleFollow($event)"
+                                ></app-author-item>
                             </div>
                         }
                     </div>
@@ -269,7 +346,7 @@
             }
     
             <!-- Load More -->
-            @if (hasMore) {
+            @if (hasMoreObj) {
                 <div class="text-center mt-5">
                     <button class="btn btn-secondary rounded-pill px-5 py-3" (click)="loadMore()">
                         <i class="bi bi-arrow-down-circle"></i> Load More Authors
@@ -278,18 +355,7 @@
             }
     
             <!-- Empty State -->
-            @if (searchQuery() && searchResults().length === 0) {
-                <div class="text-center py-5 mt-5">
-                    <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
-                        🔍
-                    </div>
-                    <h5 class="text-gray-400">No authors found</h5>
-                    <p class="text-gray-400 small">Try adjusting your search or filters</p>
-                    <button class="btn btn-primary rounded-pill px-4 mt-3" (click)="clearSearch()">
-                        Clear Search
-                    </button>
-                </div>
-            }
+            
     
         </div>
     

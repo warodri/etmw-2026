@@ -122,6 +122,11 @@ export class AuthorItem implements OnInit {
         return a?.languages || a?.userId?.languages || [];
     }
 
+    getCategories(): string[] {
+        const a: any = this.author;
+        return a?.categories || a?.userId?.categories || [];
+    }
+
     getTotalAudiobooks(): number {
         const a: any = this.author;
         return a?.totalAudiobooks || 0;

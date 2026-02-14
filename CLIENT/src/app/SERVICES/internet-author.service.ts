@@ -26,6 +26,23 @@ export class InternetAuthorService extends InternetService {
         }, callback);
     }
 
+    findAuthors(penName: string, country: string, language: string, limit: number, skip: number,  callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
+            action: 'FindAuthor',
+            lang,
+            data: {
+                showLatest: false,
+                penName, 
+                country, 
+                language, 
+                limit, 
+                skip
+            }
+        }, callback);
+    }
+    
+
 
 
 }

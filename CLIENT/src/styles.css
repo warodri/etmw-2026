@@ -208,6 +208,17 @@ body {
     cursor: pointer;
 }
 
+/* Hide horizontal scrollbar while keeping scroll */
+.hide-x-scrollbar {
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.hide-x-scrollbar::-webkit-scrollbar {
+    height: 0;
+}
+
 /* ==============================================
    HERO SECTION
    ============================================== */
@@ -1491,4 +1502,3 @@ circle {
 }
 
 /** END AUDIOBOOK DETAIL **/
-
