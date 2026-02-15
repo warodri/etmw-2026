@@ -41,6 +41,7 @@ import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelle
 import { Pricing } from './COMPONENTS/SYSTEM/pricing/pricing';
 import { ContinueListening } from './COMPONENTS/ITEMS/continue-listening/continue-listening';
 import { CategoryWithAudiobooks } from './COMPONENTS/ITEMS/category-with-audiobooks/category-with-audiobooks';
+import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 
 @NgModule({
     declarations: [
@@ -76,7 +77,8 @@ import { CategoryWithAudiobooks } from './COMPONENTS/ITEMS/category-with-audiobo
         ScreenPaymentCencelled,
         Pricing,
         ContinueListening,
-        CategoryWithAudiobooks
+        CategoryWithAudiobooks,
+        ScreenTutorials
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

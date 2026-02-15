@@ -27,4 +27,8 @@ export class ScreenPaymentCencelled implements OnInit {
     browsePlans() {
         this.router.navigate(['/pricing']);
     }
+
+    goApp() {
+        this.router.navigate(['app']);
+    }
 }

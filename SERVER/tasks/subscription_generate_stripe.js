@@ -107,7 +107,7 @@ async function upsertSubscriptionPayment(userId, plan, region, sessionId, advanc
         enabled: true
     })
     const now = new Date();
-    const period = getPeriodStartEnd(now, !!advanceMonth);
+    const monthYear = getMonthYearStart(now, !!advanceMonth);
 
     if (!existing) {
         //  Create a subscription
@@ -117,11 +117,11 @@ async function upsertSubscriptionPayment(userId, plan, region, sessionId, advanc
         const planInfo = getPlanInfo(plan);
         doc.booksPerMonth = planInfo.booksPerMonth;
         doc.price = planInfo.price;
-        doc.periodStart = period.start;
-        doc.periodEnd = period.end;
+        doc.monthStart = monthYear.month;
+        doc.yearStart = monthYear.year;
         doc.status = 'paused';
         doc.region = region;
-        doc.currency = config.STRIPE.currency || 'usd';
+        doc.currency = '$';
         doc.provider = 'stripe';
         if (sessionId) doc.stripeSessionId = sessionId;
         const newRecord = await doc.save();
@@ -133,10 +133,10 @@ async function upsertSubscriptionPayment(userId, plan, region, sessionId, advanc
         const planInfo = getPlanInfo(plan);
         existing.booksPerMonth = planInfo.booksPerMonth;
         existing.price = planInfo.price;
-        existing.periodStart = period.start;
-        existing.periodEnd = period.end;
+        existing.monthStart = monthYear.month;
+        existing.yearStart = monthYear.year;
         existing.region = region;
-        existing.currency = config.STRIPE.currency || 'usd';
+        existing.currency = '$';
         existing.provider = 'stripe';
         if (sessionId) existing.stripeSessionId = sessionId;
         await existing.save();
@@ -145,16 +145,16 @@ async function upsertSubscriptionPayment(userId, plan, region, sessionId, advanc
     }
 }
 
-function getPeriodStartEnd(now, advanceMonth) {
+function getMonthYearStart(now, advanceMonth) {
     const year = now.getFullYear();
-    const month = now.getMonth();
-    const targetMonth = advanceMonth ? month + 1 : month;
-    const start = new Date(year, targetMonth, 1, 0, 0, 0, 0);
-    const end = new Date(year, targetMonth + 1, 1, 0, 0, 0, 0);
-    return {
-        start: start.getTime(),
-        end: end.getTime()
-    };
+    const monthIndex = now.getMonth(); // 0-11
+    if (!advanceMonth) {
+        return { month: monthIndex + 1, year };
+    }
+    if (monthIndex === 11) {
+        return { month: 1, year: year + 1 };
+    }
+    return { month: monthIndex + 2, year };
 }
 
 function getPlanInfo(plan) {

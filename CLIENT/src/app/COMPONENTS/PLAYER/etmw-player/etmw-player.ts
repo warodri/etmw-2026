@@ -29,8 +29,9 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
         this.loadingAudio.set(true);
         this.getChapterAudio(chapterNumber, (success: boolean) => {
             this.loadingAudio.set(false);
+            this.audiobookNotAvailableForThisUser.set(success);
             if (!success) {
-                this.errorMessage.set('Unable to load this chapter')
+                this.errorMessage.set('Unable to load this chapter');
             } else {
                 this.errorMessage.set(null)
             }
@@ -48,6 +49,10 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
                 }
             })
         }
+    }
+
+    seeMore() {
+        this.getRouter().navigate(['app/page/chapter-not-available'])
     }
 
 }

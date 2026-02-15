@@ -14,6 +14,7 @@ import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/sc
 import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
 import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
+import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -32,6 +33,10 @@ const routes: Routes = [
     { path: 'payment/success', component: ScreenPaymentSuccess },
     { path: 'payment/failed', component: ScreenPaymentFailed },
     { path: 'payment/cancelled', component: ScreenPaymentCencelled },
+
+    //  Use this to show multiple tutorials or information text
+    { path: 'app/page/:section', component: ScreenTutorials },
+
 ];
 
 @NgModule({

@@ -3,12 +3,19 @@ const Schema = mongoose.Schema;
 
 const model = new Schema({
 
-    audiobookId: {
-        type: String,
-        required: true
-    },
     userId: {
         type: String,
+        index: true,
+        required: true
+    },
+    audiobookId: {
+        type: String,
+        index: true,
+        required: true
+    },
+    chapterNumber: {
+        type: Number,
+        index: true,
         required: true
     },
 
@@ -23,12 +30,9 @@ const model = new Schema({
     },
     updatedAt: {
         type: Number,
-        default: Date.now,
-        index: true
+        default: Date.now
     }
 
 });
 
-model.index({ published: 1, createdAt: -1 });
-
-module.exports = mongoose.model("etmw2026_audiobook_user_log", model);
+module.exports = mongoose.model("etmw2026_user_chapter_available", model);

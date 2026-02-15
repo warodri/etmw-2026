@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 })
 export class MobileFooter {
 
-    @Input() selected: 'home' | 'fav' | 'user' | 'none' = 'home'
+    @Input() selected: 'home' | 'fav' | 'user' | 'none' | null = null;
 
     constructor(
         private router: Router

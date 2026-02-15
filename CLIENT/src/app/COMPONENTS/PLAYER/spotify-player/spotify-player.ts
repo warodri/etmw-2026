@@ -49,5 +49,9 @@ export class SpotifyPlayer extends ScreenPlayer implements OnInit {
             })
         }
     }
+
+    seeMore() {
+        this.getRouter().navigate(['app/page/chapter-not-available'])
+    }
     
 }

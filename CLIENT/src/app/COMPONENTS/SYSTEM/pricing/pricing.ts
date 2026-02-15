@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, signal } from '@angular/core';
 import { UtilClass } from '../../../utils/utils';
 import { Router } from '@angular/router';
 import { UserModel } from '../../../models/user';
@@ -14,6 +14,8 @@ import { ToastService } from '../../../SERVICES/toast';
 })
 export class Pricing implements OnInit {
 
+    @Input() mainTitle = 'Choose Your Plan';
+    
     myUser = signal<UserModel | null>(null);
 
     selectedRegion = signal<'latam' | 'us' | 'uk' | 'global'>('global');
@@ -56,8 +58,10 @@ export class Pricing implements OnInit {
 
     getSubscriptionConfig(callback: any) {
         this.iSubscription.subscriptionGetConfig((response: any) => {
+            console.log('subscriptionGetConfig', response);
             if (response && response.success) {
                 this.prices.set(response.config)
+                console.log('this.prices', this.prices())
                 callback();
             }
         })

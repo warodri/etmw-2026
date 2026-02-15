@@ -28,4 +28,8 @@ export class ScreenPaymentFailed implements OnInit {
     goHome() {
         this.router.navigate(['/']);
     }
+
+    goApp() {
+        this.router.navigate(['app']);
+    }
 }

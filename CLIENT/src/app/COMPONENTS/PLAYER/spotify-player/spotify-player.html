@@ -73,6 +73,16 @@
                 </button>
             </div>
 
+            <!-- If this book is not purchased, it will appear here -->
+            @if (!audiobookNotAvailableForThisUser()) {
+                <div class="mt-4 mb-4 pt-3 pb-3 rounded-4 bg-danger text-light text-center">
+                    You can't play this chapter now &nbsp; 
+                    <button class="btn btn-sm btn-outline-light rounded-pill" (click)="seeMore()">
+                        See more
+                    </button>
+                </div>
+            }
+
             <!-- 
                 List of chapters
             -->

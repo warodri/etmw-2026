@@ -1,3 +1,5 @@
+const { isChapterAvailable, logAccessToChapter } = require('../workers/subscription');
+
 /**
  * THIS IS FOR USERS ONLY
  * USERS ASK FOR AN AUDIO. WE RUN ALL THE VALIDATIONS.
@@ -32,39 +34,19 @@ async function run(data, req, res) {
                 success: false,
                 message: 'Invalid Audiobook'
             })
-        } 
-
-        //  IS THIS AUDIOBOOK AVAILABE FOR THIS USER?
-        const AudioBooksAvailable = require('../models/user_audiobooks_available');        
-        const available = await AudioBooksAvailable.findOne({
-            userId,
-            audiobookId,
-            enabled: true
-        })
-        if (!available) {
-            return res.status(200).json({
-                success: false,
-                message: 'Audiobook not available for your account'
-            })
         }
 
         //  What chapter to search?
         const number = chapterNumber && chapterNumber > 0 ? chapterNumber : 1;
 
-        //  IS THIS CHAPTER AVAILABLE FOR THE USER?
-        const AudioBooksChapterAvailable = require('../models/user_chapter_available');        
-        const chapterAvailable = await AudioBooksChapterAvailable.findOne({
-            userId,
-            audiobookId,
-            chapterNumber: number,
-            enabled: true
-        })
-        if (!chapterAvailable) {
+        //  Is chapter available for this user?
+        const isAvailable = await isChapterAvailable(userId, audiobookId, number);
+        if (!isAvailable) {
             return res.status(200).json({
                 success: false,
-                message: 'Chapter not available for your account'
+                message: 'Chapter not available'
             })
-        } 
+        }
 
         /*  Chapters: [{
                 chapter: Number,
@@ -80,45 +62,8 @@ async function run(data, req, res) {
             })
         }
 
-        const AudiobookChapterLog = require('../models/audiobook_chapter_log');
-
-        //  Log access to this Audiobook by the user
-        const AudiobookUserLog = require('../models/audiobook_user_log');
-        let log = await AudiobookUserLog.findOne({
-            userId,
-            audiobookId,
-            enabled: true
-        })
-        if (!log) {
-            //  Add new log
-            const doc = new AudiobookChapterLog();
-            doc.userId = userId;
-            doc.audiobookId = audiobookId;
-            doc.chapterNumber = number;
-            await doc.save();
-        } else {
-            log.updatedAt = Date.now();
-            await doc.save();
-        }
-
         //  Log the access to this chapter by the user
-        log = await AudiobookChapterLog.findOne({
-            userId,
-            audiobookId,
-            audioUrl: selectedChapter.url,
-            enabled: true
-        })
-        if (!log) {
-            //  Add new log
-            const doc = new AudiobookChapterLog();
-            doc.userId = userId;
-            doc.audiobookId = audiobookId;
-            doc.chapterNumber = number;
-            await doc.save();
-        } else {
-            log.updatedAt = Date.now();
-            await doc.save();
-        }
+        await logAccessToChapter(userId, audiobookId, selectedChapter.url, number);
         
         // Construct the file path
         const fs = require('fs');

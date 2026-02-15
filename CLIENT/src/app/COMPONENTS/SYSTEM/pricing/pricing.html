@@ -2,7 +2,9 @@
 
 @if (pricesObj) {
     <div class="text-center mb-5">
-        <h2 class="section-title">Choose Your Plan</h2>
+        <h2 class="section-title">
+            {{ mainTitle }}
+        </h2>
         <h5 class="mt-3 text-gray-400">
             No credits. No hidden catalogue. If a book exists on the platform, you can listen to it.
         </h5>
@@ -30,7 +32,7 @@
                         <span class="pricing-period">/month</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>{{ pricesObj.reader.booksPerMonth }} books</strong> per month
+                        <strong>{{ pricesObj.explorer.booksPerMonth }} books</strong> per month
                     </div>
                     <ul class="pricing-features">
                         <li>

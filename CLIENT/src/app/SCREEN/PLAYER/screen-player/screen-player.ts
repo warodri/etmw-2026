@@ -59,6 +59,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     //  Flags 
     loading = signal<boolean>(true);
     audioLoaded = signal<boolean>(false);
+    audiobookNotAvailableForThisUser = signal<boolean>(false);
 
     constructor(
         private router: Router,
@@ -340,4 +341,8 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         return this.iAudiobook;
     }
 
+    getRouter() {
+        return this.router;
+    }
+    
 }

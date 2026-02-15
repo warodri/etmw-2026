@@ -1,0 +1,65 @@
+@let sectionObj = section();
+
+<div class="container-fluid">
+    
+    <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
+        
+        <app-mobile-header></app-mobile-header>
+
+        @if (!sectionObj) {
+            
+            <div class="mt-5 text-center">
+                Loading...            
+            </div>
+    
+        } @else {
+
+            <!--
+                CHAPTER NOT AVAILABLE
+            -->
+            @if (sectionObj == CHAPTER_NOT_AVAILABLE) {
+                <div class="mt-5 text-center">
+                    <div class="fw-bold text-uppercase" style="font-size: 1.6rem;">
+                        Chapter Not Available Yet
+                    </div>
+                    <div class="mt-3 fw-bold" style="font-size: 1.1rem;">
+                        Your plan 
+                        <span class="text-primary">{{ mySubscription()?.plan | uppercase }}</span>
+                        unlocks new chapters daily.
+                    </div>
+                    <div class="mt-3 text-gray-400" style="font-size: 1.05rem; line-height: 1.7;">
+                        We give more books per month for a low price, and to keep it fair, 
+                        chapters are enabled one per day.
+                    </div>
+                    <div class="mt-3 fw-bold" style="font-size: 1.1rem;">
+                        Unlimited plan users get instant access to every chapter.
+                    </div>
+                    <div class="mt-4 d-flex flex-column gap-2 align-items-center">
+                        <button class="btn btn-primary rounded-pill px-5 py-3">
+                            Contact Support
+                        </button>
+                        <div class="small text-gray-400">
+                            If you think this is another issue, we’re here to help.
+                        </div>
+                    </div>
+                </div>
+                <!--
+                    Show my subscription
+                -->
+                @if (mySubscription()) {
+                    <div class="mt-5 pt-4 d-flex justify-content-center">
+                        <app-pricing
+                            mainTitle="Update your Plan"
+                        ></app-pricing>
+                    </div>
+                }
+            }
+
+        }
+    </div>
+</div>
+
+
+<div style="height:8rem"></div>
+
+<app-mobile-footer></app-mobile-footer>
