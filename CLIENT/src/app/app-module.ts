@@ -44,6 +44,7 @@ import { CategoryWithAudiobooks } from './COMPONENTS/ITEMS/category-with-audiobo
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 import { ContactForm } from './COMPONENTS/SYSTEM/contact-form/contact-form';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
+import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 
 @NgModule({
     declarations: [
@@ -82,7 +83,8 @@ import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/scr
         CategoryWithAudiobooks,
         ScreenTutorials,
         ContactForm,
-        ScreenContactSupport
+        ScreenContactSupport,
+        ScreenStories
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

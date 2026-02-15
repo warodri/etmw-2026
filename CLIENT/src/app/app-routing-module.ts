@@ -16,6 +16,7 @@ import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelle
 import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
+import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -40,6 +41,9 @@ const routes: Routes = [
 
     //  Contact support
     { path: 'app/contact-support', component: ScreenContactSupport },
+
+    //  Stories
+    { path: 'app/stories', component: ScreenStories },
 
 ];
 
