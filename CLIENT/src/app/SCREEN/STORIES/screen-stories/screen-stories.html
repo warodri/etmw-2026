@@ -23,7 +23,12 @@
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
                                     <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill">➡️ I want more!</button>
+                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">➡️ I want more!</button>
+                                    @if (story.hasResume) {
+                                        <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story.id)">
+                                            Continue
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -31,7 +36,7 @@
                         <!-- Slide 2: Audio preview -->
                         <div class="story-slide">
                             <img class="story-image" [src]="story.audioImage" [alt]="story.author">
-                            <div class="story-audio-bar" style="max-width: 45%;">
+                            <div class="story-audio-bar">
                                 <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(story.id)">
                                     <i class="bi" [class.bi-play-fill]="!story.isPlaying" [class.bi-pause-fill]="story.isPlaying"></i>
                                 </button>
@@ -54,7 +59,12 @@
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
                                     <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill">➡️ I want more!</button>
+                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">➡️ I want more!</button>
+                                    @if (story.hasResume) {
+                                        <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story.id)">
+                                            Continue
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         </div>

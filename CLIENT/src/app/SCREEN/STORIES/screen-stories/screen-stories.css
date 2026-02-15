@@ -5,9 +5,10 @@
     padding-bottom: 2rem;
 }
 
+
 .story-card {
     position: relative;
-    height: calc(100vh - 140px);
+    height: calc(100vh - 200px);
     margin: 16px 0;
     border-radius: 24px;
     overflow: hidden;
@@ -47,7 +48,7 @@
 }
 
 .story-overlay-compact {
-    padding-bottom: 90px;
+    padding-bottom: 35px;
     max-width: 55%;
 }
 
@@ -115,8 +116,8 @@
 
 .story-audio-bar {
     position: absolute;
-    top: 16px;
-    left: 16px;
+    top: 20px;
+    left: 81px;
     right: 16px;
     display: flex;
     align-items: center;
@@ -125,16 +126,16 @@
     background: rgba(15, 23, 42, 0.7);
     border-radius: 999px;
     backdrop-filter: blur(6px);
-    max-width: 45%;
+    max-width: 29%!important;
     overflow: hidden;
 }
 
 .story-audio-fab {
     position: absolute;
     left: 20px;
-    top: 96px;
-    width: 56px;
-    height: 56px;
+    top: 20px!important;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.95);
@@ -176,7 +177,7 @@
 
 .story-indicators {
     position: absolute;
-    top: 16px;
+    top: 15px;
     right: 16px;
     display: flex;
     gap: 6px;
@@ -198,7 +199,7 @@
 
 @media (max-width: 768px) {
     .story-card {
-        height: calc(100vh - 160px);
+        height: calc(100vh - 200px);
     }
     .story-quote {
         font-size: 1.1rem;

@@ -26,7 +26,9 @@ export class ScreenStories {
         isPlaying: boolean,
         isMuted: boolean,
         progress: number,
-        expanded: boolean
+        expanded: boolean,
+        hasResume: boolean,
+        resumeTime: number
     }>>([
         {
             id: 's1',
@@ -37,14 +39,16 @@ export class ScreenStories {
             subtitle: 'A 60‑second reflection',
             quote: '“Most people don’t want freedom. They want safety.”',
             body: 'The author argues that what we call freedom is often just comfort disguised as choice. Do you agree?',
-            audioText: 'Most people don’t want freedom. They want safety. The author argues that what we call freedom is often just comfort disguised as choice. We crave the feeling of possibility but resist the weight of responsibility. So we trade true freedom for curated options, and then call it peace.',
+            audioText: 'Most people don’t want freedom. They want safety. The author argues that what we call freedom is often just comfort disguised as choice. We crave the feeling of possibility but resist the weight of responsibility. So we trade true freedom for curated options, and then call it peace. Most people don’t want freedom. They want safety. The author argues that what we call freedom is often just comfort disguised as choice. We crave the feeling of possibility but resist the weight of responsibility. So we trade true freedom for curated options, and then call it peace.',
             prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
             audioUrl: 'https://actions.google.com/sounds/v1/ambiences/wind_whistling.ogg',
             slideIndex: 0,
             isPlaying: false,
             isMuted: false,
             progress: 0,
-            expanded: false
+            expanded: false,
+            hasResume: false,
+            resumeTime: 0
         },
         {
             id: 's2',
@@ -55,14 +59,16 @@ export class ScreenStories {
             subtitle: 'Micro‑essay',
             quote: '“We don’t fear change. We fear the unknown cost of it.”',
             body: 'This story explores why we delay decisions even when the path is obvious. What would you do?',
-            audioText: 'We don’t fear change. We fear the unknown cost of it. We hesitate because every new path contains invisible tradeoffs. So we wait, and we call it patience, while it’s really the price of uncertainty.',
+            audioText: 'We don’t fear change. We fear the unknown cost of it. We hesitate because every new path contains invisible tradeoffs. So we wait, and we call it patience, while it’s really the price of uncertainty. We don’t fear change. We fear the unknown cost of it. We hesitate because every new path contains invisible tradeoffs. So we wait, and we call it patience, while it’s really the price of uncertainty.',
             prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
             audioUrl: 'https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg',
             slideIndex: 0,
             isPlaying: false,
             isMuted: false,
             progress: 0,
-            expanded: false
+            expanded: false,
+            hasResume: false,
+            resumeTime: 0
         },
         {
             id: 's3',
@@ -80,7 +86,9 @@ export class ScreenStories {
             isPlaying: false,
             isMuted: false,
             progress: 0,
-            expanded: false
+            expanded: false,
+            hasResume: false,
+            resumeTime: 0
         },
         {
             id: 's4',
@@ -98,7 +106,9 @@ export class ScreenStories {
             isPlaying: false,
             isMuted: false,
             progress: 0,
-            expanded: false
+            expanded: false,
+            hasResume: false,
+            resumeTime: 0
         }
     ]);
 
@@ -107,10 +117,16 @@ export class ScreenStories {
     private touchStoryId: string | null = null;
     private observer: IntersectionObserver | null = null;
     private audioMap = new Map<string, HTMLAudioElement>();
+    private storageKey = 'etmw_last_story_id';
+    private muteKey = 'etmw_story_muted';
 
     ngAfterViewInit(): void {
         this.setupObserver();
         this.storyItems.changes.subscribe(() => this.setupObserver());
+        setTimeout(() => {
+            this.loadResumeStates();
+            this.loadMuteState();
+        }, 0);
     }
 
     ngOnDestroy(): void {
@@ -156,6 +172,13 @@ export class ScreenStories {
 
     setSlide(storyId: string, index: number) {
         this.updateStory(storyId, { slideIndex: index });
+        if (index === 1) {
+            this.autoPlayIfAllowed(storyId);
+        }
+    }
+
+    showMore(storyId: string) {
+        this.setSlide(storyId, 1);
     }
 
     toggleExpand(storyId: string) {
@@ -191,6 +214,12 @@ export class ScreenStories {
         const next = !story.isMuted;
         audio.muted = next;
         this.updateStory(storyId, { isMuted: next });
+        this.persistMuteState(next);
+        if (next && story.isPlaying) {
+            // If user mutes, stop autoplay logic
+            audio.pause();
+            this.updateStory(storyId, { isPlaying: false });
+        }
     }
 
     private getStory(id: string) {
@@ -208,12 +237,15 @@ export class ScreenStories {
         if (!audio) {
             audio = new Audio(url);
             audio.preload = 'auto';
+            audio.muted = this.getStoredMute();
             audio.addEventListener('timeupdate', () => {
                 const progress = audio!.duration ? (audio!.currentTime / audio!.duration) * 100 : 0;
                 this.updateStory(id, { progress });
+                this.storeResume(id, audio!.currentTime, audio!.duration || 0);
             });
             audio.addEventListener('ended', () => {
                 this.updateStory(id, { isPlaying: false, progress: 0 });
+                this.storeResume(id, 0, audio!.duration || 0, true);
             });
             this.audioMap.set(id, audio);
         }
@@ -237,12 +269,139 @@ export class ScreenStories {
                 const el = entry.target as HTMLElement;
                 const storyId = el.dataset['storyId'];
                 if (!storyId) return;
-                if (!entry.isIntersecting || entry.intersectionRatio < 0.6) {
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                    this.persistStoryPosition(storyId);
+                } else {
                     this.stopAllAudio();
                 }
             });
         }, { threshold: [0, 0.6, 1] });
 
         this.storyItems?.forEach((ref) => this.observer?.observe(ref.nativeElement));
+    }
+
+    private persistStoryPosition(storyId: string) {
+        try {
+            localStorage.setItem(this.storageKey, storyId);
+        } catch (ex) {
+            // ignore storage errors
+        }
+    }
+
+    continueStory(storyId: string) {
+        const story = this.getStory(storyId);
+        if (!story) return;
+        const audio = this.getAudio(storyId, story.audioUrl);
+        const resume = this.getStoredResume(storyId);
+        if (!resume) return;
+
+        const seek = () => {
+            try {
+                audio.currentTime = Math.max(0, Math.min(audio.duration || resume.duration || 0, resume.time));
+            } catch (ex) {
+                // ignore
+            }
+            this.stopAllAudio(storyId);
+            audio.play().then(() => {
+                this.updateStory(storyId, { isPlaying: true });
+            }).catch(() => {
+                this.updateStory(storyId, { isPlaying: false });
+            });
+        };
+
+        if (audio.readyState >= 1) {
+            seek();
+        } else {
+            audio.addEventListener('loadedmetadata', () => seek(), { once: true });
+            audio.load();
+        }
+    }
+
+    private scrollToStoredStory() {
+        try {
+            const id = localStorage.getItem(this.storageKey);
+            if (!id) return;
+            const el = this.storyItems.find((ref) => ref.nativeElement?.dataset?.storyId === id);
+            if (el) {
+                el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (ex) {
+            // ignore storage errors
+        }
+    }
+
+    private loadResumeStates() {
+        this.stories.update((list) =>
+            list.map((s) => {
+                const resume = this.getStoredResume(s.id);
+                return resume ? { ...s, hasResume: true, resumeTime: resume.time } : s;
+            })
+        );
+    }
+
+    private loadMuteState() {
+        const muted = this.getStoredMute();
+        this.stories.update((list) =>
+            list.map((s) => ({ ...s, isMuted: muted }))
+        );
+    }
+
+    private persistMuteState(muted: boolean) {
+        try {
+            localStorage.setItem(this.muteKey, muted ? '1' : '0');
+        } catch (ex) {
+            // ignore
+        }
+    }
+
+    private getStoredMute(): boolean {
+        try {
+            return localStorage.getItem(this.muteKey) === '1';
+        } catch (ex) {
+            return false;
+        }
+    }
+
+    private getStoredResume(storyId: string): { time: number, duration: number } | null {
+        try {
+            const raw = localStorage.getItem(`etmw_story_resume_${storyId}`);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.time !== 'number') return null;
+            return {
+                time: parsed.time || 0,
+                duration: parsed.duration || 0
+            };
+        } catch (ex) {
+            return null;
+        }
+    }
+
+    private storeResume(storyId: string, time: number, duration: number, clear: boolean = false) {
+        try {
+            if (clear) {
+                localStorage.removeItem(`etmw_story_resume_${storyId}`);
+                this.updateStory(storyId, { hasResume: false, resumeTime: 0 });
+                return;
+            }
+            if (!duration || time <= 0) return;
+            localStorage.setItem(`etmw_story_resume_${storyId}`, JSON.stringify({ time, duration }));
+            this.updateStory(storyId, { hasResume: true, resumeTime: time });
+        } catch (ex) {
+            // ignore
+        }
+    }
+
+    private autoPlayIfAllowed(storyId: string) {
+        const story = this.getStory(storyId);
+        if (!story || story.isMuted) return;
+        const audio = this.getAudio(storyId, story.audioUrl);
+        this.stopAllAudio(storyId);
+        audio.muted = story.isMuted;
+        audio.play().then(() => {
+            this.updateStory(storyId, { isPlaying: true });
+        }).catch(() => {
+            this.updateStory(storyId, { isPlaying: false });
+        });
     }
 }

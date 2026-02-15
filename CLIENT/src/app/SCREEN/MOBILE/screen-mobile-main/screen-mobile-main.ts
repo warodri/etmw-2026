@@ -45,4 +45,8 @@ export class ScreenMobileMain implements OnInit {
         this.router.navigate(['app/authors'])
     }
 
+    gotoStories() {
+        this.router.navigate(['app/stories'])
+    }
+
 }
