@@ -14,33 +14,7 @@ import { AuthorModel } from '../../models/author';
     styleUrl: './screen-home.css',
 })
 export class ScreenHome implements OnInit {
-
-    contactForm = signal({
-        name: '',
-        email: '',
-        userType: '',
-        subject: '',
-        message: ''
-    });
-    
-    categories = signal([{
-        label: 'Psychology',
-        emoji: '🧠'
-    }, {
-        label: 'Technology',
-        emoji: '💻'
-    }, {
-        label: 'Health',
-        emoji: '🍎'
-    }, {
-        label: 'Finance',
-        emoji: '💰'
-    }, {
-        label: 'Travel',
-        emoji: '✈️'
-    }])
-
-    
+        
     latestAudiobooks = signal<AudiobookModel[]>([])
     latestAuthors = signal<AuthorModel[]>([])
 

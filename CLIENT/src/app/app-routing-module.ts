@@ -15,6 +15,7 @@ import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/scre
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
 import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
+import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -36,6 +37,9 @@ const routes: Routes = [
 
     //  Use this to show multiple tutorials or information text
     { path: 'app/page/:section', component: ScreenTutorials },
+
+    //  Contact support
+    { path: 'app/contact-support', component: ScreenContactSupport },
 
 ];
 

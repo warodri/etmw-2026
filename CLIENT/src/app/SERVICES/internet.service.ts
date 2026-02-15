@@ -22,6 +22,36 @@ export class InternetService {
         this.internetCommon = new InternetCommon(this.httpClient);
     }
 
+    sendContactForm(
+        sector: 'website' | 'support',
+        payload: {
+            name: string,
+            email: string,
+            userType: string,
+            subject: string,
+            message: string,
+            issueType?: string,
+            platform?: string,
+            device?: string,
+            appVersion?: string,
+            audiobookId?: string,
+            chapterNumber?: string,
+            paymentId?: string
+        },
+        callback: any
+    ) {
+        const lang: string = LangUtils.detectLanguage();
+        const url = this.SERVER + '/' + (sector === 'support' ? this.APP_SECURE : this.APP);
+        this.internetCommon?.doPost(url, {
+            action: 'SendContactForm',
+            lang,
+            data: {
+                sector,
+                ...payload
+            }
+        }, callback);
+    }
+
     getAppConfig(callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {

@@ -42,6 +42,8 @@ import { Pricing } from './COMPONENTS/SYSTEM/pricing/pricing';
 import { ContinueListening } from './COMPONENTS/ITEMS/continue-listening/continue-listening';
 import { CategoryWithAudiobooks } from './COMPONENTS/ITEMS/category-with-audiobooks/category-with-audiobooks';
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
+import { ContactForm } from './COMPONENTS/SYSTEM/contact-form/contact-form';
+import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 
 @NgModule({
     declarations: [
@@ -78,7 +80,9 @@ import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutoria
         Pricing,
         ContinueListening,
         CategoryWithAudiobooks,
-        ScreenTutorials
+        ScreenTutorials,
+        ContactForm,
+        ScreenContactSupport
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [
