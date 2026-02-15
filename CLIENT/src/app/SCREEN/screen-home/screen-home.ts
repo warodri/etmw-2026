@@ -83,5 +83,8 @@ export class ScreenHome implements OnInit {
         this.router.navigate(['app/authors'])
     }
 
+    goTo(route: string) {
+        this.router.navigate(['app/page', route])
+    }
 
 }

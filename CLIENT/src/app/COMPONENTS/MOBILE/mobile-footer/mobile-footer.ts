@@ -19,4 +19,6 @@ export class MobileFooter {
         this.router.navigate(['app'])
     }
 
+
+
 }

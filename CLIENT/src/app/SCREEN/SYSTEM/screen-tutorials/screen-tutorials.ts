@@ -14,6 +14,8 @@ export class ScreenTutorials implements OnInit {
     section = signal<string | null>(null);
 
     CHAPTER_NOT_AVAILABLE = 'chapter-not-available';
+
+    //  T&C and legl
     LISTENER_TOS = 'listener-tos';
     AUTHOR_AGREEMENT = 'author-agreement';
     GDPR = 'privacy';
