@@ -45,6 +45,8 @@ import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutoria
 import { ContactForm } from './COMPONENTS/SYSTEM/contact-form/contact-form';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
+import { Authors } from './COMPONENTS/AUTHOR/authors/authors';
+import { Categories } from './COMPONENTS/ITEMS/categories/categories';
 
 @NgModule({
     declarations: [
@@ -84,7 +86,9 @@ import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
         ScreenTutorials,
         ContactForm,
         ScreenContactSupport,
-        ScreenStories
+        ScreenStories,
+        Authors,
+        Categories
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

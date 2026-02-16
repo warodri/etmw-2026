@@ -19,11 +19,15 @@
                                 <div class="story-title">{{ story.title }}</div>
                                 <div class="story-subtitle">{{ story.subtitle }}</div>
                                 <div class="story-quote">{{ story.quote }}</div>
-                                <div class="story-body">{{ story.body }}</div>
+                                <div class="story-body"
+                                     [class.expanded]="story.expanded"
+                                     (click)="toggleExpand(story.id)">
+                                    {{ story.body }}
+                                </div>
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
                                     <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">➡️ I want more!</button>
+                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">See More</button>
                                     @if (story.hasResume) {
                                         <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story.id)">
                                             Continue

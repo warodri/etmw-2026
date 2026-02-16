@@ -16,7 +16,6 @@ import { AuthorModel } from '../../models/author';
 export class ScreenHome implements OnInit {
         
     latestAudiobooks = signal<AudiobookModel[]>([])
-    latestAuthors = signal<AuthorModel[]>([])
 
     constructor(
         private router: Router,
@@ -27,7 +26,6 @@ export class ScreenHome implements OnInit {
     ngOnInit() {
         this.getLatest();
         this.detectRegion();
-        this.getLatestAuthors();
     }
 
     getLatest() {
@@ -39,29 +37,15 @@ export class ScreenHome implements OnInit {
         })
     }
 
-    getLatestAuthors() {
-        this.iAuthor.getLatestAuthors((response: any) => {
-            console.log('getLatestAuthors', response);
-            if (response && response.success) {
-                this.latestAuthors.set(response.authors)
-            }
-        })
-    }
-
+    /**
+     * For now we do nothing with the region
+     */
     private detectRegion() {
         const regionInfo = UtilClass.detectRegion();        
-        if (regionInfo.region == 'latam') {
-
-        }        
-        else if (regionInfo.region == 'us') {
-
-        } 
-        else if (regionInfo.region == 'uk') {
-
-        } 
-        else {
-
-        }
+        if (regionInfo.region == 'latam') {}        
+        else if (regionInfo.region == 'us') {} 
+        else if (regionInfo.region == 'uk') {} 
+        else {}
     }
 
     scrollToId(id: string) {
