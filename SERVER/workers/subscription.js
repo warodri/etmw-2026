@@ -4,6 +4,15 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
     //  Validate
     if (!userId || !audiobookId || !chapterNumber) return false;
 
+    //  If this user is the owner, then return true
+    const Audiobook = require('../models/audiobook');
+    const ab = await Audiobook.findOne({
+        _id: audiobookId,
+        enabled: true
+    })
+    if (!ab) return false;
+    if (ab.userId == userId) return true;
+
     //  Get this user's subscription
     const Subscription = require('../models/subscription');
     const sub = await Subscription.findOne({
