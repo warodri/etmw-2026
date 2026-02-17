@@ -24,6 +24,14 @@
     transition: transform 0.35s ease;
 }
 
+.story-last-slide {
+    position:absolute!important; 
+    left:0!important; 
+    top:0!important; 
+    width:100%!important; 
+    height:100%!important; 
+    transform: translateX(-15%)!important;
+}
 .story-slide {
     position: relative;
     width: 100%;
@@ -68,6 +76,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.story-language {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .story-quote {
@@ -115,18 +131,13 @@
 }
 
 .story-audio-bar {
-    position: absolute;
-    top: 20px;
-    left: 81px;
-    right: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: rgba(15, 23, 42, 0.7);
+
     border-radius: 999px;
     backdrop-filter: blur(6px);
-    max-width: 29%!important;
     overflow: hidden;
 }
 
@@ -195,6 +206,36 @@
 
 .story-indicators .dot.active {
     background: var(--color-primary);
+}
+
+.story-slide-piece {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, rgba(59, 130, 246, 0.35), rgba(15, 23, 42, 1));
+    color: #f8fafc;
+}
+
+.story-piece {
+    max-width: 520px;
+    padding: 32px;
+    text-align: center;
+    color: inherit;
+    position: relative;
+    z-index: 1;
+}
+
+.story-piece-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #f8fafc;
+}
+
+.story-piece-text {
+    color: #e2e8f0;
+    font-size: 1rem;
+    margin-bottom: 16px;
 }
 
 @media (max-width: 768px) {

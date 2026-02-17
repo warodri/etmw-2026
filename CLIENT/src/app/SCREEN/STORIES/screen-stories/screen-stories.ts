@@ -1,4 +1,34 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, QueryList, ViewChildren, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, QueryList, ViewChildren, signal } from '@angular/core';
+
+type ChapterPiece = {
+    title: string,
+    quote: string,
+    readingText: string,
+    audioImage: string,
+    audioUrl: string | null,
+    slideIndex: number,
+    isPlaying: boolean,
+    isMuted: boolean,
+    progress: number,
+    expanded: boolean,
+    hasResume: boolean,
+    resumeTime: number
+};
+
+type Story = {
+    _id: string,
+    audiobookId: string,
+    chapterNumber: number,
+    totalChapters: number,
+    language: string,
+    chapterPieces: ChapterPiece[],
+    image: string,
+    author: string,
+    title: string,
+    subtitle: string,
+    quote: string,
+    slideIndex: number
+};
 
 @Component({
   selector: 'app-screen-stories',
@@ -10,105 +40,192 @@ export class ScreenStories {
 
     @ViewChildren('storyItem') storyItems!: QueryList<ElementRef>;
 
-    stories = signal<Array<{
-        id: string,
-        image: string,
-        audioImage: string,
-        author: string,
-        title: string,
-        subtitle: string,
-        quote: string,
-        body: string,
-        audioText: string,
-        prompt: string,
-        audioUrl: string,
-        slideIndex: number,
-        isPlaying: boolean,
-        isMuted: boolean,
-        progress: number,
-        expanded: boolean,
-        hasResume: boolean,
-        resumeTime: number
-    }>>([
+    stories = signal<Story[]>([
         {
-            id: 's1',
+            _id: '1',
+            audiobookId: '1',
+            chapterNumber: 2,    
+            totalChapters: 30,
+            language: 'en',
+            chapterPieces: [
+                { 
+                    title: 'Chapter 1 · Part A',
+                    quote: '“Most people don’t want freedom. They want safety.”',
+                    readingText: 'A quiet opening that sets the tone for what follows.',
+                    audioImage: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/wind_whistling.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                },
+                { 
+                    title: 'Chapter 1 · Part B',
+                    quote: '“Comfort disguised as choice.”',
+                    readingText: 'A small turn that hints at the larger conflict.',
+                    audioImage: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/wind_whistling.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                }
+            ],
             image: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=1200&h=1600&fit=crop',
-            audioImage: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=1600&fit=crop',
-            author: 'Maya Ortega',
+            author: 'Walter Rodriguez',
             title: 'Freedom & Safety',
             subtitle: 'A 60‑second reflection',
             quote: '“Most people don’t want freedom. They want safety.”',
-            body: 'The author argues that what we call freedom is often just comfort disguised as choice. Do you agree?',
-            audioText: 'Most people don’t want freedom. They want safety. The author argues that what we call freedom is often just comfort disguised as choice. We crave the feeling of possibility but resist the weight of responsibility. So we trade true freedom for curated options, and then call it peace. Most people don’t want freedom. They want safety. The author argues that what we call freedom is often just comfort disguised as choice. We crave the feeling of possibility but resist the weight of responsibility. So we trade true freedom for curated options, and then call it peace.',
-            prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
-            audioUrl: 'https://actions.google.com/sounds/v1/ambiences/wind_whistling.ogg',
-            slideIndex: 0,
-            isPlaying: false,
-            isMuted: false,
-            progress: 0,
-            expanded: false,
-            hasResume: false,
-            resumeTime: 0
+            slideIndex: 0
         },
         {
-            id: 's2',
+            _id: '2',
+            audiobookId: '1',
+            chapterNumber: 3,    
+            totalChapters: 30,
+            language: 'en',
+            chapterPieces: [
+                { 
+                    title: 'Chapter 2 · Part A',
+                    quote: '“We don’t fear change. We fear the unknown cost of it.”',
+                    readingText: 'A fork in the road reveals a hidden cost.',
+                    audioImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                },
+                { 
+                    title: 'Chapter 2 · Part B',
+                    quote: '“The price of uncertainty.”',
+                    readingText: 'The decision sharpens, and so does the tension.',
+                    audioImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                },
+                { 
+                    title: 'END',
+                    quote: '“The price of uncertainty.”',
+                    readingText: 'The decision sharpens, and so does the tension.',
+                    audioImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&h=1600&fit=crop',
+                    audioUrl: '',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                }
+            ],
             image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=1600&fit=crop',
-            audioImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&h=1600&fit=crop',
             author: 'Jonas Reed',
             title: 'The Cost of Change',
             subtitle: 'Micro‑essay',
             quote: '“We don’t fear change. We fear the unknown cost of it.”',
-            body: 'This story explores why we delay decisions even when the path is obvious. What would you do?',
-            audioText: 'We don’t fear change. We fear the unknown cost of it. We hesitate because every new path contains invisible tradeoffs. So we wait, and we call it patience, while it’s really the price of uncertainty. We don’t fear change. We fear the unknown cost of it. We hesitate because every new path contains invisible tradeoffs. So we wait, and we call it patience, while it’s really the price of uncertainty.',
-            prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
-            audioUrl: 'https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg',
-            slideIndex: 0,
-            isPlaying: false,
-            isMuted: false,
-            progress: 0,
-            expanded: false,
-            hasResume: false,
-            resumeTime: 0
+            slideIndex: 0
         },
         {
-            id: 's3',
+            _id: '3',
+            audiobookId: '1',
+            chapterNumber: 30,    
+            totalChapters: 30,
+            language: 'en',
+            chapterPieces: [
+                { 
+                    title: 'Chapter 30 · Part A',
+                    quote: '“Discipline is kindness to your future self.”',
+                    readingText: 'Small disciplines begin to compound.',
+                    audioImage: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/waves_on_beach.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                },
+                { 
+                    title: 'Chapter 30 · Part B',
+                    quote: '“Momentum builds where consistency lives.”',
+                    readingText: 'A last reflection before the close.',
+                    audioImage: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/waves_on_beach.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                }
+            ],
             image: 'https://images.unsplash.com/photo-1473181488821-2d23949a045a?w=1200&h=1600&fit=crop',
-            audioImage: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&h=1600&fit=crop',
             author: 'Aisha Noor',
             title: 'Discipline Is Kindness',
             subtitle: 'Daily note',
             quote: '“Discipline is kindness to your future self.”',
-            body: 'A short reflection on consistency and why tiny habits compound into life‑changing results.',
-            audioText: 'Discipline is kindness to your future self. Tiny habits feel invisible today, but they compound into tomorrow’s freedom. Consistency is less about intensity and more about showing up with patience.',
-            prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
-            audioUrl: 'https://actions.google.com/sounds/v1/ambiences/waves_on_beach.ogg',
-            slideIndex: 0,
-            isPlaying: false,
-            isMuted: false,
-            progress: 0,
-            expanded: false,
-            hasResume: false,
-            resumeTime: 0
+            slideIndex: 0
         },
         {
-            id: 's4',
+            _id: '4',
+            audiobookId: '1',
+            chapterNumber: 1,    
+            totalChapters: 30,
+            language: 'en',
+            chapterPieces: [
+                { 
+                    title: 'Chapter 1 · Part A',
+                    quote: '“Attention is the real currency.”',
+                    readingText: 'The final thread becomes clear.',
+                    audioImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/office_ambience.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                },
+                { 
+                    title: 'last',
+                    quote: '“Attention is the real currency.”',
+                    readingText: 'A last reflection before the close.',
+                    audioImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&h=1600&fit=crop',
+                    audioUrl: 'https://actions.google.com/sounds/v1/ambiences/office_ambience.ogg',
+                    slideIndex: 0,
+                    isPlaying: false,
+                    isMuted: false,
+                    progress: 0,
+                    expanded: false,
+                    hasResume: false,
+                    resumeTime: 0
+                }
+            ],
             image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=1200&h=1600&fit=crop',
-            audioImage: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&h=1600&fit=crop',
             author: 'Leo March',
-            title: 'Attention Currency',
+            title: 'Walter',
             subtitle: 'Short essay',
             quote: '“Attention is the real currency.”',
-            body: 'A quiet warning about the cost of constant notifications — and the freedom of focus.',
-            audioText: 'Attention is the real currency. Every notification is a tax on your focus. The freedom of focus returns when you choose what deserves your attention — and what doesn’t.',
-            prompt: 'Below: ❤️ Like 💬 Discuss ➡️ I want more!',
-            audioUrl: 'https://actions.google.com/sounds/v1/ambiences/office_ambience.ogg',
-            slideIndex: 0,
-            isPlaying: false,
-            isMuted: false,
-            progress: 0,
-            expanded: false,
-            hasResume: false,
-            resumeTime: 0
+            slideIndex: 0
         }
     ]);
 
@@ -119,6 +236,10 @@ export class ScreenStories {
     private audioMap = new Map<string, HTMLAudioElement>();
     private storageKey = 'etmw_last_story_id';
     private muteKey = 'etmw_story_muted';
+
+    constructor(
+        private cdr: ChangeDetectorRef
+    ) {}
 
     ngAfterViewInit(): void {
         this.setupObserver();
@@ -164,16 +285,21 @@ export class ScreenStories {
 
         if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
         if (dx < 0) {
-            this.setSlide(storyId, 1);
+            const story = this.getStory(storyId);
+            const maxIndex = story ? this.slideCount(story) - 1 : 1;
+            const next = Math.min(maxIndex, (story?.slideIndex || 0) + 1);
+            this.setSlide(storyId, next);
         } else {
-            this.setSlide(storyId, 0);
+            const story = this.getStory(storyId);
+            const prev = Math.max(0, (story?.slideIndex || 0) - 1);
+            this.setSlide(storyId, prev);
         }
     }
 
     setSlide(storyId: string, index: number) {
         this.updateStory(storyId, { slideIndex: index });
-        if (index === 1) {
-            this.autoPlayIfAllowed(storyId);
+        if (index >= 1) {
+            this.autoPlayIfAllowed(storyId, index - 1);
         }
     }
 
@@ -181,55 +307,169 @@ export class ScreenStories {
         this.setSlide(storyId, 1);
     }
 
-    toggleExpand(storyId: string) {
-        const story = this.getStory(storyId);
-        if (!story) return;
-        this.updateStory(storyId, { expanded: !story.expanded });
+    private buildMessagePiece(story: Pick<Story, 'chapterNumber' | 'totalChapters'>): ChapterPiece | null {
+        if (story.chapterNumber < story.totalChapters) {
+            return {
+                title: 'More to come',
+                quote: 'Stay tuned',
+                readingText: 'The story continues soon!',
+                audioImage: '',
+                audioUrl: '',
+                slideIndex: 0,
+                isPlaying: false,
+                isMuted: true,
+                progress: 0,
+                expanded: false,
+                hasResume: false,
+                resumeTime: 0
+            };
+        }
+        if (story.chapterNumber === story.totalChapters) {
+            return {
+                title: 'Thanks for enjoying the book',
+                quote: '',
+                readingText: 'If you liked it, make sure to check more.',
+                audioImage: '',
+                audioUrl: '',
+                slideIndex: 0,
+                isPlaying: false,
+                isMuted: true,
+                progress: 0,
+                expanded: false,
+                hasResume: false,
+                resumeTime: 0
+            };
+        }
+        return null;
     }
 
-    toggleAudio(storyId: string) {
+    displayPieces(story: Pick<Story, 'chapterPieces' | 'chapterNumber' | 'totalChapters'>): ChapterPiece[] {
+        const message = this.buildMessagePiece(story);
+        const a = message ? [...story.chapterPieces, message] : [...story.chapterPieces];
+        return a;
+    }
+
+    slideCount(story: Pick<Story, 'chapterPieces' | 'chapterNumber' | 'totalChapters'>): number {
+        return 1 + this.displayPieces(story).length;
+    }
+
+    slideDots(story: Pick<Story, 'chapterPieces' | 'chapterNumber' | 'totalChapters'>): number[] {
+        return Array.from({ length: this.slideCount(story) }, (_, i) => i);
+    }
+
+    toggleExpand(storyId: string, pieceIndex: number) {
         const story = this.getStory(storyId);
         if (!story) return;
-        const audio = this.getAudio(storyId, story.audioUrl);
+        const piece = story.chapterPieces[pieceIndex];
+        if (!piece) return;
+        this.updatePiece(storyId, pieceIndex, { expanded: !piece.expanded });
+    }
 
-        if (story.isPlaying) {
+    toggleAudio(storyId: string, pieceIndex: number) {
+        const story = this.getStory(storyId);
+        if (!story) return;
+        const piece = story.chapterPieces[pieceIndex];
+        if (!piece) return;
+        if (!piece.audioUrl) return;
+        const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
+
+        if (piece.isPlaying) {
             audio.pause();
-            this.updateStory(storyId, { isPlaying: false });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
             return;
         }
 
-        this.stopAllAudio(storyId);
-        audio.muted = story.isMuted;
+        this.stopAllAudio(this.audioKey(storyId, pieceIndex));
+        audio.muted = piece.isMuted;
         audio.play().then(() => {
-            this.updateStory(storyId, { isPlaying: true });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: true });
         }).catch(() => {
-            this.updateStory(storyId, { isPlaying: false });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
         });
     }
 
-    toggleMute(storyId: string) {
+    toggleMute(storyId: string, pieceIndex: number) {
         const story = this.getStory(storyId);
         if (!story) return;
-        const audio = this.getAudio(storyId, story.audioUrl);
-        const next = !story.isMuted;
+        const piece = story.chapterPieces[pieceIndex];
+        if (!piece) return;
+        if (!piece.audioUrl) return;
+        const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
+        const next = !piece.isMuted;
         audio.muted = next;
-        this.updateStory(storyId, { isMuted: next });
+        this.updatePiece(storyId, pieceIndex, { isMuted: next });
         this.persistMuteState(next);
-        if (next && story.isPlaying) {
+        if (next && piece.isPlaying) {
             // If user mutes, stop autoplay logic
             audio.pause();
-            this.updateStory(storyId, { isPlaying: false });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
         }
     }
 
     private getStory(id: string) {
-        return this.stories().find((s) => s.id === id) || null;
+        return this.stories().find((s) => s._id === id) || null;
+    }
+
+    languageLabel(code: string): string {
+        if (!code) return 'Language: Unknown';
+        const base = code.toLowerCase().split(/[-_]/)[0];
+        const labels: Record<string, string> = {
+            en: 'English',
+            es: 'Spanish',
+            fr: 'French',
+            de: 'German',
+            it: 'Italian',
+            pt: 'Portuguese',
+            nl: 'Dutch',
+            sv: 'Swedish',
+            no: 'Norwegian',
+            da: 'Danish',
+            fi: 'Finnish',
+            pl: 'Polish',
+            cs: 'Czech',
+            hu: 'Hungarian',
+            ro: 'Romanian',
+            el: 'Greek',
+            tr: 'Turkish',
+            ru: 'Russian',
+            uk: 'Ukrainian',
+            ar: 'Arabic',
+            he: 'Hebrew',
+            hi: 'Hindi',
+            bn: 'Bengali',
+            ur: 'Urdu',
+            th: 'Thai',
+            vi: 'Vietnamese',
+            id: 'Indonesian',
+            ms: 'Malay',
+            zh: 'Chinese',
+            ja: 'Japanese',
+            ko: 'Korean'
+        };
+        const label = labels[base];
+        return label ? `Language: ${label}` : `Language: ${code.toUpperCase()}`;
     }
 
     private updateStory(id: string, patch: Partial<any>) {
         this.stories.update((list) =>
-            list.map((s) => s.id === id ? { ...s, ...patch } : s)
+            list.map((s) => s._id === id ? { ...s, ...patch } : s)
         );
+    }
+
+    private updatePiece(storyId: string, pieceIndex: number, patch: Partial<any>) {
+        this.stories.update((list) =>
+            list.map((s) => {
+                if (s._id !== storyId) return s;
+                return {
+                    ...s,
+                    chapterPieces: s.chapterPieces.map((p, i) => i === pieceIndex ? { ...p, ...patch } : p)
+                };
+            })
+        );
+    }
+
+    private audioKey(storyId: string, pieceIndex: number) {
+        return `${storyId}:${pieceIndex}`;
     }
 
     private getAudio(id: string, url: string) {
@@ -240,12 +480,20 @@ export class ScreenStories {
             audio.muted = this.getStoredMute();
             audio.addEventListener('timeupdate', () => {
                 const progress = audio!.duration ? (audio!.currentTime / audio!.duration) * 100 : 0;
-                this.updateStory(id, { progress });
-                this.storeResume(id, audio!.currentTime, audio!.duration || 0);
+                const [storyId, pieceIndexRaw] = id.split(':');
+                const pieceIndex = Number(pieceIndexRaw);
+                if (!Number.isNaN(pieceIndex)) {
+                    this.updatePiece(storyId, pieceIndex, { progress });
+                    this.storeResume(storyId, pieceIndex, audio!.currentTime, audio!.duration || 0);
+                }
             });
             audio.addEventListener('ended', () => {
-                this.updateStory(id, { isPlaying: false, progress: 0 });
-                this.storeResume(id, 0, audio!.duration || 0, true);
+                const [storyId, pieceIndexRaw] = id.split(':');
+                const pieceIndex = Number(pieceIndexRaw);
+                if (!Number.isNaN(pieceIndex)) {
+                    this.updatePiece(storyId, pieceIndex, { isPlaying: false, progress: 0 });
+                    this.storeResume(storyId, pieceIndex, 0, audio!.duration || 0, true);
+                }
             });
             this.audioMap.set(id, audio);
         }
@@ -257,8 +505,19 @@ export class ScreenStories {
             if (exceptId && id === exceptId) return;
             audio.pause();
         });
+        const except = exceptId ? exceptId.split(':') : null;
+        const exceptStoryId = except?.[0];
+        const exceptPieceIndex = except?.[1] ? Number(except[1]) : null;
         this.stories.update((list) =>
-            list.map((s) => exceptId && s.id === exceptId ? s : { ...s, isPlaying: false })
+            list.map((s) => ({
+                ...s,
+                chapterPieces: s.chapterPieces.map((p, i) => {
+                    if (exceptStoryId && s._id === exceptStoryId && exceptPieceIndex === i) {
+                        return p;
+                    }
+                    return { ...p, isPlaying: false };
+                })
+            }))
         );
     }
 
@@ -288,11 +547,14 @@ export class ScreenStories {
         }
     }
 
-    continueStory(storyId: string) {
+    continueStory(storyId: string, pieceIndex: number) {
         const story = this.getStory(storyId);
         if (!story) return;
-        const audio = this.getAudio(storyId, story.audioUrl);
-        const resume = this.getStoredResume(storyId);
+        const piece = story.chapterPieces[pieceIndex];
+        if (!piece) return;
+        if (!piece.audioUrl) return;
+        const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
+        const resume = this.getStoredResume(storyId, pieceIndex);
         if (!resume) return;
 
         const seek = () => {
@@ -301,11 +563,11 @@ export class ScreenStories {
             } catch (ex) {
                 // ignore
             }
-            this.stopAllAudio(storyId);
+            this.stopAllAudio(this.audioKey(storyId, pieceIndex));
             audio.play().then(() => {
-                this.updateStory(storyId, { isPlaying: true });
+                this.updatePiece(storyId, pieceIndex, { isPlaying: true });
             }).catch(() => {
-                this.updateStory(storyId, { isPlaying: false });
+                this.updatePiece(storyId, pieceIndex, { isPlaying: false });
             });
         };
 
@@ -332,17 +594,23 @@ export class ScreenStories {
 
     private loadResumeStates() {
         this.stories.update((list) =>
-            list.map((s) => {
-                const resume = this.getStoredResume(s.id);
-                return resume ? { ...s, hasResume: true, resumeTime: resume.time } : s;
-            })
+            list.map((s) => ({
+                ...s,
+                chapterPieces: s.chapterPieces.map((p, i) => {
+                    const resume = this.getStoredResume(s._id, i);
+                    return resume ? { ...p, hasResume: true, resumeTime: resume.time } : p;
+                })
+            }))
         );
     }
 
     private loadMuteState() {
         const muted = this.getStoredMute();
         this.stories.update((list) =>
-            list.map((s) => ({ ...s, isMuted: muted }))
+            list.map((s) => ({
+                ...s,
+                chapterPieces: s.chapterPieces.map((p) => ({ ...p, isMuted: muted }))
+            }))
         );
     }
 
@@ -362,9 +630,9 @@ export class ScreenStories {
         }
     }
 
-    private getStoredResume(storyId: string): { time: number, duration: number } | null {
+    private getStoredResume(storyId: string, pieceIndex: number): { time: number, duration: number } | null {
         try {
-            const raw = localStorage.getItem(`etmw_story_resume_${storyId}`);
+            const raw = localStorage.getItem(`etmw_story_resume_${storyId}_${pieceIndex}`);
             if (!raw) return null;
             const parsed = JSON.parse(raw);
             if (typeof parsed.time !== 'number') return null;
@@ -377,31 +645,35 @@ export class ScreenStories {
         }
     }
 
-    private storeResume(storyId: string, time: number, duration: number, clear: boolean = false) {
+    private storeResume(storyId: string, pieceIndex: number, time: number, duration: number, clear: boolean = false) {
         try {
             if (clear) {
-                localStorage.removeItem(`etmw_story_resume_${storyId}`);
-                this.updateStory(storyId, { hasResume: false, resumeTime: 0 });
+                localStorage.removeItem(`etmw_story_resume_${storyId}_${pieceIndex}`);
+                this.updatePiece(storyId, pieceIndex, { hasResume: false, resumeTime: 0 });
                 return;
             }
             if (!duration || time <= 0) return;
-            localStorage.setItem(`etmw_story_resume_${storyId}`, JSON.stringify({ time, duration }));
-            this.updateStory(storyId, { hasResume: true, resumeTime: time });
+            localStorage.setItem(`etmw_story_resume_${storyId}_${pieceIndex}`, JSON.stringify({ time, duration }));
+            this.updatePiece(storyId, pieceIndex, { hasResume: true, resumeTime: time });
         } catch (ex) {
             // ignore
         }
     }
 
-    private autoPlayIfAllowed(storyId: string) {
+    private autoPlayIfAllowed(storyId: string, pieceIndex: number) {
         const story = this.getStory(storyId);
-        if (!story || story.isMuted) return;
-        const audio = this.getAudio(storyId, story.audioUrl);
-        this.stopAllAudio(storyId);
-        audio.muted = story.isMuted;
+        if (!story) return;
+        const piece = story.chapterPieces[pieceIndex];
+        if (!piece || piece.isMuted) return;
+        if (!piece.audioUrl) return;
+        const key = this.audioKey(storyId, pieceIndex);
+        const audio = this.getAudio(key, piece.audioUrl);
+        this.stopAllAudio(key);
+        audio.muted = piece.isMuted;
         audio.play().then(() => {
-            this.updateStory(storyId, { isPlaying: true });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: true });
         }).catch(() => {
-            this.updateStory(storyId, { isPlaying: false });
+            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
         });
     }
 }

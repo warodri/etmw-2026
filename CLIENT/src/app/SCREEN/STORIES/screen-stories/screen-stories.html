@@ -5,78 +5,88 @@
         <app-mobile-header></app-mobile-header>
 
         <div class="stories-feed">
-            @for (story of stories(); track story.id) {
-                <div class="story-card" #storyItem [attr.data-story-id]="story.id"
-                    (touchstart)="onTouchStart($event, story.id)"
-                    (touchmove)="onTouchMove($event, story.id)"
-                    (touchend)="onTouchEnd($event, story.id)">
+            @for (story of stories(); track story._id) {
+                <div class="story-card" #storyItem [attr.data-story-id]="story._id"
+                    (touchstart)="onTouchStart($event, story._id)"
+                    (touchmove)="onTouchMove($event, story._id)"
+                    (touchend)="onTouchEnd($event, story._id)">
                     
-                    <div class="story-slider" [style.transform]="'translateX(' + (-story.slideIndex * 100) + '%)'">
+                    <div class="story-slider"
+                         [style.width.%]="slideCount(story) * 100"
+                         [style.transform]="'translateX(' + (-story.slideIndex * 100) + '%)'">
                         <!-- Slide 1: Image + quote -->
                         <div class="story-slide">
                             <img class="story-image" [src]="story.image" [alt]="story.author">
                             <div class="story-overlay" style="max-width: 50%;">
                                 <div class="story-title">{{ story.title }}</div>
                                 <div class="story-subtitle">{{ story.subtitle }}</div>
+                                <div class="story-language">{{ languageLabel(story.language) }}</div>
                                 <div class="story-quote">{{ story.quote }}</div>
-                                <div class="story-body"
-                                     [class.expanded]="story.expanded"
-                                     (click)="toggleExpand(story.id)">
-                                    {{ story.body }}
-                                </div>
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
                                     <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">See More</button>
-                                    @if (story.hasResume) {
-                                        <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story.id)">
-                                            Continue
-                                        </button>
-                                    }
+                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story._id)">See More</button>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Slide 2: Audio preview -->
-                        <div class="story-slide">
-                            <img class="story-image" [src]="story.audioImage" [alt]="story.author">
-                            <div class="story-audio-bar">
-                                <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(story.id)">
-                                    <i class="bi" [class.bi-play-fill]="!story.isPlaying" [class.bi-pause-fill]="story.isPlaying"></i>
-                                </button>
-                                <div class="story-audio-progress">
-                                    <div class="story-audio-progress-fill" [style.width.%]="story.progress"></div>
-                                </div>
-                            </div>
-                            <button class="story-audio-fab" (click)="toggleMute(story.id)">
-                                <i class="bi" [class.bi-volume-up]="!story.isMuted" [class.bi-volume-mute]="story.isMuted"></i>
-                            </button>
-                            <div class="story-overlay story-overlay-compact" style="max-width: 50%;">
-                                <div class="story-title">{{ story.title }}</div>
-                                <div class="story-subtitle">{{ story.subtitle }}</div>
-                                <div class="story-quote">{{ story.quote }}</div>
-                                <div class="story-body story-body-scroll"
-                                     [class.expanded]="story.expanded"
-                                     (click)="toggleExpand(story.id)">
-                                    {{ story.audioText }}
-                                </div>
-                                <div class="story-actions">
-                                    <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
-                                    <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story.id)">➡️ I want more!</button>
-                                    @if (story.hasResume) {
-                                        <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story.id)">
-                                            Continue
-                                        </button>
+                        @for (piece of displayPieces(story); track $index) {
+                            @if (!piece.audioUrl) {
+                                <div class="story-slide">
+                                    @if (story.chapterNumber == story.totalChapters) {
+                                        <img class="story-image" src="the-end.png" alt="The End!" style="max-width: 30%;">
+                                    } @else {
+                                        <img class="story-image" src="more-chapters-to-come.png" alt="More chapters to come!" style="max-width: 30%;">
+                                        <div class="story-overlay text-center" style="max-width: 26%; top:75%">
+                                            <h1 class="fw-bold text-primary">{{ piece.title }}</h1>
+                                            <h3>{{ piece.quote }}</h3>
+                                            <h3>{{ piece.readingText }}</h3>
+                                        </div>
                                     }
                                 </div>
-                            </div>
-                        </div>
+                            } @else {
+                                <div class="story-slide">
+                                    <img class="story-image" [src]="piece.audioImage" [alt]="story.author">
+                                    <button class="story-audio-fab" (click)="toggleMute(story._id, $index)">
+                                        <i class="bi" [class.bi-volume-up]="!piece.isMuted" [class.bi-volume-mute]="piece.isMuted"></i>
+                                    </button>
+                                    <div class="story-overlay story-overlay-compact" style="max-width: 26%;">
+                                        <div class="mb-3 story-audio-bar">
+                                            <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(story._id, $index)">
+                                                <i class="bi" [class.bi-play-fill]="!piece.isPlaying" [class.bi-pause-fill]="piece.isPlaying"></i>
+                                            </button>
+                                            <div class="story-audio-progress">
+                                                <div class="story-audio-progress-fill" [style.width.%]="piece.progress"></div>
+                                            </div>
+                                        </div>    
+                                        <div class="story-title">{{ piece.title }}</div>
+                                        <div class="story-subtitle">{{ story.title }}</div>
+                                        <div class="story-language">{{ languageLabel(story.language) }}</div>
+                                        <div class="story-quote">{{ piece.quote }}</div>
+                                        <div class="story-body story-body-scroll"
+                                             [class.expanded]="piece.expanded"
+                                             (click)="toggleExpand(story._id, $index)">
+                                            {{ piece.readingText }}
+                                        </div>
+                                        <div class="story-actions">
+                                            <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
+                                            <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
+                                            @if (piece.hasResume) {
+                                                <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story._id, $index)">
+                                                    Continue
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
                     </div>
 
                     <div class="story-indicators">
-                        <div class="dot" [class.active]="story.slideIndex === 0"></div>
-                        <div class="dot" [class.active]="story.slideIndex === 1"></div>
+                        @for (dot of slideDots(story); track dot) {
+                            <div class="dot" [class.active]="story.slideIndex === dot"></div>
+                        }
                     </div>
                 </div>
             }
