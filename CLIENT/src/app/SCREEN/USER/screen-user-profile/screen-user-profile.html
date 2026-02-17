@@ -54,7 +54,7 @@
                 }
 
                 <!-- Bio -->
-                <p class="text-gray-400 mb-4" style="line-height: 1.75;">
+                <div class="text-gray-400 px-3 pt-2 pb-5 word-break text-justify" style="line-height: 1.75;">
                     @if (userObj.bio) {
                         <!-- 📚 Passionate writer crafting stories that inspire | 🎧 Creating immersive audiobook experiences |  -->
                         {{ userObj.bio }}
@@ -62,7 +62,7 @@
                     @if (userObj.city || userObj.country) {
                         🌍 Based in {{ userObj.city }} {{ userObj.country }}
                     }                        
-                </p>
+                </div>
 
                 <!-- Quick Stats Grid -->
                 <div class="d-flex justify-content-center gap-3 mb-4">

@@ -34,6 +34,14 @@ body {
     display: none
 }
 
+.word-break {
+    white-space: pre-line;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
 .border-primary-2x {
     border: 2px solid var(--color-primary)!important;
 }

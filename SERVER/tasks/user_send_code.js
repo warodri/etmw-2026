@@ -45,23 +45,25 @@ async function run(data, req, res) {
         await emailUtils.sendEmailToUser(email, 
             `📌 Your Secure Login Code - Don't share`, 
             `
-            <p>Hey there!</p>
+            <div style="color: #ffffff;">
+                <p>Hey there!</p>
 
-            <p>
-            🔑 This is your Your Login Code:
-            </p>
-            <h1>${ code }</h1>
+                <p>
+                🔑 This is your Your Login Code:
+                </p>
+                <h1>${ code }</h1>
 
-            <p>
-            For security reasons, this code will expire soon, 
-            so do use it promptly. If you didn't request this, 
-            feel free to ignore. <b>No action needed</b>
-            </p>
+                <p>
+                    For security reasons, this code will expire soon, 
+                    so do use it promptly. If you didn't request this, 
+                    feel free to ignore. <b>No action needed</b>
+                </p>
 
-            <p>
-            Cheers, <br>
-            <b>The Team at Enter To My World</b>
-            </p>
+                <p>
+                    Cheers, <br>
+                    <b>The Team at Enter To My World</b>
+                </p>
+            </div>
         `)
 
         //  Avisar a los ADMIN

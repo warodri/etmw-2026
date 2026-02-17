@@ -8,7 +8,6 @@ import { PromoCodeModel } from '../../../models/promo-codes';
 import { UtilClass } from '../../../utils/utils';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { Language, ProcessedVoice } from '../../../models/voices';
-import { Config } from '../../../utils/config';
 
 @Component({
     selector: 'app-screen-upload-audiobook',
@@ -331,8 +330,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
             console.log('getMyUser', response)
             if (response && response.success) {
                 this.myUser.set(response.user);
-                callback();
             }
+            callback();
         })
     }
 

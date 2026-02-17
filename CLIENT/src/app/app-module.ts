@@ -47,6 +47,7 @@ import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/scr
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 import { Authors } from './COMPONENTS/AUTHOR/authors/authors';
 import { Categories } from './COMPONENTS/ITEMS/categories/categories';
+import { HomepageCategoriesAndBooks } from './COMPONENTS/ITEMS/homepage-categories-and-books/homepage-categories-and-books';
 
 @NgModule({
     declarations: [
@@ -88,7 +89,8 @@ import { Categories } from './COMPONENTS/ITEMS/categories/categories';
         ScreenContactSupport,
         ScreenStories,
         Authors,
-        Categories
+        Categories,
+        HomepageCategoriesAndBooks,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

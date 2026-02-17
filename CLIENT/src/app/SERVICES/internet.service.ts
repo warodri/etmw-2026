@@ -54,7 +54,7 @@ export class InternetService {
 
     getAppConfig(callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'GetAppConfig',
             lang,
             data: {

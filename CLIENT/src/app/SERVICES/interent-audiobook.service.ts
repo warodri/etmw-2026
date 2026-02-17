@@ -26,7 +26,7 @@ export class InternetAudiobookService extends InternetService {
 
     getAllCategories(callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'GetAllCategories',
             lang,
             data: {

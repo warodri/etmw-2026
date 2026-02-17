@@ -4,6 +4,9 @@ const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * MONGODB IS CONNECTED
+ */
 SharedMongoose.initMongoose( async () => {
 
     console.log('✅ MongoDB connection established for CRON');
@@ -31,7 +34,10 @@ SharedMongoose.initMongoose( async () => {
     
 })
 
-
+/**
+ * ADDS THE NEXT CHAPTER TO READ FOR USERS IN THE 
+ * NON-UNLIMITED PLAN.
+ */
 async function AddChapterToUser() {
     try {
         const processStartedAt = Date.now();

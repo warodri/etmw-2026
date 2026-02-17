@@ -94,7 +94,6 @@
                 </button>
             </div>
 
-
         } @else {
             <div class="container d-flex justify-content-between align-items-center gap-3">        
                 <div class="d-flex justify-content-start align-items-center gap-2">
@@ -113,7 +112,7 @@
                         @if (myUserObj) {
                             <div class="d-flex justify-content-start align-items-center gap-2 etmw-bg-main rounded-5 pointer" (click)="gotoUserProfile()">
                                 @if (myUserObj.profilePicture) {
-                                    <img class="rounded-circle" src="f-author-1.jpeg" style="width:50px; height:50px; object-fit: cover;" />
+                                    <img class="rounded-circle" [src]="myUserObj.profilePicture" style="width:50px; height:50px; object-fit: cover;" />
                                 } @else {
                                     <img class="rounded-circle" src="nouser.png" style="width:50px; height:50px; object-fit: cover;" />
                                 }
