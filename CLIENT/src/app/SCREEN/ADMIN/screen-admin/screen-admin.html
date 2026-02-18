@@ -1,0 +1,572 @@
+<div class="admin-screen">
+    <div class="container py-4">
+        <div class="main-card">
+            <div class="header-gradient text-center">
+                <h1 class="mb-2">Enter To My World</h1>
+                <p class="mb-0 opacity-75">Internal Use</p>
+            </div>
+
+            <div class="p-4">
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Admin Tasks</h4>
+                    <div class="btn-group">
+                        <button class="btn" [class.btn-primary]="activeSection() === 'promo'" [class.btn-outline-primary]="activeSection() !== 'promo'" (click)="setActiveSection('promo')">
+                            Promo Codes
+                        </button>
+                        <button class="btn" [class.btn-primary]="activeSection() === 'audiobooks'" [class.btn-outline-primary]="activeSection() !== 'audiobooks'" (click)="setActiveSection('audiobooks')">
+                            Audiolibros
+                        </button>
+                    </div>
+                </div>
+
+                @if (activeSection() === 'promo') {
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Promo Codes Manager</h5>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-primary" (click)="loadPromoCodes()">
+                                                <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                            </button>
+                                            <button class="btn btn-success" (click)="openAddPromoCode()">
+                                                <i class="bi bi-plus-circle"></i> Add Promo Code
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if (promoLoading()) {
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                        </div>
+                                    } @else {
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Code</th>
+                                                        <th>Partner Name</th>
+                                                        <th>Website</th>
+                                                        <th>Status</th>
+                                                        <th>Created</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (promoCodes().length === 0) {
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">No promo codes found</td>
+                                                        </tr>
+                                                    } @else {
+                                                        @for (code of promoCodes(); track code._id) {
+                                                            <tr>
+                                                                <td><strong>{{ code.code }}</strong></td>
+                                                                <td>{{ code.partnerName }}</td>
+                                                                <td>
+                                                                    <a [href]="code.website" target="_blank" class="text-decoration-none">
+                                                                        {{ code.website || '' }}
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge" [class.badge-enabled]="code.enabled" [class.badge-disabled]="!code.enabled">
+                                                                        {{ code.enabled ? 'Active' : 'Disabled' }}
+                                                                    </span>
+                                                                </td>
+                                                                <td>{{ code.createdAt ? (code.createdAt | date:'shortDate') : 'N/D' }}</td>
+                                                                <td>
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <button class="btn btn-outline-primary" (click)="editPromoCode(code)" title="Edit">
+                                                                            <i class="bi bi-pencil"></i>
+                                                                        </button>
+                                                                        <button class="btn btn-outline-danger" (click)="deletePromoCode(code)" title="Delete">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (promoFormOpen()) {
+                                <div class="card shadow-sm mt-4">
+                                    <div class="card-header">
+                                        <strong>{{ promoEditId() ? 'Edit Promo Code' : 'Add Promo Code' }}</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Promo Code *</label>
+                                                <input class="form-control" [ngModel]="promoForm().code" (ngModelChange)="setPromoFormField('code', $event)" placeholder="e.g., PARTNER2024">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Partner Name *</label>
+                                                <input class="form-control" [ngModel]="promoForm().partnerName" (ngModelChange)="setPromoFormField('partnerName', $event)" placeholder="e.g., Writers Guild International">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Partner Description *</label>
+                                                <textarea class="form-control" rows="3" [ngModel]="promoForm().partnerDescription" (ngModelChange)="setPromoFormField('partnerDescription', $event)"></textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Website *</label>
+                                                <input class="form-control" [ngModel]="promoForm().website" (ngModelChange)="setPromoFormField('website', $event)" placeholder="https://example.com">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Link to Code Page *</label>
+                                                <input class="form-control" [ngModel]="promoForm().linkToCode" (ngModelChange)="setPromoFormField('linkToCode', $event)" placeholder="https://example.com/promo">
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" [ngModel]="promoForm().enabled" (ngModelChange)="setPromoFormField('enabled', $event)">
+                                                    <label class="form-check-label">Enabled</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-end gap-2">
+                                        <button class="btn btn-secondary" (click)="cancelPromoForm()">Cancel</button>
+                                        <button class="btn btn-primary" (click)="savePromoCode()">Save</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (activeSection() === 'audiobooks') {
+                    @if (!currentAudiobook()) {
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="mb-0">Audiolibros subidos</h3>
+                                <button class="btn btn-primary" (click)="loadAudiobooks()">
+                                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                </button>
+                            </div>
+
+                            @if (audiobooksLoading()) {
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            } @else {
+                                <div class="row">
+                                    @if (audiobooks().length === 0) {
+                                        <div class="col-12">
+                                            <p class="text-muted">No se encontraron audiolibros</p>
+                                        </div>
+                                    } @else {
+                                        @for (book of audiobooks(); track book._id) {
+                                            <div class="col-md-4 col-lg-3 mb-3">
+                                                <div class="card audiobook-card" [class.priority]="book.paymentCompleted && book.uploadMethod === 'digital'" (click)="viewAudiobook(book)">
+                                                    <div class="card-body">
+                                                        @if (book.paymentCompleted && book.uploadMethod === 'digital') {
+                                                            <span class="badge bg-success mb-2">Listo para convertir</span>
+                                                        }
+                                                        <h6 class="card-title">{{ book.title || 'Sin título' }}</h6>
+                                                        <p class="card-text text-muted small mb-2">{{ book.authorName || 'Autor desconocido' }}</p>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <div class="text-muted small">
+                                                                    <i class="bi bi-music-note"></i> {{ book.audioFiles?.length || 0 }} capítulos subidos
+                                                                </div>
+                                                                <div class="text-muted small border-top pt-2 mt-2">
+                                                                    <i class="bi bi-music-note"></i> Total de capítulos: {{ book.totalChapters || 0 }}
+                                                                </div>
+                                                                <div class="text-muted small border-top pt-2 mt-2">
+                                                                    <i class="bi bi-file-earmark"></i> Total de páginas: {{ book.totalPages || 0 }}
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">{{ book.uploadMethod || 'N/D' }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        @if (currentAudiobook(); as current) {
+                            <button class="btn btn-secondary mb-3" (click)="backToList()">
+                                <i class="bi bi-arrow-left"></i> Volver a la lista
+                            </button>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card shadow">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información importante</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Título:</label>
+                                                <div>{{ current.title || 'N/D' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Autor:</label>
+                                                <div>{{ current.authorName || 'N/D' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Fecha de pago:</label>
+                                                <div>{{ current.paymentDate ? (current.paymentDate | date:'short') : 'N/D' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Pago base:</label>
+                                                <div>{{ current.basePrice ? ('$' + current.basePrice) : 'N/D' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Precio total:</label>
+                                                <div>{{ current.totalPrice ? ('$' + current.totalPrice) : 'N/D' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Total de páginas</label>
+                                                <div class="mt-1 input-group">
+                                                    <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($event)" placeholder="Introduce el total de páginas">
+                                                    <button class="btn btn-success" (click)="updateTotalPages()">
+                                                        <i class="bi bi-check-lg"></i> Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Total de capítulos (incluyendo epílogo)</label>
+                                                <div class="mt-1 input-group">
+                                                    <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($event)" placeholder="Introduce el total de capítulos">
+                                                    <button class="btn btn-success" (click)="updateTotalChapters()">
+                                                        <i class="bi bi-check-lg"></i> Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Descripción</label>
+                                                <div class="text-muted word-break">{{ current.description || 'Sin descripción' }}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="fw-bold">Categorías:</label>
+                                                @if (current.categories?.length) {
+                                                    <div>
+                                                        @for (cat of current.categories; track cat) {
+                                                            <span class="badge bg-secondary me-1">{{ cat }}</span>
+                                                        }
+                                                    </div>
+                                                } @else {
+                                                    <span class="text-muted">Ninguna</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3 shadow">
+                                        <div class="card-header">
+                                            <button class="btn btn-link text-decoration-none text-dark" (click)="detailsOpen.set(!detailsOpen())">
+                                                <i class="bi bi-list-ul"></i> Detalles adicionales
+                                                <i class="bi" [class.bi-chevron-down]="!detailsOpen()" [class.bi-chevron-up]="detailsOpen()"></i>
+                                            </button>
+                                        </div>
+                                        @if (detailsOpen()) {
+                                            <div class="card-body">
+                                                <pre class="bg-light p-3 rounded" style="font-size: 12px; max-height: 400px; overflow-y: auto;">{{ current | json }}</pre>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    @if (getOpenFileUrl(); as openUrl) {
+                                        <div class="p-3">
+                                            <a [href]="openUrl" class="btn btn-primary rounded-pill" target="_blank">Abrir archivo</a>
+                                        </div>
+                                    }
+
+                                    <div class="card shadow">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="bi bi-music-note-list"></i> Capítulos completados ({{ current.audioFiles?.length || 0 }})</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (!current.audioFiles?.length) {
+                                                <div class="text-muted">Aún no hay capítulos convertidos</div>
+                                            } @else {
+                                                @for (file of current.audioFiles; track file.chapter) {
+                                                    <div class="list-group-item chapter-item mb-2">
+                                                        <div class="d-flex justify-content-between align-items-center gap-3">
+                                                            <div class="d-flex justify-content-start align-items-center gap-3">
+                                                                <span><strong>Capítulo {{ file.chapter }}</strong></span>
+                                                                <button class="btn btn-sm btn-primary rounded-pill" (click)="playChapter(file.chapter)">
+                                                                    @if (!audioLoading()[file.chapter]) {
+                                                                        <span><i class="bi bi-play-fill"></i> Reproducir</span>
+                                                                    } @else {
+                                                                        <span class="spinner-border spinner-border-sm"></span>
+                                                                    }
+                                                                </button>
+                                                            </div>
+                                                            <small class="text-muted">{{ file.durationSec ? (file.durationSec / 60 | number:'1.0-0') + ' min' : 'N/D' }}</small>
+                                                        </div>
+                                                        @if (audioUrls()[file.chapter]) {
+                                                            <div class="mt-2">
+                                                                <audio controls class="w-100" [src]="audioUrls()[file.chapter]"></audio>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3 shadow">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="bi bi-gear"></i> Configuración de conversión</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm align-middle mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row" class="text-primary">Idioma de origen</th>
+                                                            <td>{{ getLanguageName(current.sourceLanguage) }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row" class="text-primary">Idioma de destino</th>
+                                                            <td>{{ getLanguageName(current.targetLanguage) }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">ID de voz</th>
+                                                            <td class="font-monospace">{{ current.voiceId || 'N/D' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Nombre de la voz</th>
+                                                            <td>{{ current.voiceName || 'N/D' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Usar expresión</th>
+                                                            <td>{{ current.useExpression ? 'Sí' : 'No' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Velocidad de habla</th>
+                                                            <td>{{ current.speechRate || '1.0' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Estabilidad</th>
+                                                            <td>{{ current.stability || '0.5' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">Claridad</th>
+                                                            <td>{{ current.clarity || '0.75' }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 card shadow">
+                                        <div class="card-header bg-primary text-light">
+                                            <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Convierte a Audio</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-4">
+                                                <label class="fw-bold">Subir PDF para convertir</label>
+                                                <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                                                    <input type="file" class="form-control" accept="application/pdf" style="max-width: 360px;" (change)="setSelectedPdfFile($event)">
+                                                    <button class="btn btn-outline-primary" (click)="loadPdfForConversion()">
+                                                        <i class="bi bi-file-earmark-pdf"></i> Cargar PDF
+                                                    </button>
+                                                    <button class="btn btn-primary" (click)="convertPdfToMp3()">
+                                                        <i class="bi bi-file-earmark-music"></i> Convertir PDF a MP3
+                                                    </button>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 mt-3">
+                                                    <div class="fw-bold" style="width: 180px;">Número de capítulo:</div>
+                                                    <input type="number" class="form-control" [ngModel]="chapterNumberInput()" (ngModelChange)="chapterNumberInput.set($event)" placeholder="ej: 1, 2, 3..." min="1" style="max-width: 220px;">
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 mt-3">
+                                                    <div class="fw-bold" style="width: 180px;">Total de capítulos (incluyendo Epilogo):</div>
+                                                    <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($event)" placeholder="ej: 10, 12, 40..." min="1" style="max-width: 220px;">
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 mt-3">
+                                                    <div class="fw-bold" style="width: 180px;">Total de páginas:</div>
+                                                    <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($event)" placeholder="ej: 100, 240, etc..." min="1" style="max-width: 220px;">
+                                                </div>
+                                                <div class="small text-muted mt-2">{{ pdfStatus() }}</div>
+                                            </div>
+
+                                            @if (conversionStatusVisible()) {
+                                                <div class="alert mt-3" [class.alert-info]="conversionStatusType() === 'info'" [class.alert-success]="conversionStatusType() === 'success'" [class.alert-danger]="conversionStatusType() === 'danger'">
+                                                    @if (conversionStatusType() === 'info') {
+                                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                                    }
+                                                    <span>{{ conversionStatusText() }}</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 card shadow">
+                                        <div class="card-header bg-primary text-light d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0"><i class="bi bi-journal-text"></i> Historias del Audiolibro</h5>
+                                            <button class="btn btn-sm btn-outline-light" (click)="loadStoriesForCurrentAudiobook()">
+                                                <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (storiesLoading()) {
+                                                <div class="text-center py-3">
+                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                </div>
+                                            } @else {
+                                                @if (storiesError()) {
+                                                    <div class="alert alert-danger">
+                                                        {{ storiesError() }}
+                                                    </div>
+                                                } @else if (stories().length === 0) {
+                                                    <div class="text-muted">No hay historias para este audiolibro.</div>
+                                                } @else {
+                                                    @for (story of stories(); track story._id) {
+                                                        <div class="story-item card mb-3">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                                                    <div>
+                                                                        <div class="fw-bold">Capítulo {{ story.chapterNumber }}</div>
+                                                                        <div class="h6 mb-1">{{ story.title || 'Sin título' }}</div>
+                                                                        <div class="text-muted">{{ story.subtitle || '' }}</div>
+                                                                    </div>
+                                                                    <span class="badge bg-secondary">Pieces: {{ story.chapterPieces?.length || 0 }}</span>
+                                                                </div>
+
+                                                                <div class="mt-3 d-flex flex-wrap gap-3 align-items-start">
+                                                                    @if (story.image) {
+                                                                        <img [src]="story.image" alt="Story image" class="story-image">
+                                                                    }
+                                                                    <div class="story-meta">
+                                                                        @if (story.author) {
+                                                                            <div class="text-muted mb-2">Autor: {{ story.author }}</div>
+                                                                        }
+                                                                        @if (story.quote) {
+                                                                            <div class="fst-italic">“{{ story.quote }}”</div>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-3">
+                                                                    <button class="btn btn-sm btn-outline-primary" (click)="toggleStoryExpanded(story._id)">
+                                                                        {{ storyExpanded()[story._id] ? 'Ocultar detalles' : 'Ver detalles' }}
+                                                                    </button>
+                                                                    <button class="btn btn-sm btn-outline-secondary ms-2" (click)="openStoryEditor(story)">
+                                                                        Editar historia
+                                                                    </button>
+                                                                </div>
+
+                                                                @if (storyExpanded()[story._id]) {
+                                                                    <div class="mt-3">
+                                                                        <div class="story-pieces">
+                                                                            @for (piece of story.chapterPieces; track piece.slideIndex) {
+                                                                                <div class="story-piece mb-3">
+                                                                                    <div class="fw-semibold">Parte {{ $index + 1 }} · {{ piece.title || 'Sin título' }}</div>
+                                                                                    @if (piece.quote) {
+                                                                                        <div class="text-muted mb-1">“{{ piece.quote }}”</div>
+                                                                                    }
+                                                                                    @if (piece.readingText) {
+                                                                                        <div class="small text-muted mb-2">Texto: {{ piece.readingText }}</div>
+                                                                                    }
+                                                                                    <div class="d-flex flex-wrap gap-2">
+                                                                                        @if (piece.audioDuration) {
+                                                                                            <span class="badge bg-light text-dark">Audio: {{ piece.audioDuration | number:'1.0-0' }}s</span>
+                                                                                        }
+                                                                                        @if (piece.audioUrl) {
+                                                                                            <span class="badge bg-light text-dark">Audio URL</span>
+                                                                                        }
+                                                                                        @if (piece.audioImage) {
+                                                                                            <span class="badge bg-light text-dark">Imagen</span>
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                }
+
+                                                                @if (storyEditId() === story._id) {
+                                                                    <div class="mt-3 story-editor card">
+                                                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                                                            <strong>Editar historia</strong>
+                                                                            <button class="btn btn-sm btn-outline-secondary" (click)="closeStoryEditor()">Cerrar</button>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            @if (storyEditError()) {
+                                                                                <div class="alert alert-danger">{{ storyEditError() }}</div>
+                                                                            }
+                                                                            <div class="row g-3">
+                                                                                <div class="col-md-6">
+                                                                                    <label class="form-label">Título</label>
+                                                                                    <input class="form-control" [ngModel]="storyEditForm().title" (ngModelChange)="setStoryFormField('title', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <label class="form-label">Subtítulo</label>
+                                                                                    <input class="form-control" [ngModel]="storyEditForm().subtitle" (ngModelChange)="setStoryFormField('subtitle', $event)">
+                                                                                </div>
+                                                                                <div class="col-12">
+                                                                                    <label class="form-label">Quote</label>
+                                                                                    <textarea class="form-control" rows="2" [ngModel]="storyEditForm().quote" (ngModelChange)="setStoryFormField('quote', $event)"></textarea>
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <label class="form-label">Imagen (URL)</label>
+                                                                                    <input class="form-control" [ngModel]="storyEditForm().image" (ngModelChange)="setStoryFormField('image', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <label class="form-label">Autor</label>
+                                                                                    <input class="form-control" [ngModel]="storyEditForm().author" (ngModelChange)="setStoryFormField('author', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <label class="form-label">Capítulo</label>
+                                                                                    <input type="number" class="form-control" [ngModel]="storyEditForm().chapterNumber" (ngModelChange)="setStoryFormField('chapterNumber', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <label class="form-label">Total capítulos</label>
+                                                                                    <input type="number" class="form-control" [ngModel]="storyEditForm().totalChapters" (ngModelChange)="setStoryFormField('totalChapters', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <label class="form-label">Slide index</label>
+                                                                                    <input type="number" class="form-control" [ngModel]="storyEditForm().slideIndex" (ngModelChange)="setStoryFormField('slideIndex', $event)">
+                                                                                </div>
+                                                                                <div class="col-md-6">
+                                                                                    <label class="form-label">Idioma</label>
+                                                                                    <input class="form-control" [ngModel]="storyEditForm().language" (ngModelChange)="setStoryFormField('language', $event)">
+                                                                                </div>
+                                                                                <div class="col-12">
+                                                                                    <label class="form-label">Chapter Pieces (JSON)</label>
+                                                                                    <textarea class="form-control story-json" rows="8" [ngModel]="storyEditForm().chapterPiecesJson" (ngModelChange)="setStoryFormField('chapterPiecesJson', $event)"></textarea>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="card-footer d-flex justify-content-end gap-2">
+                                                                            <button class="btn btn-secondary" (click)="closeStoryEditor()">Cancelar</button>
+                                                                            <button class="btn btn-primary" [disabled]="storyEditSaving()" (click)="saveStoryEdits()">
+                                                                                @if (storyEditSaving()) {
+                                                                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                                                                }
+                                                                                Guardar cambios
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

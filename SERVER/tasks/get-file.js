@@ -3,7 +3,7 @@ const path = require('path');
 
 async function run(req, res) {
     try {
-        const id = req.params.id;            // e.g. "1764835843945.png"
+        const id = req.params.id;    // e.g. "1764835843945.png" or "audiobooks/story/images/999999/1764835843945.png" or "audiobooks/story/99999999/story_1_0.mp3"
         const mimeBase64 = req.params.mimetype;  
         const mimetype = Buffer.from(mimeBase64, 'base64').toString('utf8');
 
@@ -11,8 +11,21 @@ async function run(req, res) {
             return res.send("Missing data");
         }
 
-        // Absolute path to uploads folder
-        const filePath = path.join(__dirname, '..', 'uploads', id);
+        //  If contains "audiobooks/" then it's asking for an image or an audio from a story
+        const isStory = (id.indexOf('audiobooks/') > -1);
+        
+        // Absolute path to "uploads" or "audiobooks" folder
+        let filePath = path.join(__dirname, '..', 'uploads', id);
+        if (isStory) {
+            filePath = path.join(__dirname, '..', 'audiobooks', id);
+        }
+
+        /**
+         * IMPORTANT FOR STORIES
+         * If the user requests an audiobook chapter
+         * then I must also validate the user can actually
+         * listen the MP3 according to their paying plan.
+         */
 
         // Check if file exists
         if (!fs.existsSync(filePath)) {

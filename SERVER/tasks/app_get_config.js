@@ -26,7 +26,7 @@ async function run(data, req, res) {
             uk: 29,
             global: 29,
         }, {
-            label: '500-700 pages',
+            label: '501-700 pages',
             latam: 25,
             us: 39,
             uk: 39,

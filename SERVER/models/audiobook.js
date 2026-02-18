@@ -119,6 +119,9 @@ const model = new Schema({
     totalPages: {
         type: Number
     },
+    totalChapters: {
+        type: Number
+    },
     totalAudioDurationSec: {
         type: Number
     },

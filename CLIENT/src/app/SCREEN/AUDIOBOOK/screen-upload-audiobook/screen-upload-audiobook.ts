@@ -215,6 +215,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     }
 
     // Flags
+    DETECT_CURRENCY = true;
     working = signal<boolean>(true);
     showInstructionsStep1 = signal<boolean>(true);
     private audio?: HTMLAudioElement;
@@ -364,7 +365,9 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     detectRegion() {
         const regionInfo = UtilClass.detectRegion();        
         this.regionDetected.set(regionInfo.region);
-        this.selectedCurrency.set(regionInfo.currency);
+        if (this.DETECT_CURRENCY) {
+            this.selectedCurrency.set(regionInfo.currency);
+        }
     }
 
     selectUploadBasePrice(item: {

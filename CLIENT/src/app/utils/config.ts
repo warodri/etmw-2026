@@ -13,7 +13,7 @@ export class Config {
     public static SERVER = {
         dev: true,
         local: 'http://localhost:3080',
-        remote: 'https://entertomyworld.com',
+        remote: 'https://entertomyworld.com:3080',
     }
 
     public static CLIENT = {

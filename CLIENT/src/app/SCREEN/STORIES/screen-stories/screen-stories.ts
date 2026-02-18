@@ -1,4 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, QueryList, ViewChildren, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, ViewChildren, signal } from '@angular/core';
+import { UserModel } from '../../../models/user';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { InternetStoryService } from '../../../SERVICES/internet-stories.service';
+import { Config } from '../../../utils/config';
 
 type ChapterPiece = {
     title: string,
@@ -27,7 +31,9 @@ type Story = {
     title: string,
     subtitle: string,
     quote: string,
-    slideIndex: number
+    slideIndex: number,
+    createdAt?: number,
+    updatedAt?: number,
 };
 
 @Component({
@@ -36,11 +42,20 @@ type Story = {
   templateUrl: './screen-stories.html',
   styleUrl: './screen-stories.css',
 })
-export class ScreenStories {
+export class ScreenStories implements OnInit {
 
     @ViewChildren('storyItem') storyItems!: QueryList<ElementRef>;
 
-    stories = signal<Story[]>([
+    myUser = signal<UserModel | null>(null);
+
+    stories = signal<Story[]>([])
+
+    SERVER_FOR_IMAGES = Config.dev ? Config.SERVER.local : Config.SERVER.remote
+
+    /**
+     * Delete once all is working nicely
+     */
+    storiesMock = signal<Story[]>([
         {
             _id: '1',
             audiobookId: '1',
@@ -238,8 +253,15 @@ export class ScreenStories {
     private muteKey = 'etmw_story_muted';
 
     constructor(
-        private cdr: ChangeDetectorRef
+        private iUser: InternetUserService,
+        private iStory: InternetStoryService
     ) {}
+
+    ngOnInit(): void {
+        this.loadMyUser(() => {
+            this.loadStories();
+        })
+    }
 
     ngAfterViewInit(): void {
         this.setupObserver();
@@ -257,6 +279,39 @@ export class ScreenStories {
             audio.src = '';
         });
         this.audioMap.clear();
+    }
+
+    loadMyUser(callback: any) {
+        this.iUser.getMyUser((response: any) => {
+            console.log('getMyUser', response)
+            if (response && response.success) {
+                this.myUser.set(response.user);
+            }
+            callback();
+        })
+    }
+
+    loadStories() {
+        this.iStory.getStories((response: any) => {
+            console.log('getStories', response)
+            if (response && response.success) {
+                for (let item of response.stories) {
+                    if (!item.image) {
+                        item.image = 'story-fallback-img.jpeg';
+                    } else {
+                        item.image = this.SERVER_FOR_IMAGES + '/file/' + item.image;
+                    }
+                    for (let subItem of item.chapterPieces) {
+                        if (!subItem.audioImage) {
+                            subItem.audioImage = 'story-fallback-img.jpeg';
+                        } else {
+                            subItem.audioImage = this.SERVER_FOR_IMAGES + '/file/' + subItem.audioImage;
+                        }                        
+                    }
+                }
+                this.stories.set(response.stories);
+            }
+        })
     }
 
     onTouchStart(event: TouchEvent, storyId: string) {

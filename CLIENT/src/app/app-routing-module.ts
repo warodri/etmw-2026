@@ -17,6 +17,7 @@ import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
+import { ScreenAdmin } from './SCREEN/ADMIN/screen-admin/screen-admin';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -44,6 +45,9 @@ const routes: Routes = [
 
     //  Stories
     { path: 'app/stories', component: ScreenStories },
+
+    //  Admin
+    { path: 'app/admin', component: ScreenAdmin },
 
 ];
 

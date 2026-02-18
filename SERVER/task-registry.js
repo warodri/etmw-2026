@@ -1,3 +1,11 @@
+
+//
+//  STORIES
+//
+GetStories = require('./tasks/story_get');
+GetStoriesByAudiobook = require('./tasks/story_get_by_audiobook');
+UpdateAudiobookStory = require('./tasks/story_update');
+
 //
 //  SUBSCRIPTIONS
 //
@@ -18,6 +26,7 @@ const AudiobookCreateStripeCheckout = require("./tasks/audiobook_create_stripe_c
 const AudiobookCheckPaymentStatus = require("./tasks/audiobook_check_payment_status");
 const AudiobooksGetAdmin = require("./tasks/audiobook_get_admin");
 const UpdateAudiobookTotalPages = require("./tasks/audiobook_update_total_pages");
+const UpdateAudiobookTotalChapters = require("./tasks/audiobook_update_total_chapters");
 const ConvertToMP3 = require("./tasks/audiobook_convert_to_mp3");
 const AudiobookTranslate = require("./tasks/audiobook_translate");
 const AudiobookUploadCover = require("./tasks/auidobook_upload_cover");
@@ -70,6 +79,11 @@ const FindAuthor = require('./tasks/author_find');
 
 const TasksRegistry = {
 
+    //  STORIES
+    UpdateAudiobookStory,
+    GetStoriesByAudiobook,
+    GetStories,
+    
     //  AUTHOR
     FindAuthor,
     
@@ -88,6 +102,7 @@ const TasksRegistry = {
     AudiobookTranslate,
     AudiobookGetChapterAudio,
     ConvertToMP3,
+    UpdateAudiobookTotalChapters,
     UpdateAudiobookTotalPages,
     AudiobooksGetAdmin,
     AudiobookCheckPaymentStatus,

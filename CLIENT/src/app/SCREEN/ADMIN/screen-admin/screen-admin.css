@@ -1,0 +1,141 @@
+.admin-screen {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.main-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.task-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.task-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.badge-enabled {
+    background-color: #28a745;
+}
+
+.badge-disabled {
+    background-color: #dc3545;
+}
+
+.word-break {
+    white-space: pre-line;
+}
+
+.audiobook-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.audiobook-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.audiobook-card.priority {
+    border-left: 4px solid #198754;
+}
+
+.text-viewer {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: 'Georgia', serif;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.text-viewer::selection {
+    background: #ffc107;
+    color: #000;
+}
+
+.selected-text-box {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    padding: 15px;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.chapter-item {
+    background: #e7f5ff;
+    border-left: 3px solid #0d6efd;
+}
+
+.conversion-textarea {
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.story-item {
+    border: 1px solid #e9ecef;
+}
+
+.story-image {
+    width: 120px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.story-meta {
+    flex: 1;
+    min-width: 220px;
+}
+
+.story-pieces {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.story-piece {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+.story-piece:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.story-editor {
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+}
+
+.story-json {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+}

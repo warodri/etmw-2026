@@ -5,7 +5,7 @@ async function run(data, req, res) {
         const payload = (req.body && req.body.data) ? req.body.data : (req.body || data || {});
         const {
             audiobookId,
-            totalPages,
+            totalChapters,
         } = payload;
 
         const AudioBook = require('../models/audiobook');
@@ -22,7 +22,7 @@ async function run(data, req, res) {
             })
         } else {
 
-            audiobook.totalPages = totalPages;
+            audiobook.totalChapters = totalChapters;
             audiobook.updatedAt = Date.now();
             await audiobook.save();
             

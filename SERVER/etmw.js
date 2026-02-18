@@ -97,9 +97,8 @@ SharedMongoose.initMongoose( async () => {
         http = https.createServer(options, app);
     }
 
-    /**
-     * STRIPE SUCCESS
-     */
+    //  STRIPE RESULT
+    //  For both: When paying for an audiobook or a subscription
     app.get('/api/stripe-success', apiLimiter, async (req, res) => {
         const { session_id, audiobook_id, user_id } = req.query;
         if (audiobook_id) {
@@ -109,16 +108,9 @@ SharedMongoose.initMongoose( async () => {
             const StripeResult = require('./tasks/subscription_stripe_result');
             await StripeResult.handleStripeSuccess(req, res);
         }
-
     })
 
     //  Downloads the content of a file
-    app.get('/file/:id/:mimetype', apiLimiter, (req, res) => {
-        const GetFile = require('./tasks/get-file');
-        GetFile.run(req, res);
-    })
-
-    //  Stripe Success
     app.get('/file/:id/:mimetype', apiLimiter, (req, res) => {
         const GetFile = require('./tasks/get-file');
         GetFile.run(req, res);
