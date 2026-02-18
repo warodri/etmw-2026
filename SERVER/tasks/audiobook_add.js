@@ -117,14 +117,14 @@ async function run(data, req, res) {
 
         //  Tell Admins
         const mainConfig = require('../config');
-        const SERVER = mainConfig.dev ? mainConfig.SERVER.local : mainConfig.SERVER.remote;
+        const CLIENT = mainConfig.dev ? mainConfig.CLIENT.local : mainConfig.CLIENT.remote;
         const SUBJECT = 'ETMW - Un usuario acaba de subir un libro';
         const BODY = `
             <h5><b>Todavia no esta pagado</b></h5>
             Titulo: <b>${title}</b> <br>
             Descripcion: <b>${description}</b> <br>
             <hr />
-            Accede aqui: ${SERVER}/audiobooks.html
+            Accede aqui: ${SERVER}/#/app/admin
         `
         informAdmins(SUBJECT, BODY);
 

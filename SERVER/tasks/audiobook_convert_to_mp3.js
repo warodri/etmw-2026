@@ -7,7 +7,7 @@ const OpenAI = require("openai");
 const client = new OpenAI({ apiKey: config.OPEN_AI.API_KEY });
 
 /**
- * THIS IS EXECUTED FORM OUR PRIVATE UI "audiobooks.html"
+ * THIS IS EXECUTED FORM OUR PRIVATE UI "app/admin"
  * 
  * 1) I converts the chapter to MP3
  * 2) Generates the Story
@@ -140,7 +140,7 @@ async function run(data, req, res) {
         // Generate the story for this chapter
         await generateStory(audiobook, author, params);
 
-        //  Respond to our UI "audiobooks.html"
+        //  Respond to our UI "app/admin"
         res.json({
             success: true,
             message: 'Conversion successful',
@@ -392,6 +392,7 @@ async function generate10MinuteAudios(audiobook, params, chapterPieces) {
             style: params.style,
             speakerBoost: params.speakerBoost,
             outputFormat: params.outputFormat,
+            language: params.language || audiobook.targetLanguage || audiobook.sourceLanguage
         }
         const audioBuffer = await elevenLabsUtils.textToSpeech(newParams);
 
@@ -509,7 +510,7 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
     const Story = require('../models/story');
     const chapterNumber = Number(params.chapterNumber || 1);
     const totalChapters = Number(params.totalChapters || audiobook.totalPages || chapterNumber || 1);
-    const language = audiobook.targetLanguage || audiobook.sourceLanguage || params.language || 'en';
+    const language = params.language || audiobook.targetLanguage || audiobook.sourceLanguage || 'en';
     const firstPiece = chapterPieces[0] || {};
 
     const doc = {
@@ -528,7 +529,7 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
     };
 
     await Story.findOneAndUpdate(
-        { audiobookId: String(audiobook._id), chapterNumber: chapterNumber },
+        { audiobookId: String(audiobook._id), chapterNumber: chapterNumber, language: language },
         doc,
         { upsert: true, new: true, setDefaultsOnInsert: true }
     );

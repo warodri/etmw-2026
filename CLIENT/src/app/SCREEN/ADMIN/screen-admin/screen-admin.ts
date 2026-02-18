@@ -64,6 +64,23 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     totalChaptersInput = signal('');
     totalPagesInput = signal('');
     chapterNumberInput = signal('');
+    conversionLanguageInput = signal('');
+    popularLanguages = [
+        { code: 'en', label: 'English' },
+        { code: 'es', label: 'Español' },
+        { code: 'pt', label: 'Português' },
+        { code: 'fr', label: 'Français' },
+        { code: 'de', label: 'Deutsch' },
+        { code: 'it', label: 'Italiano' },
+        { code: 'nl', label: 'Nederlands' },
+        { code: 'pl', label: 'Polski' },
+        { code: 'ru', label: 'Русский' },
+        { code: 'ja', label: '日本語' },
+        { code: 'ko', label: '한국어' },
+        { code: 'zh', label: '中文' },
+        { code: 'ar', label: 'العربية' },
+        { code: 'hi', label: 'हिन्दी' }
+    ];
 
     stories = signal<any[]>([]);
     storiesLoading = signal(false);
@@ -248,6 +265,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         this.totalPagesInput.set(String(audiobook.totalPages || ''));
         this.totalChaptersInput.set(String(audiobook.totalChapters || ''));
         this.chapterNumberInput.set('');
+        this.conversionLanguageInput.set(audiobook.targetLanguage || audiobook.sourceLanguage || '');
         this.pdfTextForConversion.set('');
         this.pdfNameForConversion.set('');
         this.pdfStatus.set('');
@@ -391,6 +409,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         const chapterNumber = parseInt(this.chapterNumberInput(), 10);
         const totalChapters = parseInt(this.totalChaptersInput(), 10);
         const totalPages = parseInt(this.totalPagesInput(), 10);
+        const language = this.conversionLanguageInput();
 
         this.conversionStatusVisible.set(true);
         this.conversionStatusType.set('info');
@@ -412,7 +431,8 @@ export class ScreenAdmin implements OnInit, OnDestroy {
                 outputFormat: 'mp3_44100_128',
                 chapterNumber,
                 totalChapters,
-                totalPages
+                totalPages,
+                language
             },
             (result: any) => {
                 if (result && result.success) {
@@ -430,6 +450,18 @@ export class ScreenAdmin implements OnInit, OnDestroy {
                 }
             }
         );
+    }
+
+    createStoryForLanguage() {
+        if (!this.pdfTextForConversion()) {
+            alert('Primero carga un PDF válido.');
+            return;
+        }
+        if (!this.conversionLanguageInput()) {
+            alert('Introduce el idioma para la nueva historia.');
+            return;
+        }
+        this.convertPdfToMp3();
     }
 
     playChapter(chapterNumber: number) {

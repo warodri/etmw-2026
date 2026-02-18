@@ -405,10 +405,29 @@ async function textToSpeech(params) {
         similarity = 0.75,
         style = 0, // Expression/style exaggeration (0.0 - 1.0)
         speakerBoost = true,
-        outputFormat = 'mp3_44100_128'
+        outputFormat = 'mp3_44100_128',
+        language,
+        languageCode
     } = params;
 
     try {
+        const payload = {
+            text: text,
+            model_id: modelId,
+            voice_settings: {
+                stability: stability,
+                similarity_boost: similarity,
+                style: style, // Only works with v2 models
+                use_speaker_boost: speakerBoost
+            },
+            output_format: outputFormat
+        };
+
+        const resolvedLanguage = languageCode || language;
+        if (resolvedLanguage) {
+            payload.language_code = resolvedLanguage;
+        }
+
         const response = await fetch(
             `${ELEVENLABS_API_BASE}/text-to-speech/${voiceId}`,
             {
@@ -418,17 +437,7 @@ async function textToSpeech(params) {
                     'Content-Type': 'application/json',
                     'xi-api-key': API_KEY
                 },
-                body: JSON.stringify({
-                    text: text,
-                    model_id: modelId,
-                    voice_settings: {
-                        stability: stability,
-                        similarity_boost: similarity,
-                        style: style, // Only works with v2 models
-                        use_speaker_boost: speakerBoost
-                    },
-                    output_format: outputFormat
-                })
+                body: JSON.stringify(payload)
             }
         );
 

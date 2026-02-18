@@ -25,7 +25,7 @@ async function run(data, req, res) {
         if (doc && doc.paymentCompleted) {
 
             const config = require('../config')
-            SERVER = config.dev ? config.SERVER.local : config.SERVER.remote;
+            CLIENT = config.dev ? config.CLIENT.local : config.CLIENT.remote;
 
             //  Inform Admins all okay
             const SUBJECT = 'ETMW - Libro fue pagado!';
@@ -34,7 +34,7 @@ async function run(data, req, res) {
                 Titulo: <b>${doc.title}</b> <br>
                 Descripcion: <b>${doc.description}</b> <br>
                 <hr />
-                Procesa la conversion desde aqui: ${SERVER}/audiobooks.html
+                Procesa la conversion desde aqui: ${CLIENT}/#/app/admin
             `
             informAdmins(SUBJECT, BODY);
 
