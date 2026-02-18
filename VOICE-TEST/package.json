@@ -1,0 +1,16 @@
+{
+  "name": "eleven-labs-tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@cartesia/cartesia-js": "^2.2.9",
+    "@elevenlabs/elevenlabs-js": "^2.36.0"
+  }
+}

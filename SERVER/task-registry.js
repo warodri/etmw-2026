@@ -34,6 +34,7 @@ const AudiobookUploadCover = require("./tasks/auidobook_upload_cover");
 const AudiobookFind = require("./tasks/audiobook_find");
 const AudiobookFindById = require("./tasks/audiobook_find");
 const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
+const AudiobookGetChapterAudioIsAvailable = require("./tasks/audiobook_get_chapter_audio_is_available");
 
 //
 //  VOICES
@@ -101,6 +102,7 @@ const TasksRegistry = {
     AudiobookUploadCover,
     AudiobookTranslate,
     AudiobookGetChapterAudio,
+    AudiobookGetChapterAudioIsAvailable,
     ConvertToMP3,
     UpdateAudiobookTotalChapters,
     UpdateAudiobookTotalPages,

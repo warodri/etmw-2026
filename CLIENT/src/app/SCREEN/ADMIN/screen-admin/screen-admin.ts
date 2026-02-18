@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { InternetAdminService } from '../../../SERVICES/internet-admin.service';
+import { Config } from '../../../utils/config';
 
 type PromoCode = {
     _id: string;
@@ -64,7 +65,6 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     totalChaptersInput = signal('');
     totalPagesInput = signal('');
     chapterNumberInput = signal('');
-    conversionLanguageInput = signal('');
     popularLanguages = [
         { code: 'en', label: 'English' },
         { code: 'es', label: 'Español' },
@@ -86,6 +86,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     storiesLoading = signal(false);
     storiesError = signal('');
     storyExpanded = signal<Record<string, boolean>>({});
+    storyLanguageInput = signal('');
     storyEditId = signal<string | null>(null);
     storyEditSaving = signal(false);
     storyEditError = signal('');
@@ -265,7 +266,6 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         this.totalPagesInput.set(String(audiobook.totalPages || ''));
         this.totalChaptersInput.set(String(audiobook.totalChapters || ''));
         this.chapterNumberInput.set('');
-        this.conversionLanguageInput.set(audiobook.targetLanguage || audiobook.sourceLanguage || '');
         this.pdfTextForConversion.set('');
         this.pdfNameForConversion.set('');
         this.pdfStatus.set('');
@@ -275,6 +275,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         this.storyExpanded.set({});
         this.storyEditId.set(null);
         this.storyEditError.set('');
+        this.storyLanguageInput.set(audiobook.targetLanguage || audiobook.sourceLanguage || '');
         this.revokeAudioUrls();
         this.loadStoriesForCurrentAudiobook();
     }
@@ -287,6 +288,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         this.storyExpanded.set({});
         this.storyEditId.set(null);
         this.storyEditError.set('');
+        this.storyLanguageInput.set('');
         this.revokeAudioUrls();
     }
 
@@ -387,6 +389,10 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     }
 
     convertPdfToMp3() {
+        this.convertPdfToMp3WithLanguage();
+    }
+
+    private convertPdfToMp3WithLanguage(languageOverride?: string) {
         const current = this.currentAudiobook();
         if (!current) return;
         if (!this.pdfTextForConversion()) {
@@ -409,7 +415,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         const chapterNumber = parseInt(this.chapterNumberInput(), 10);
         const totalChapters = parseInt(this.totalChaptersInput(), 10);
         const totalPages = parseInt(this.totalPagesInput(), 10);
-        const language = this.conversionLanguageInput();
+        const language = languageOverride || current.targetLanguage || current.sourceLanguage || '';
 
         this.conversionStatusVisible.set(true);
         this.conversionStatusType.set('info');
@@ -457,11 +463,11 @@ export class ScreenAdmin implements OnInit, OnDestroy {
             alert('Primero carga un PDF válido.');
             return;
         }
-        if (!this.conversionLanguageInput()) {
+        if (!this.storyLanguageInput()) {
             alert('Introduce el idioma para la nueva historia.');
             return;
         }
-        this.convertPdfToMp3();
+        this.convertPdfToMp3WithLanguage(this.storyLanguageInput());
     }
 
     playChapter(chapterNumber: number) {
@@ -507,7 +513,8 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         const mimetype = current.file.mimetype;
         if (!filename || !mimetype) return null;
         const encodedMime = btoa(mimetype);
-        return `/file/${filename}/${encodedMime}`;
+        const SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+        return `${SERVER}/file/${filename}/${encodedMime}`;
     }
 
     getLanguageName(code: string) {

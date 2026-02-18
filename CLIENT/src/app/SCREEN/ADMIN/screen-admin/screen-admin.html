@@ -391,15 +391,6 @@
                                                 <div class="fw-bold" style="width: 180px;">Total de páginas:</div>
                                                 <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($event)" placeholder="ej: 100, 240, etc..." min="1" style="max-width: 220px;">
                                             </div>
-                                            <div class="d-flex align-items-center gap-2 mt-3">
-                                                <div class="fw-bold" style="width: 180px;">Idioma (story/audio):</div>
-                                                <select class="form-select" [ngModel]="conversionLanguageInput()" (ngModelChange)="conversionLanguageInput.set($event)" style="max-width: 220px;">
-                                                    <option value="">Selecciona idioma</option>
-                                                    @for (lang of popularLanguages; track lang.code) {
-                                                        <option [value]="lang.code">{{ lang.label }} ({{ lang.code }})</option>
-                                                    }
-                                                </select>
-                                            </div>
                                             <div class="small text-muted mt-2">{{ pdfStatus() }}</div>
                                         </div>
 
@@ -425,7 +416,7 @@
                                             <div class="story-create mb-3">
                                                 <div class="d-flex flex-wrap align-items-center gap-2">
                                                     <div class="fw-bold">Crear historia en otro idioma:</div>
-                                                    <select class="form-select" [ngModel]="conversionLanguageInput()" (ngModelChange)="conversionLanguageInput.set($event)" style="max-width: 200px;">
+                                                    <select class="form-select" [ngModel]="storyLanguageInput()" (ngModelChange)="storyLanguageInput.set($event)" style="max-width: 200px;">
                                                         <option value="">Selecciona idioma</option>
                                                         @for (lang of popularLanguages; track lang.code) {
                                                             <option [value]="lang.code">{{ lang.label }} ({{ lang.code }})</option>

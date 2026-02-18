@@ -435,11 +435,11 @@
                             </div>
                             <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage" (change)="calculateTranslationCost()">
                                 <option value="">Same as source</option>
-                                @for (lang of availableLanguages; track lang.code) {
-                                    <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
+                                @for (lang of availableLocales; track lang.code) {
+                                    <option [value]="lang.code">{{ getLocaleLabel(lang.code) }}</option>
                                 }
                             </select>
-                            @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                            @if (isTranslationEnabled()) {
                                 @if (!translation.useFixedPrice) {
                                     <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">
                                         <i class="bi bi-info-circle-fill"></i> 
@@ -453,19 +453,19 @@
                         -->
                         <div class="mb-4">
                             <h3>
-                                Voices Included
+                                Voices
                             </h3>
                             <p class="text-gray-400 mb-3">
-                                You can pick any of these voices or select a premium from below
+                                Pick a voice for your audiobook
                             </p>
                             <div class="row g-3" [class.included-voices-limit]="!includedVoicesShowMore()">
-                                @for (voice of standardVoices(); track voice.id) {
+                                @for (voice of availableVoices(); track voice.id) {
                                     <div class="col-6">
                                         <div class="bg-secondary rounded-4 p-3 pointer position-relative"
                                              [class.border]="bookConfig.voiceId === voice.id"
                                              [class.border-primary]="bookConfig.voiceId === voice.id"
                                              [class.border-2]="bookConfig.voiceId === voice.id"
-                                             (click)="selectVoice(voice.id, voice.name, false)">
+                                             (click)="selectVoice(voice.id, voice.name)">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
                                                     <div class="fw-bold">{{ voice.name }}</div>
@@ -700,7 +700,7 @@
                                     <span class="fw-semibold">+$20</span>
                                 </div>
                             }
-                            @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                            @if (isTranslationEnabled()) {
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-gray-400">Translation</span>
                                     <span class="fw-semibold">+{{ selectedCurrency() }}{{ totalTranslation()}}</span>
@@ -835,7 +835,7 @@
                                                 <i class="bi bi-emoji-smile"></i> Expression Enabled
                                             </span>
                                         }
-                                        @if (bookConfig.targetLanguage && bookConfig.targetLanguage !== bookConfig.sourceLanguage) {
+                            @if (isTranslationEnabled()) {
                                             <span class="bg-slate-800 px-3 py-1 rounded-3">
                                                 <i class="bi bi-translate"></i> Translating to {{ getLanguageName(bookConfig.targetLanguage) }}
                                             </span>

@@ -124,7 +124,7 @@ async function run(data, req, res) {
             Titulo: <b>${title}</b> <br>
             Descripcion: <b>${description}</b> <br>
             <hr />
-            Accede aqui: ${SERVER}/#/app/admin
+            Accede aqui: ${CLIENT}/#/app/admin
         `
         informAdmins(SUBJECT, BODY);
 

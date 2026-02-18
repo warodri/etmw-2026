@@ -119,6 +119,80 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         { code: 'ru', name: 'Russian', flag: '🇷🇺' }
     ];
 
+    availableLocales = [
+        { code: 'ar-EG', name: 'ar-EG' },
+        { code: 'ar-KW', name: 'ar-KW' },
+        { code: 'ar-LB', name: 'ar-LB' },
+        { code: 'ar-MA', name: 'ar-MA' },
+        { code: 'ar-SA', name: 'ar-SA' },
+        { code: 'bg-BG', name: 'bg-BG' },
+        { code: 'ceb-PH', name: 'ceb-PH' },
+        { code: 'cmn-CN', name: 'cmn-CN' },
+        { code: 'cmn-TW', name: 'cmn-TW' },
+        { code: 'cs-CZ', name: 'cs-CZ' },
+        { code: 'da-DK', name: 'da-DK' },
+        { code: 'de-AT', name: 'de-AT' },
+        { code: 'de-DE', name: 'de-DE' },
+        { code: 'el-GR', name: 'el-GR' },
+        { code: 'en-AU', name: 'en-AU' },
+        { code: 'en-CA', name: 'en-CA' },
+        { code: 'en-FI', name: 'en-FI' },
+        { code: 'en-GB', name: 'en-GB' },
+        { code: 'en-IE', name: 'en-IE' },
+        { code: 'en-IN', name: 'en-IN' },
+        { code: 'en-JM', name: 'en-JM' },
+        { code: 'en-KR', name: 'en-KR' },
+        { code: 'en-MY', name: 'en-MY' },
+        { code: 'en-NG', name: 'en-NG' },
+        { code: 'en-NZ', name: 'en-NZ' },
+        { code: 'en-PH', name: 'en-PH' },
+        { code: 'en-RU', name: 'en-RU' },
+        { code: 'en-SG', name: 'en-SG' },
+        { code: 'en-US', name: 'en-US' },
+        { code: 'en-ZA', name: 'en-ZA' },
+        { code: 'es-AR', name: 'es-AR' },
+        { code: 'es-CL', name: 'es-CL' },
+        { code: 'es-CO', name: 'es-CO' },
+        { code: 'es-ES', name: 'es-ES' },
+        { code: 'es-MX', name: 'es-MX' },
+        { code: 'es-PE', name: 'es-PE' },
+        { code: 'es-US', name: 'es-US' },
+        { code: 'es-VE', name: 'es-VE' },
+        { code: 'fi-FI', name: 'fi-FI' },
+        { code: 'fil-PH', name: 'fil-PH' },
+        { code: 'fr-BE', name: 'fr-BE' },
+        { code: 'fr-CA', name: 'fr-CA' },
+        { code: 'fr-CH', name: 'fr-CH' },
+        { code: 'fr-FR', name: 'fr-FR' },
+        { code: 'fr-TN', name: 'fr-TN' },
+        { code: 'fr-US', name: 'fr-US' },
+        { code: 'hi-IN', name: 'hi-IN' },
+        { code: 'hr-HR', name: 'hr-HR' },
+        { code: 'hu-HU', name: 'hu-HU' },
+        { code: 'id-ID', name: 'id-ID' },
+        { code: 'ilo-PH', name: 'ilo-PH' },
+        { code: 'it-IT', name: 'it-IT' },
+        { code: 'ja-JP', name: 'ja-JP' },
+        { code: 'jv-ID', name: 'jv-ID' },
+        { code: 'ko-KR', name: 'ko-KR' },
+        { code: 'li-NL', name: 'li-NL' },
+        { code: 'ms-MY', name: 'ms-MY' },
+        { code: 'nl-BE', name: 'nl-BE' },
+        { code: 'nl-NL', name: 'nl-NL' },
+        { code: 'no-NO', name: 'no-NO' },
+        { code: 'pl-PL', name: 'pl-PL' },
+        { code: 'pt-BR', name: 'pt-BR' },
+        { code: 'pt-PT', name: 'pt-PT' },
+        { code: 'ro-RO', name: 'ro-RO' },
+        { code: 'ru-RU', name: 'ru-RU' },
+        { code: 'sk-SK', name: 'sk-SK' },
+        { code: 'sv-SE', name: 'sv-SE' },
+        { code: 'ta-IN', name: 'ta-IN' },
+        { code: 'tr-TR', name: 'tr-TR' },
+        { code: 'uk-UA', name: 'uk-UA' },
+        { code: 'vi-VN', name: 'vi-VN' }
+    ];
+
     availableVoiceLanguages: Array<Language> = [];
 
     //  Region detected depends the pricing
@@ -132,7 +206,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         global: number,
     }> = []
 
-    standardVoices = signal<Array<ProcessedVoice>>([]);
+    availableVoices = signal<Array<ProcessedVoice>>([]);
     premiumVoices = signal<Array<ProcessedVoice>>([]);
     premiumVoiceCost: {
         latam: number,
@@ -184,7 +258,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     showPaymentWaiting = signal<boolean>(false);
     includedVoicesShowMore = signal<boolean>(false);
     showPremiumVoices = signal<boolean>(false);
-    premiumVoicesShowMore = signal<boolean>(false);
+    premiumVoicesShowMore = signal<boolean>(true);
 
     sendBookAddress: {
         UK: {
@@ -409,13 +483,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 return;
             }
             //  Donwlod voices for next step
-            this.iAudiobook.getVoicesByTier((response: any) => {
-                console.log('getVoicesByTier', response)
-                if (response && response.success) {
-                    this.standardVoices.set(response.voices.standard)
-                    this.premiumVoices.set(response.voices.premium)
-                }
-            })
+            this.loadVoicesByLanguage();
         }
         if (this.currentStep() < 6) {
             this.currentStep.set(this.currentStep() + 1);
@@ -517,7 +585,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     }
 
     // Step 4: Configuration
-    selectVoice(voiceId: string, voiceName: string, isPro: boolean) {
+    selectVoice(voiceId: string, voiceName: string, isPro: boolean = false) {
         this.bookConfig.voiceId = voiceId;
         this.bookConfig.voiceName = voiceName;
         this.isVoiceProfessional.set(isPro);
@@ -574,8 +642,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
             total += 20;
         }
         
-        if (this.bookConfig.targetLanguage && 
-            this.bookConfig.targetLanguage !== this.bookConfig.sourceLanguage) {
+        if (this.isTranslationEnabled()) {
             total += this.getTranslationCost();
         }
         
@@ -610,7 +677,18 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 this.TRANSLATION_PRICE_PER_WORD = pricePerWord;
             }
         }
+        this.loadVoicesByLanguage();
     }
+
+    loadVoicesByLanguage() {
+        const locale = this.bookConfig.targetLanguage || null;
+        this.iAudiobook.getVoicesByTier(locale, true, (response: any) => {
+            if (response && response.success) {
+                this.availableVoices.set(response.voices || [])
+                this.premiumVoices.set([])
+            }
+        })
+    }    
 
     canProceedFromStep4(): boolean {
         return this.bookConfig.sourceLanguage !== '' &&
@@ -623,12 +701,130 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     // Step 5: Review
     getLanguageName(code: string): string {
         const lang = this.availableLanguages.find(l => l.code === code);
-        return lang ? lang.name : code;
+        if (lang) return lang.name;
+        const locale = this.availableLocales.find(l => l.code === code);
+        return locale ? this.getLocaleLabel(locale.code) : code;
     }
 
     getVoiceName(voiceId: string): string {
-        const voice = this.standardVoices().find(v => v.id === voiceId);
+        const voice = this.availableVoices().find(v => v.id === voiceId);
         return voice ? voice.name : voiceId;
+    }
+
+    isTranslationEnabled(): boolean {
+        const source = this.getBaseLanguage(this.bookConfig.sourceLanguage);
+        const target = this.getBaseLanguage(this.bookConfig.targetLanguage);
+        return !!target && target !== source;
+    }
+
+    getBaseLanguage(code: string): string {
+        if (!code) return '';
+        return code.split('-')[0];
+    }
+
+    getLocaleLabel(code: string): string {
+        if (!code) return '';
+        const [lang, region] = code.split('-');
+        const languageMap: Record<string, string> = {
+            ar: 'Arabic',
+            bg: 'Bulgarian',
+            ceb: 'Cebuano',
+            cmn: 'Mandarin Chinese',
+            cs: 'Czech',
+            da: 'Danish',
+            de: 'German',
+            el: 'Greek',
+            en: 'English',
+            es: 'Spanish',
+            fi: 'Finnish',
+            fil: 'Filipino',
+            fr: 'French',
+            hi: 'Hindi',
+            hr: 'Croatian',
+            hu: 'Hungarian',
+            id: 'Indonesian',
+            ilo: 'Ilocano',
+            it: 'Italian',
+            ja: 'Japanese',
+            jv: 'Javanese',
+            ko: 'Korean',
+            li: 'Limburgish',
+            ms: 'Malay',
+            nl: 'Dutch',
+            no: 'Norwegian',
+            pl: 'Polish',
+            pt: 'Portuguese',
+            ro: 'Romanian',
+            ru: 'Russian',
+            sk: 'Slovak',
+            sv: 'Swedish',
+            ta: 'Tamil',
+            tr: 'Turkish',
+            uk: 'Ukrainian',
+            vi: 'Vietnamese'
+        };
+        const regionMap: Record<string, string> = {
+            EG: 'Egypt',
+            KW: 'Kuwait',
+            LB: 'Lebanon',
+            MA: 'Morocco',
+            SA: 'Saudi Arabia',
+            BG: 'Bulgaria',
+            PH: 'Philippines',
+            CN: 'China',
+            TW: 'Taiwan',
+            CZ: 'Czech Republic',
+            DK: 'Denmark',
+            AT: 'Austria',
+            DE: 'Germany',
+            GR: 'Greece',
+            AU: 'Australia',
+            CA: 'Canada',
+            FI: 'Finland',
+            GB: 'United Kingdom',
+            IE: 'Ireland',
+            IN: 'India',
+            JM: 'Jamaica',
+            KR: 'Korea',
+            MY: 'Malaysia',
+            NG: 'Nigeria',
+            NZ: 'New Zealand',
+            RU: 'Russia',
+            SG: 'Singapore',
+            US: 'United States',
+            ZA: 'South Africa',
+            AR: 'Argentina',
+            CL: 'Chile',
+            CO: 'Colombia',
+            ES: 'Spain',
+            MX: 'Mexico',
+            PE: 'Peru',
+            VE: 'Venezuela',
+            BE: 'Belgium',
+            CH: 'Switzerland',
+            FR: 'France',
+            TN: 'Tunisia',
+            HR: 'Croatia',
+            HU: 'Hungary',
+            ID: 'Indonesia',
+            IT: 'Italy',
+            JP: 'Japan',
+            NL: 'Netherlands',
+            NO: 'Norway',
+            PL: 'Poland',
+            BR: 'Brazil',
+            PT: 'Portugal',
+            RO: 'Romania',
+            SK: 'Slovakia',
+            SE: 'Sweden',
+            TR: 'Turkey',
+            UA: 'Ukraine',
+            VN: 'Vietnam'
+        };
+
+        const languageName = languageMap[lang] || lang;
+        const regionName = regionMap[region] || region;
+        return region ? `${languageName} (${regionName})` : languageName;
     }
 
     showTerms(event: Event) {

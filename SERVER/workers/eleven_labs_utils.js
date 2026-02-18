@@ -17,7 +17,7 @@ const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
  * Read cache from file
  * @returns {Promise<Object|null>} - Cached data or null if expired/missing
  */
-async function readCache() {
+async function readCache(key = 'all') {
     try {
         const fileExists = await fs.access(CACHE_FILE).then(() => true).catch(() => false);
         
@@ -28,15 +28,31 @@ async function readCache() {
         const fileContent = await fs.readFile(CACHE_FILE, 'utf8');
         const cache = JSON.parse(fileContent);
 
-        // Check if cache is expired
         const now = Date.now();
-        if (now - cache.timestamp > CACHE_DURATION) {
+        // Legacy cache format
+        if (cache && cache.timestamp && cache.data && !cache.entries) {
+            if (key !== 'all') {
+                return null;
+            }
+            if (now - cache.timestamp > CACHE_DURATION) {
+                console.log('Cache expired, will fetch fresh data');
+                return null;
+            }
+            console.log('Using cached voices data');
+            return cache.data;
+        }
+
+        const entry = cache?.entries?.[key];
+        if (!entry) {
+            return null;
+        }
+        if (now - entry.timestamp > CACHE_DURATION) {
             console.log('Cache expired, will fetch fresh data');
             return null;
         }
 
         console.log('Using cached voices data');
-        return cache.data;
+        return entry.data;
     } catch (error) {
         console.error('Error reading cache:', error);
         return null;
@@ -47,9 +63,27 @@ async function readCache() {
  * Write cache to file
  * @param {Object} data - Data to cache
  */
-async function writeCache(data) {
+async function writeCache(key = 'all', data) {
     try {
-        const cache = {
+        let cache = { entries: {} };
+        try {
+            const fileContent = await fs.readFile(CACHE_FILE, 'utf8');
+            const parsed = JSON.parse(fileContent);
+            if (parsed?.entries) {
+                cache = parsed;
+            } else if (parsed?.timestamp && parsed?.data) {
+                cache.entries = {
+                    all: {
+                        timestamp: parsed.timestamp,
+                        data: parsed.data
+                    }
+                };
+            }
+        } catch {
+            // no-op
+        }
+
+        cache.entries[key] = {
             timestamp: Date.now(),
             data: data
         };
@@ -212,44 +246,68 @@ async function getVoices(filters = {}) {
  * @returns {Promise<Object>} - {standard: [], premium: []}
  */
 async function getVoicesByTier(filters = {}, forceRefresh = false) {
-    const hasFilters = Object.keys(filters).length > 0;
+    const language = filters.language || null;
+    const locale = filters.locale || null;
+    const sort = filters.sort || 'trending';
+    const category = filters.category || 'high_quality';
+    const pageSize = Math.min(filters.pageSize || 100, 100);
 
-    if (!forceRefresh && !hasFilters) {
-        const cached = await readCache();
+    const cacheKey = `shared:${language || 'all'}:${locale || 'all'}:${sort}:${category}:${pageSize}`;
+
+    if (!forceRefresh) {
+        const cached = await readCache(cacheKey);
         if (cached) return cached;
     }
 
-    const voices = await getVoices(filters);
+    const params = new URLSearchParams();
+    params.append('page_size', pageSize.toString());
+    params.append('category', category);
+    params.append('sort', sort);
+    if (language) params.append('language', language);
+    if (locale) params.append('locale', locale);
 
-    const result = {
-        standard: [],
-        premium: []
-    };
-
-    for (const voice of voices) {
-        const voiceData = {
-            id: voice.voice_id,
-            name: voice.name,
-            category: voice.category,
-            description: voice.description || '',
-            labels: voice.labels || {},
-            previewUrl: voice.preview_url || null,
-            models: voice.settings?.model_ids || [],
-            fineTuning: !!voice.fine_tuning
-        };
-
-        if (
-            voice.category === 'professional' ||
-            voice.category === 'cloned'
-        ) {
-            result.premium.push(voiceData);
-        } else {
-            result.standard.push(voiceData);
+    const url = `${ELEVENLABS_API_BASE}/shared-voices?${params.toString()}`;
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'xi-api-key': API_KEY
         }
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
     }
 
-    if (!hasFilters) {
-        await writeCache(result);
+    const data = await response.json();
+    const voices = Array.isArray(data?.voices) ? data.voices : [];
+    const filteredVoices = voices.filter(voice => {
+        if (locale) return voice.locale === locale;
+        if (language) return voice.language === language;
+        return true;
+    });
+
+    const result = filteredVoices.map(voice => ({
+        id: voice.voice_id,
+        name: voice.name,
+        category: voice.category || 'shared',
+        description: voice.description || '',
+        labels: {
+            gender: voice.gender || '',
+            accent: voice.accent || '',
+            age: voice.age || '',
+            use_case: voice.use_case || '',
+            language: voice.language || '',
+            locale: voice.locale || ''
+        },
+        previewUrl: voice.preview_url || null,
+        settings: null,
+        fineTuning: null,
+        availableForTiers: []
+    }));
+
+    if (!forceRefresh) {
+        await writeCache(cacheKey, result);
     }
 
     return result;
@@ -405,9 +463,7 @@ async function textToSpeech(params) {
         similarity = 0.75,
         style = 0, // Expression/style exaggeration (0.0 - 1.0)
         speakerBoost = true,
-        outputFormat = 'mp3_44100_128',
-        language,
-        languageCode
+        outputFormat = 'mp3_44100_128'
     } = params;
 
     try {
@@ -422,11 +478,6 @@ async function textToSpeech(params) {
             },
             output_format: outputFormat
         };
-
-        const resolvedLanguage = languageCode || language;
-        if (resolvedLanguage) {
-            payload.language_code = resolvedLanguage;
-        }
 
         const response = await fetch(
             `${ELEVENLABS_API_BASE}/text-to-speech/${voiceId}`,
