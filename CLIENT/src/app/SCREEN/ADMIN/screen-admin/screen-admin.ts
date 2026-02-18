@@ -415,7 +415,8 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         const chapterNumber = parseInt(this.chapterNumberInput(), 10);
         const totalChapters = parseInt(this.totalChaptersInput(), 10);
         const totalPages = parseInt(this.totalPagesInput(), 10);
-        const language = languageOverride || current.targetLanguage || current.sourceLanguage || '';
+        const sourceLanguage = current.sourceLanguage;
+        const targetLanguage = current.targetLanguage;
 
         this.conversionStatusVisible.set(true);
         this.conversionStatusType.set('info');
@@ -438,7 +439,8 @@ export class ScreenAdmin implements OnInit, OnDestroy {
                 chapterNumber,
                 totalChapters,
                 totalPages,
-                language
+                sourceLanguage,
+                targetLanguage
             },
             (result: any) => {
                 if (result && result.success) {

@@ -57,14 +57,17 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
     getChapterAudio(chapterNumber: number, callback: any) {
         const audiobookId = this.audiobookId();
         if (audiobookId) {
-            this.getInternetAudiobook().audiobookGetChapterAudioIsAvailable(audiobookId, chapterNumber, (buffer: ArrayBuffer | null) => {
+            this.getInternetAudiobook().audiobookGetChapterAudio(audiobookId, chapterNumber, (buffer: ArrayBuffer | null) => {
                 if (!buffer) {
                     this.errorMessage.set('Unable to load this chapter');
                     return;
                 }
                 const blob = new Blob([buffer], { type: 'audio/mpeg' });
                 const url = URL.createObjectURL(blob);
-                //  TODO: now play the audio in "url"
+                this.setAudioSource(url, true, () => {
+                    this.audioLoaded.set(true);
+                    if (callback) callback();
+                });
             }
         );
         }

@@ -134,9 +134,9 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    audiobookGetChapterAudioIsAvailable(audiobookId: string, chapterNumber: number, callback: (result: ArrayBuffer | null) => void) {
+    audiobookGetChapterAudioIsAvailable(audiobookId: string, chapterNumber: number, callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPostArrayBuffer(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'AudiobookGetChapterAudioIsAvailable',
             lang,
             data: {

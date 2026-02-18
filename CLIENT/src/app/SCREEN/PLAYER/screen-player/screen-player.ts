@@ -52,8 +52,8 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     //  Audio playing
     selectedChapterIndex = signal<number>(0);
     private intervalId: any;
-    private audioElement: HTMLAudioElement | null = null;
-    private audioUrl: string | null = null;
+    protected audioElement: HTMLAudioElement | null = null;
+    protected audioUrl: string | null = null;
     loadingAudio = signal<boolean>(false);
 
     //  Flags 
@@ -280,7 +280,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         }
     }
 
-    private initAudioElement() {
+    protected initAudioElement() {
         if (this.audioElement) return;
         this.audioElement = new Audio();
         this.audioElement.addEventListener('timeupdate', () => {
@@ -294,13 +294,14 @@ export class ScreenPlayer implements OnInit, OnDestroy {
             if (!this.audioElement) return;
             this.totalSeconds = Math.floor(this.audioElement.duration || 0);
             this.updateTime();
+            this.audioLoaded.set(true);
         });
         this.audioElement.addEventListener('ended', () => {
             this.isPlaying = false;
         });
     }
 
-    private loadChapterAudio(chapterNumber: number, callback?: any) {
+    protected loadChapterAudio(chapterNumber: number, callback?: any) {
         const audiobookId = this.audiobookId();
         if (!audiobookId) return;
 
@@ -311,6 +312,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
                 this.toast.show('Audio not available');
                 return;
             }
+            this.audioLoaded.set(false);
             if (this.audioUrl) {
                 URL.revokeObjectURL(this.audioUrl);
             }
@@ -320,6 +322,29 @@ export class ScreenPlayer implements OnInit, OnDestroy {
             this.audioElement.load();
             if (callback) callback();
         });
+    }
+
+    protected setAudioSource(url: string, autoplay: boolean = true, callback?: () => void) {
+        this.initAudioElement();
+        if (!this.audioElement) return;
+        this.audioLoaded.set(false);
+        if (this.audioUrl) {
+            URL.revokeObjectURL(this.audioUrl);
+        }
+        this.audioUrl = url;
+        this.audioElement.src = url;
+        this.audioElement.load();
+        if (autoplay) {
+            this.audioElement.play().then(() => {
+                this.isPlaying = true;
+                if (callback) callback();
+            }).catch(() => {
+                this.isPlaying = false;
+                if (callback) callback();
+            });
+        } else {
+            if (callback) callback();
+        }
     }
 
     openChapters() {

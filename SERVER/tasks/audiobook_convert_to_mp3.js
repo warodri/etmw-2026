@@ -21,6 +21,23 @@ async function run(data, req, res) {
             params,
         } = payload;
 
+        /**
+         * params is:
+         *  voiceId: string,
+            text: string,
+            modelId: 'eleven_turbo_v2',
+            stability: number,
+            similarity: number,
+            style: number,
+            speakerBoost: boolean,
+            outputFormat: 'mp3_44100_128',
+            chapterNumber: number,
+            totalChapters: number,
+            totalPages: number,
+            sourceLanguage: string,
+            targetLanguage: string
+         */
+
         //  Validate
         if (!audiobookId || !params) {
             return res.json({ 
@@ -60,6 +77,16 @@ async function run(data, req, res) {
                 message: 'Invalid chapter number' 
             });
         }
+
+        //  If params.targetLanguage is different than params.sourceLanguage,
+        //  then ask OpenAI to translate.
+        if (params.targetLanguage && params.sourceLanguage && params.targetLanguage != params.sourceLanguage) {
+            params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
+            params.language = params.targetLanguage;
+        }
+
+        //  Must continue with the translated text from here on.
+        //  The user uploded a book in one language but he wants another now.
 
         //  Convert to audio
         const audioBuffer = await elevenLabsUtils.textToSpeech(params);
@@ -121,7 +148,8 @@ async function run(data, req, res) {
 
         // Update pipeline status
         if (audiobook.pipelineStatus === 'uploaded') {
-            audiobook.pipelineStatus = 'tts_processing';
+            audiobook.pipelineStatus = 'published';
+            audiobook.published = true;
         }
 
         //  Update last time modified
@@ -504,6 +532,91 @@ function extractFirstSentence(text, maxLen) {
     const match = text.match(/[^.?!]+[.?!]/);
     const sentence = match ? match[0] : text;
     return sentence.replace(/\s+/g, ' ').trim().slice(0, maxLen);
+}
+
+const LANGUAGE_NAMES = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'it': 'Italian',
+    'pt': 'Portuguese',
+    'pl': 'Polish',
+    'nl': 'Dutch',
+    'hi': 'Hindi',
+    'ja': 'Japanese',
+    'zh': 'Chinese',
+    'ko': 'Korean',
+    'ar': 'Arabic',
+    'ru': 'Russian'
+};
+
+function getLanguageName(code) {
+    if (!code) return code;
+    const base = String(code).split('-')[0];
+    return LANGUAGE_NAMES[base] || code;
+}
+
+async function translateWithOpenAi(text, sourceLanguage, targetLanguage) {
+    const sourceLangName = getLanguageName(sourceLanguage);
+    const targetLangName = getLanguageName(targetLanguage);
+
+    const systemPrompt = `You are a professional translator specializing in literary translation. Your task is to translate text from ${sourceLangName} to ${targetLangName}.
+
+Important: Return ONLY the translated text, without any preamble, explanations, or commentary.`;
+
+    const completion = await client.chat.completions.create({
+        model: "gpt-4.1-mini",
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Translate the following text from ${sourceLangName} to ${targetLangName}:\n\n${text}` }
+        ],
+        temperature: 0,
+    });
+
+    const responseText = completion.choices?.[0]?.message?.content || '';
+    return responseText.trim();
+}
+
+async function translateWithOpenAiChunked(text, sourceLanguage, targetLanguage) {
+    if (!text) return '';
+    const chunks = splitTextIntoChunks(text, 4000);
+    const translatedChunks = [];
+
+    for (const chunk of chunks) {
+        const translated = await translateWithOpenAi(chunk, sourceLanguage, targetLanguage);
+        translatedChunks.push(translated);
+    }
+
+    return translatedChunks.join('\n\n').trim();
+}
+
+function splitTextIntoChunks(text, maxChars) {
+    const clean = String(text || '').trim();
+    if (!clean) return [];
+    if (clean.length <= maxChars) return [clean];
+
+    const sentences = clean.match(/[^.?!]+[.?!]+/g) || [];
+    if (sentences.length === 0) {
+        const chunks = [];
+        for (let i = 0; i < clean.length; i += maxChars) {
+            chunks.push(clean.slice(i, i + maxChars));
+        }
+        return chunks;
+    }
+
+    const chunks = [];
+    let current = '';
+    for (const sentence of sentences) {
+        if ((current + sentence).length > maxChars) {
+            if (current.trim()) chunks.push(current.trim());
+            current = sentence;
+        } else {
+            current += sentence;
+        }
+    }
+    if (current.trim()) chunks.push(current.trim());
+    return chunks;
 }
 
 async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
