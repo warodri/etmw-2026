@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { InternetAudiobookService } from '../../SERVICES/interent-audiobook.service';
-import { AudiobookModel } from '../../models/audiobook';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { AudiobookModel } from '../../../models/audiobook';
 import { ActivatedRoute } from '@angular/router';
-import { ToastService } from '../../SERVICES/toast';
+import { ToastService } from '../../../SERVICES/toast';
 import { Router } from '@angular/router';
-import { UtilsService } from '../../utils/utils-service';
-import { InternetUserService } from '../../SERVICES/internet-user.service';
-import { ListeningProgressModel } from '../../models/listening-progress';
+import { UtilsService } from '../../../utils/utils-service';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { ListeningProgressModel } from '../../../models/listening-progress';
+import { InternetService } from '../../../SERVICES/internet.service';
 
 @Component({
     selector: 'app-screen-item-detail',
@@ -23,10 +24,12 @@ export class ScreenItemDetail implements OnInit {
 
     //  Flags 
     loading = signal<boolean>(true);
+    isBookmarked = signal<boolean>(false);
 
     constructor(
         private iAudiobook: InternetAudiobookService,
         private iUser: InternetUserService,
+        private internet: InternetService,
         private route: ActivatedRoute,
         private toast: ToastService,
         private router: Router,
@@ -37,6 +40,7 @@ export class ScreenItemDetail implements OnInit {
         this.route.paramMap.subscribe(params => {
             this.audiobookId.set(params.get('id'));
             this.getAudiobookById(() => {
+                this.getMyBookmarks();
                 this.getListeningProgress(() => {
                     this.loading.set(false);
                 })
@@ -62,12 +66,11 @@ export class ScreenItemDetail implements OnInit {
 
     getListeningProgress(callback: any) {
         const audiobookId = this.audiobookId();
-        const chapterNumber = this.getSelectedChapterNumber();
-        if (!audiobookId || !chapterNumber) {
+        if (!audiobookId) {
             if (callback) callback();
             return;
         }
-        this.iUser.userGetListeningHistory(audiobookId, chapterNumber, (response: any) => {
+        this.iUser.userGetListeningHistory(audiobookId, (response: any) => {
             if (response && response.success) {
                 this.listeningProgress.set(this.normalizeListeningHistory(response.history))
             }
@@ -132,7 +135,6 @@ export class ScreenItemDetail implements OnInit {
 
     selectChapter(index: number) {
         this.selectedChapterIndex.set(index);
-        this.getListeningProgress(() => {});
     }
 
     playSelectedChapter() {
@@ -155,12 +157,41 @@ export class ScreenItemDetail implements OnInit {
         }
     }
 
-    private getSelectedChapterNumber(): number {
-        const chapters = this.getChapters();
-        const idx = this.selectedChapterIndex();
-        const chapter = chapters[idx]?.chapter;
-        if (typeof chapter === 'number' && chapter > 0) return chapter;
-        return chapters[0]?.chapter || 1;
+    async shareCurrentPage() {
+        const url = typeof window !== 'undefined' ? window.location.href : '';
+        if (!url) {
+            this.toast.show('Unable to share this page.');
+            return;
+        }
+
+        const title = this.audiobook()?.title || 'Audiobook';
+        const nav = typeof navigator !== 'undefined' ? navigator : null;
+
+        try {
+            if (nav && 'share' in nav) {
+                await nav.share({
+                    title,
+                    text: `Check this audiobook: ${title}`,
+                    url
+                });
+                return;
+            }
+        } catch (ex: any) {
+            // If user cancels native share, do nothing.
+            if (ex?.name === 'AbortError') return;
+        }
+
+        try {
+            if (nav?.clipboard?.writeText) {
+                await nav.clipboard.writeText(url);
+                this.toast.show('Link copied to clipboard.');
+                return;
+            }
+        } catch (ex) {
+            // Continue to final fallback
+        }
+
+        this.toast.show(url);
     }
 
     private normalizeListeningHistory(raw: any): ListeningProgressModel[] {
@@ -169,4 +200,36 @@ export class ScreenItemDetail implements OnInit {
         return [raw];
     }
 
+    getChapterProgressPercent(chapter: number): number {
+        const history = this.listeningProgress();
+        const item = history.find((h) => Number(h.chapterNumber) === Number(chapter));
+        if (!item || typeof item.progressPercent !== 'number') return 0;
+        return Math.max(0, Math.min(100, Math.round(item.progressPercent)));
+    }
+
+    toggleBookmark() {
+        const audiobookId = this.audiobookId()
+        if (audiobookId) {
+            this.isBookmarked.set(!this.isBookmarked());
+            this.internet.bookmarkUpsert(audiobookId, 'audiobook', (response: any) => {
+                console.log('bookmarkUpsert', response)
+            })
+        }
+    }
+
+    getMyBookmarks() {
+        const audiobookId = this.audiobookId()
+        if (audiobookId) {
+            this.isBookmarked.set(false);
+            this.internet.bookmarkUpsertGetMine((response: any) => {
+                console.log('bookmarkUpsertGetMine', response)
+                for (let item of response.bookmarks) {
+                    if (item.targetId == audiobookId) {
+                        this.isBookmarked.set(true);
+                        break;
+                    }
+                }
+            })
+        }        
+    }
 }

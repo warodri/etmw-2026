@@ -1,34 +1,28 @@
+
 async function run(data, req, res) {
     try {
         const {
-            audiobookId,
-            chapterNumber,
         } = data;
-
-        //  Validate user
+        
         const userId = req.userId || null;
-        if (!userId || !audiobookId) {
+
+        if (!userId) {
             return res.status(200).json({
                 success: false,
-                message: 'Invalid user'
+                message: 'invalid data'
             })
         }
 
-        //  Get user listening history
-        const ListeningProgress = require('../models/listening_progress');
-        const query = {
-            userId,
-            audiobookId,
-            enabled: true
-        };
-        if (typeof chapterNumber === 'number' && chapterNumber > 0) {
-            query.chapterNumber = chapterNumber;
-        }
-        const history = await ListeningProgress.find(query).sort({ chapterNumber: 1, updatedAt: -1 });
+        const Bookmark = require('../models/bookmark');
 
+        const bookmarks = await Bookmark.find({
+            userId,
+            enabled: true
+        });
+        
         return res.status(200).json({
             success: true,
-            history,
+            bookmarks
         })
 
     } catch (ex) {

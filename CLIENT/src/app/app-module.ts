@@ -5,7 +5,6 @@ import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { ScreenHome } from './SCREEN/screen-home/screen-home';
-import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
 import { Main } from './COMPONENTS/MAIN/main/main';
 import { Search } from './COMPONENTS/SEARCH/search/search';
 import { ItemDetail } from './COMPONENTS/ITEMS/item-detail/item-detail';
@@ -49,6 +48,7 @@ import { Authors } from './COMPONENTS/AUTHOR/authors/authors';
 import { Categories } from './COMPONENTS/ITEMS/categories/categories';
 import { HomepageCategoriesAndBooks } from './COMPONENTS/ITEMS/homepage-categories-and-books/homepage-categories-and-books';
 import { ScreenAdmin } from './SCREEN/ADMIN/screen-admin/screen-admin';
+import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
 
 @NgModule({
     declarations: [

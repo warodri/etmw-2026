@@ -115,16 +115,21 @@ export class InternetUserService extends InternetService {
         }, callback);
     }
 
-    userGetListeningHistory(audiobookId: string, chapterNumber: number, callback: any) {
+    userGetListeningHistory(audiobookId: string, chapterNumberOrCallback: number | any, callback?: any) {
+        const hasChapter = typeof chapterNumberOrCallback === 'number';
+        const done = hasChapter ? callback : chapterNumberOrCallback;
         const lang: string = LangUtils.detectLanguage();
+        const data: any = {
+            audiobookId
+        };
+        if (hasChapter) {
+            data.chapterNumber = chapterNumberOrCallback;
+        }
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'UserGetListeningHistory',
             lang,
-            data: {
-                audiobookId,
-                chapterNumber
-            }
-        }, callback);
+            data
+        }, done);
     }
 
     userSetListeningHistory(audiobookId: string, chapterNumber: number, progressPercent: number, completed: boolean, callback: any) {

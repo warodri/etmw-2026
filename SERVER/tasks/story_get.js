@@ -7,18 +7,27 @@ async function run(data, req, res) {
         } = data;
 
         //  Find stories
+        const Audiobook = require('../models/audiobook');
         const Story = require('../models/story');
         const stories = await Story.find({
             enabled: true
         }).skip( skip ).limit( limit )
 
-        /**
-         * IMPORTANT
-         * Yes, we are returning the chapter text. 
-         * But for the audio part, the user needs to request
-         * to the server and it will validate if the user is 
-         * able to listen or not that audio.
-         */
+        //  Replace the first image with the image of the book
+        for (let item of stories) {
+            const audiobookId = item.audiobookId;
+            if (audiobookId) {
+                const a = await Audiobook.findOne({
+                    _id: audiobookId,
+                    enabled: true
+                })
+                if (a) {
+                    item.image = a.coverFile;
+                    item.title = a.title;
+                }
+            }
+        }
+
         return res.status(200).json({
             success: true,
             stories

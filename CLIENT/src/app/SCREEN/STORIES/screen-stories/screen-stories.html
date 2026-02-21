@@ -17,11 +17,11 @@
                             <img class="story-image" [src]="story.image" [alt]="story.author" style="max-width: 35%;">
                             <div class="story-overlay" style="max-width: 35%;">
                                 <div class="story-title">{{ story.title }}</div>
-                                <div class="story-subtitle">{{ story.subtitle }}</div>
+                                <div class="story-quote">{{ story.subtitle }}</div>
                                 <div class="story-language pt-1 pb-1">
                                     {{ languageLabel(story.language) }}
                                 </div>
-                                <div class="story-quote">{{ story.quote }}</div>
+                                <!-- <div class="story-quote">{{ story.quote }}</div> -->
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
                                     <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>

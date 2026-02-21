@@ -13,11 +13,11 @@ import { ScreenUploadAudiobook } from './SCREEN/AUDIOBOOK/screen-upload-audioboo
 import { ScreenPaymentSuccess } from './SCREEN/PAYMENT/screen-payment-success/screen-payment-success';
 import { ScreenPaymentFailed } from './SCREEN/PAYMENT/screen-payment-failed/screen-payment-failed';
 import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelled/screen-payment-cencelled';
-import { ScreenItemDetail } from './SCREEN/screen-item-detail/screen-item-detail';
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 import { ScreenAdmin } from './SCREEN/ADMIN/screen-admin/screen-admin';
+import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },

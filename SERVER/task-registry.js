@@ -1,10 +1,17 @@
 
 //
+//  BOOKMARKS
+//
+BookmarkUpsert = require('./tasks/bookmark_upsert');
+BookmarkUpsertGetMine = require('./tasks/bookmark_get_mine');
+
+//
 //  STORIES
 //
 GetStories = require('./tasks/story_get');
 GetStoriesByAudiobook = require('./tasks/story_get_by_audiobook');
 UpdateAudiobookStory = require('./tasks/story_update');
+StoryUploadNewFile = require('./tasks/story_upload_new_file');
 
 //
 //  SUBSCRIPTIONS
@@ -81,8 +88,13 @@ const FindAuthor = require('./tasks/author_find');
 
 const TasksRegistry = {
 
+    //  BOOKMARKS
+    BookmarkUpsert,
+    BookmarkUpsertGetMine,
+
     //  STORIES
     UpdateAudiobookStory,
+    StoryUploadNewFile,
     GetStoriesByAudiobook,
     GetStories,
     

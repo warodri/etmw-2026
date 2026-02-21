@@ -91,6 +91,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     storyLanguageInput = signal('');
     storyEditId = signal<string | null>(null);
     storyEditSaving = signal(false);
+    storyFileUploading = signal(false);
     storyEditError = signal('');
     storyEditForm = signal<any>({
         title: '',
@@ -102,7 +103,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         totalChapters: '',
         language: '',
         slideIndex: '',
-        chapterPiecesJson: ''
+        chapterPieces: []
     });
 
     private pdfJsLoaded = false;
@@ -565,6 +566,17 @@ export class ScreenAdmin implements OnInit, OnDestroy {
     }
 
     openStoryEditor(story: any) {
+        const chapterPieces = Array.isArray(story.chapterPieces)
+            ? story.chapterPieces.map((piece: any) => ({
+                title: piece?.title || '',
+                quote: piece?.quote || '',
+                readingText: piece?.readingText || '',
+                audioImage: piece?.audioImage || '',
+                audioUrl: piece?.audioUrl || '',
+                slideIndex: piece?.slideIndex ?? '',
+                audioDuration: piece?.audioDuration ?? ''
+            }))
+            : [];
         this.storyEditId.set(story._id);
         this.storyEditError.set('');
         this.storyEditForm.set({
@@ -577,7 +589,7 @@ export class ScreenAdmin implements OnInit, OnDestroy {
             totalChapters: String(story.totalChapters ?? ''),
             language: story.language || '',
             slideIndex: String(story.slideIndex ?? ''),
-            chapterPiecesJson: JSON.stringify(story.chapterPieces || [], null, 2)
+            chapterPieces
         });
     }
 
@@ -593,20 +605,90 @@ export class ScreenAdmin implements OnInit, OnDestroy {
         }));
     }
 
+    setStoryPieceField(index: number, key: string, value: any) {
+        this.storyEditForm.update((form: any) => ({
+            ...form,
+            chapterPieces: (form.chapterPieces || []).map((piece: any, i: number) =>
+                i === index ? { ...piece, [key]: value } : piece
+            )
+        }));
+    }
+
+    uploadStoryCoverFile(event: Event) {
+        this.uploadStoryImageFile(event, -1);
+    }
+
+    uploadStoryPieceFile(event: Event, pieceIndex: number) {
+        this.uploadStoryImageFile(event, pieceIndex);
+    }
+
+    private uploadStoryImageFile(event: Event, pieceIndex: number) {
+        const storyId = this.storyEditId();
+        const input = event.target as HTMLInputElement;
+        const file = input?.files?.[0] || null;
+        if (!storyId || !file) return;
+
+        this.storyFileUploading.set(true);
+        this.storyEditError.set('');
+        this.internetAdmin.storyUploadNewFile(storyId, pieceIndex, file, (result: any) => {
+            this.storyFileUploading.set(false);
+            if (input) input.value = '';
+            if (result && result.success && result.story) {
+                this.stories.update((list) =>
+                    list.map((story) => story._id === result.story._id ? result.story : story)
+                );
+                this.openStoryEditor(result.story);
+            } else {
+                this.storyEditError.set(result?.message || 'No se pudo subir la imagen.');
+            }
+        });
+    }
+
+    addStoryPiece() {
+        this.storyEditForm.update((form: any) => ({
+            ...form,
+            chapterPieces: [
+                ...(form.chapterPieces || []),
+                {
+                    title: '',
+                    quote: '',
+                    readingText: '',
+                    audioImage: '',
+                    audioUrl: '',
+                    slideIndex: (form.chapterPieces || []).length,
+                    audioDuration: ''
+                }
+            ]
+        }));
+    }
+
+    removeStoryPiece(index: number) {
+        this.storyEditForm.update((form: any) => ({
+            ...form,
+            chapterPieces: (form.chapterPieces || []).filter((_: any, i: number) => i !== index)
+        }));
+    }
+
     saveStoryEdits() {
         const storyId = this.storyEditId();
         if (!storyId) return;
 
         const form = this.storyEditForm();
-        let chapterPieces: any = undefined;
-        if (form.chapterPiecesJson && String(form.chapterPiecesJson).trim().length > 0) {
-            try {
-                chapterPieces = JSON.parse(form.chapterPiecesJson);
-            } catch (error) {
-                this.storyEditError.set('El JSON de chapterPieces no es válido.');
-                return;
-            }
-        }
+        const chapterPieces = Array.isArray(form.chapterPieces)
+            ? form.chapterPieces.map((piece: any, index: number) => ({
+                title: piece?.title || '',
+                quote: piece?.quote || '',
+                readingText: piece?.readingText || '',
+                audioImage: piece?.audioImage || '',
+                audioUrl: piece?.audioUrl || '',
+                slideIndex: piece?.slideIndex !== '' && piece?.slideIndex !== null && piece?.slideIndex !== undefined
+                    ? Number(piece.slideIndex)
+                    : index,
+                audioDuration: piece?.audioDuration !== '' && piece?.audioDuration !== null && piece?.audioDuration !== undefined
+                    ? Number(piece.audioDuration)
+                    : undefined
+            }))
+            : [];
 
         const payload: any = {
             title: form.title,
@@ -618,11 +700,8 @@ export class ScreenAdmin implements OnInit, OnDestroy {
             chapterNumber: form.chapterNumber ? Number(form.chapterNumber) : undefined,
             totalChapters: form.totalChapters ? Number(form.totalChapters) : undefined,
             slideIndex: form.slideIndex ? Number(form.slideIndex) : undefined,
+            chapterPieces
         };
-
-        if (chapterPieces !== undefined) {
-            payload.chapterPieces = chapterPieces;
-        }
 
         this.storyEditSaving.set(true);
         this.storyEditError.set('');

@@ -91,5 +91,28 @@ export class InternetService {
         }, callback);
     }
 
+    //  BOOKMARKS
+    
+    bookmarkUpsert(targetId: string, targetType: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'BookmarkUpsert',
+            lang,
+            data: {
+                targetId,
+                targetType
+            }
+        }, callback);
+    }
+
+    bookmarkUpsertGetMine(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'BookmarkUpsertGetMine',
+            lang,
+            data: {
+            }
+        }, callback);
+    }
 
 }

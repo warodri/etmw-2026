@@ -543,6 +543,9 @@
                                                                                 <div class="col-md-6">
                                                                                     <label class="form-label">Imagen (URL)</label>
                                                                                     <input class="form-control" [ngModel]="storyEditForm().image" (ngModelChange)="setStoryFormField('image', $event)">
+                                                                                    <div class="mt-2">
+                                                                                        <input type="file" class="form-control form-control-sm" accept="image/*" [disabled]="storyFileUploading()" (change)="uploadStoryCoverFile($event)">
+                                                                                    </div>
                                                                                 </div>
                                                                                 <div class="col-md-6">
                                                                                     <label class="form-label">Autor</label>
@@ -565,12 +568,73 @@
                                                                                     <input class="form-control" [ngModel]="storyEditForm().language" (ngModelChange)="setStoryFormField('language', $event)">
                                                                                 </div>
                                                                                 <div class="col-12">
-                                                                                    <label class="form-label">Chapter Pieces (JSON)</label>
-                                                                                    <textarea class="form-control story-json" rows="8" [ngModel]="storyEditForm().chapterPiecesJson" (ngModelChange)="setStoryFormField('chapterPiecesJson', $event)"></textarea>
+                                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                                        <label class="form-label mb-0">Chapter Pieces</label>
+                                                                                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addStoryPiece()">
+                                                                                            <i class="bi bi-plus-circle"></i> Agregar pieza
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    @if (!storyEditForm().chapterPieces?.length) {
+                                                                                        <div class="text-muted small">No hay piezas todavía.</div>
+                                                                                    } @else {
+                                                                                        <div class="story-piece-editor-list">
+                                                                                            @for (piece of storyEditForm().chapterPieces; track $index) {
+                                                                                                <div class="story-piece-editor card mb-2">
+                                                                                                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                                                                                        <strong>Pieza {{ $index + 1 }}</strong>
+                                                                                                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeStoryPiece($index)">
+                                                                                                            <i class="bi bi-trash"></i>
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                    <div class="card-body">
+                                                                                                        <div class="row g-2">
+                                                                                                            <div class="col-md-6">
+                                                                                                                <label class="form-label small">Título</label>
+                                                                                                                <input class="form-control form-control-sm" [ngModel]="piece.title" (ngModelChange)="setStoryPieceField($index, 'title', $event)">
+                                                                                                            </div>
+                                                                                                            <div class="col-md-3">
+                                                                                                                <label class="form-label small">Slide index</label>
+                                                                                                                <input type="number" class="form-control form-control-sm" [ngModel]="piece.slideIndex" (ngModelChange)="setStoryPieceField($index, 'slideIndex', $event)">
+                                                                                                            </div>
+                                                                                                            <div class="col-md-3">
+                                                                                                                <label class="form-label small">Duración (s)</label>
+                                                                                                                <input type="number" class="form-control form-control-sm" [ngModel]="piece.audioDuration" (ngModelChange)="setStoryPieceField($index, 'audioDuration', $event)">
+                                                                                                            </div>
+                                                                                                            <div class="col-12">
+                                                                                                                <label class="form-label small">Quote</label>
+                                                                                                                <textarea class="form-control form-control-sm" rows="2" [ngModel]="piece.quote" (ngModelChange)="setStoryPieceField($index, 'quote', $event)"></textarea>
+                                                                                                            </div>
+                                                                                                            <div class="col-12">
+                                                                                                                <label class="form-label small">Reading text</label>
+                                                                                                                <textarea class="form-control form-control-sm" rows="3" [ngModel]="piece.readingText" (ngModelChange)="setStoryPieceField($index, 'readingText', $event)"></textarea>
+                                                                                                            </div>
+                                                                                                            <div class="col-md-6">
+                                                                                                                <label class="form-label small">Audio image</label>
+                                                                                                                <input class="form-control form-control-sm" [ngModel]="piece.audioImage" (ngModelChange)="setStoryPieceField($index, 'audioImage', $event)">
+                                                                                                                <div class="mt-1">
+                                                                                                                    <input type="file" class="form-control form-control-sm" accept="image/*" [disabled]="storyFileUploading()" (change)="uploadStoryPieceFile($event, $index)">
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            <div class="col-md-6">
+                                                                                                                <label class="form-label small">Audio URL</label>
+                                                                                                                <input class="form-control form-control-sm" [ngModel]="piece.audioUrl" (ngModelChange)="setStoryPieceField($index, 'audioUrl', $event)">
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    }
                                                                                 </div>
                                                                             </div>
                                                                         </div>
                                                                         <div class="card-footer d-flex justify-content-end gap-2">
+                                                                            @if (storyFileUploading()) {
+                                                                                <div class="d-flex align-items-center me-auto small text-muted">
+                                                                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                                                                    Subiendo imagen...
+                                                                                </div>
+                                                                            }
                                                                             <button class="btn btn-secondary" (click)="closeStoryEditor()">Cancelar</button>
                                                                             <button class="btn btn-primary" [disabled]="storyEditSaving()" (click)="saveStoryEdits()">
                                                                                 @if (storyEditSaving()) {

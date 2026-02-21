@@ -78,7 +78,7 @@
             }
         </div>
     
-        <div class="px-4">
+        <div>
     
             <!--
                 SEARCH RESULTS
@@ -198,14 +198,22 @@
                                     
                                     @if (category.children.length > 0) {
                                         <div class="d-flex flex-wrap justify-content-center gap-1 mt-2">
-                                            @for (child of category.children; track child.name) {
-                                                <div class="badge bg-slate-800 px-2 py-1">
-                                                    {{ child.name }}  &nbsp;
-                                                    <span class="small bg-light text-dark rounded-pill px-1">
-                                                        {{ (child.count || 0) ? ('' + (child.count || 0)) : '0' }}
-                                                    </span>
-                                                </div>
-                                            }
+                                            <table cellpadding="5">
+                                                <tbody>
+                                                    @for (child of category.children; track child.name) {
+                                                        <tr>
+                                                            <td class="text-start small">
+                                                                {{ child.name }}  &nbsp;
+                                                            </td>
+                                                            <td>
+                                                                <span class="small">
+                                                                    {{ (child.count || 0) ? ('' + (child.count || 0)) : '0' }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
                                         </div>
                                     }
                                 </div>

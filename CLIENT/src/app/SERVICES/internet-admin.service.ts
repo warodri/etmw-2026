@@ -151,7 +151,17 @@ export class InternetAdminService extends InternetService {
         }, callback);
     }
 
-    
-
+    storyUploadNewFile(_id: string, pieceIndex: number, file: File, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        const formData = new FormData();
+        formData.append('action', 'StoryUploadNewFile');
+        formData.append('lang', lang);
+        formData.append('data', JSON.stringify({
+            _id,
+            pieceIndex
+        }));
+        formData.append('file', file);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP, formData, callback);
+    }
 
 }
