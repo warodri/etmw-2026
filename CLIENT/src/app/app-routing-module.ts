@@ -16,8 +16,8 @@ import { ScreenPaymentCencelled } from './SCREEN/PAYMENT/screen-payment-cencelle
 import { ScreenTutorials } from './SCREEN/SYSTEM/screen-tutorials/screen-tutorials';
 import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/screen-contact-support';
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
-import { ScreenAdmin } from './SCREEN/ADMIN/screen-admin/screen-admin';
 import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
+import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -47,7 +47,7 @@ const routes: Routes = [
     { path: 'app/stories', component: ScreenStories },
 
     //  Admin
-    { path: 'app/admin', component: ScreenAdmin },
+    { path: 'app/admin', component: ScreenAdminComponent },
 
 ];
 

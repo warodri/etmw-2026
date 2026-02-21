@@ -28,7 +28,7 @@ type PromoForm = {
     templateUrl: './screen-admin.html',
     styleUrl: './screen-admin.css',
 })
-export class ScreenAdmin implements OnInit, OnDestroy {
+export class ScreenAdminComponent implements OnInit, OnDestroy {
 
     SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
     

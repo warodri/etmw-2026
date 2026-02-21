@@ -47,8 +47,9 @@ import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 import { Authors } from './COMPONENTS/AUTHOR/authors/authors';
 import { Categories } from './COMPONENTS/ITEMS/categories/categories';
 import { HomepageCategoriesAndBooks } from './COMPONENTS/ITEMS/homepage-categories-and-books/homepage-categories-and-books';
-import { ScreenAdmin } from './SCREEN/ADMIN/screen-admin/screen-admin';
 import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
+import { CommonModule } from '@angular/common';
+import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
 
 @NgModule({
     declarations: [
@@ -92,12 +93,13 @@ import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-i
         Authors,
         Categories,
         HomepageCategoriesAndBooks,
-        ScreenAdmin,
+        ScreenAdminComponent,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [
         HttpClientModule, 
         BrowserModule,
+        CommonModule,
         AppRoutingModule,
         FormsModule,
         ImageCropperComponent,
