@@ -49,7 +49,7 @@ export class HomepageCategoriesAndBooks implements OnInit {
             skip,
             (response: any) => {
                 if (response && response.success) {
-                    for (let item of response.audiobook) {
+                    for (let item of response.audiobooks) {
                         item.coverFileFull = this.getCoverUrl(item);
                     }
                     this.audiobooks.set( response.audiobooks || [] );

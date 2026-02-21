@@ -4,13 +4,11 @@ const Schema = mongoose.Schema;
 const model = new Schema({
 
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: "etmw2026_users",
+        type: String,
         index: true
     },
     audiobookId: {
-        type: Schema.Types.ObjectId,
-        ref: "etmw2026_audiobooks",
+        type: String,
         index: true
     },
     chapterNumber: {
@@ -20,13 +18,10 @@ const model = new Schema({
         type: Number,
         default: 0
     },
-
     completed: {
         type: Boolean,
-        default: false,
-        index: true
+        default: false
     },
-
 
     enabled: {
         type: Boolean,

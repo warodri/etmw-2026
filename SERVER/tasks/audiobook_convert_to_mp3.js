@@ -100,9 +100,11 @@ async function run(data, req, res) {
         if (shouldTranslate(sourceLanguage, targetLanguage)) {
             params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
         }
-
+        
+        //////////////////////////////////////////////////////////////////////
         //  Must continue with the translated text from here on.
         //  The user uploded a book in one language but he wants another now.
+        //////////////////////////////////////////////////////////////////////
 
         // Convert to audio (ElevenLabs max text length per request: 30000 chars)
         const audioBuffer = await convertTextToSpeechChunked(params);
@@ -313,17 +315,13 @@ async function generateStoryTitleAndQuote(audiobook, params, chapterPieces) {
         if (!Number.isFinite(item.slideIndex)) {
             item.slideIndex = i;
         }
-        // Call OpenAI to Create a "title" and a "quote". It must be dramatic enough to ge the reader's attention. 
-        
+        // Call OpenAI to Create a "title" and a "quote". It must be dramatic enough to ge the reader's attention.         
         // Example: Provocative sentence
         //     “Most people don’t want freedom. They want safety.”
-
         // Or Story fragments:
         //     “He left the house barefoot. That was the moment everything changed.”
-
         // Or a Personal confession:
         //     “I used to believe success meant silence.”
-
         const response = await openAiGenerateTextandQuote(item.readingText, audiobook, params);
         if (!response) {
             throw new Error('Open AI did not return title and quote')
@@ -469,11 +467,15 @@ async function generate10MinuteAudios(audiobook, params, chapterPieces) {
 }
 
 async function openAiGenerateTextandQuote(readingText, audiobook, params) {
+    
+    const sourceLanguage = params.sourceLanguage || audiobook.sourceLanguage || 'en';
+    const targetLanguage = params.targetLanguage || audiobook.targetLanguage || sourceLanguage;
+
     const cleanedText = trimPromptText(readingText, 9000);
     const systemPrompt = `You are a creative editor. Create a dramatic, intriguing short title, a short subtitle, and a memorable quote based on the provided text. 
-
-Return ONLY valid JSON with the exact keys: "title", "subtitle", "quote". 
-No markdown, no extra text. Keep each field under 160 characters. Avoid spoilers.`;
+- Language to be used to generate the text: ${targetLanguage}.
+- Return ONLY valid JSON with the exact keys: "title", "subtitle", "quote". 
+- No markdown, no extra text. Keep each field under 160 characters. Avoid spoilers.`;
 
     const completion = await client.chat.completions.create({
         model: "gpt-4.1-mini",

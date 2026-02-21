@@ -41,6 +41,7 @@ export class SpotifyPlayer extends ScreenPlayer implements OnInit {
         const audiobookId = this.audiobookId();
         if (audiobookId) {
             this.getInternetAudiobook().audiobookGetChapterAudio(audiobookId, chapterNumber, (response: any) => {
+                console.log('Spotify Player: audiobookGetChapterAudio', response)
                 if (response && response.success) {
                     callback(true);
                 } else {

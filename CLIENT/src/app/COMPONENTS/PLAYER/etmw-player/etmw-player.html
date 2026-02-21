@@ -83,40 +83,40 @@
             <!-- Controls -->
             <div class="d-flex justify-content-center align-items-center gap-4 mb-5">
                 <!-- Shuffle -->
-                <button class="btn btn-link text-white p-0" (click)="toggleShuffle()" [attr.disabled]="!audioLoaded()">
+                <button class="btn btn-link text-white p-0" (click)="toggleShuffle()" [disabled]="!audioLoaded()">
                     <i class="bi bi-shuffle" [class.text-primary]="isShuffle" style="font-size: 1.5rem;"></i>
                 </button>
                 <!-- Skip BAck -->
-                <button class="btn btn-link text-white p-0" (click)="skipBackward()" [attr.disabled]="!audioLoaded()">
+                <button class="btn btn-link text-white p-0" (click)="skipBackward()" [disabled]="!audioLoaded()">
                     <i class="bi bi-skip-start-fill" style="font-size: 2rem;"></i>
                 </button>                
                 <!-- Play -->
                 <button class="btn rounded-circle d-flex align-items-center justify-content-center" 
-                        [attr.disabled]="!audioLoaded()"
+                        [disabled]="!audioLoaded()"
                         (click)="togglePlay()"
                         style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); border: none; box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);">
                     <i class="bi" [class.bi-pause-fill]="isPlaying" [class.bi-play-fill]="!isPlaying" style="font-size: 2.5rem;"></i>
                 </button>
                 <!-- Skip forward -->
-                <button class="btn btn-link text-white p-0" (click)="skipForward()" [attr.disabled]="!audioLoaded()">
+                <button class="btn btn-link text-white p-0" (click)="skipForward()" [disabled]="!audioLoaded()">
                     <i class="bi bi-skip-end-fill" style="font-size: 2rem;"></i>
                 </button>
                 <!-- Repeat -->
-                <button class="btn btn-link text-white p-0" (click)="toggleRepeat()" [attr.disabled]="!audioLoaded()">
+                <button class="btn btn-link text-white p-0" (click)="toggleRepeat()" [disabled]="!audioLoaded()">
                     <i class="bi" [class.bi-repeat]="!isRepeat" [class.bi-repeat-1]="isRepeat" [class.text-primary]="isRepeat" style="font-size: 1.5rem;"></i>
                 </button>
             </div>
     
             <!-- Additional Controls -->
             <div class="d-flex justify-content-center gap-3 mb-4">
-                <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openChapters()">
+                <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="toggleChapterList()">
                     <i class="bi bi-list-ul"></i> Chapters
                 </button>
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openSpeed()">
                     <i class="bi bi-speedometer2"></i> {{ playbackSpeed }}x
                 </button>
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openTimer()">
-                    <i class="bi bi-clock"></i> Timer
+                    <i class="bi bi-clock"></i> {{ getSleepTimerLabel() }}
                 </button>
             </div>
 
@@ -131,41 +131,43 @@
             }
 
             <!-- List of chapters -->
-            <div class="p-4">
-                @if (getChapters().length > 0) {
-                    <div class="chapter-list">
-                        @for (ch of getChapters(); track ch.chapter; let idx = $index) {
-                            <div class="chapter-item" [class.active]="selectedChapterIndex() === idx" (click)="selectChapter(idx)">
-                                <div class="chapter-index">
-                                    {{ ch.chapter }}
+            @if (showChapterList()) {
+                <div class="p-4">
+                    @if (getChapters().length > 0) {
+                        <div class="chapter-list">
+                            @for (ch of getChapters(); track ch.chapter; let idx = $index) {
+                                <div class="chapter-item" [class.active]="selectedChapterIndex() === idx" (click)="selectChapter(idx)">
+                                    <div class="chapter-index">
+                                        {{ ch.chapter }}
+                                    </div>
+                                    <div class="chapter-body">
+                                        <div class="chapter-title">Chapter {{ ch.chapter }}</div>
+                                        <div class="chapter-meta">{{ formatDuration(ch.durationSec) }}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-dark rounded-pill"
+                                        (click)="playChapter(ch.chapter); $event.stopPropagation()">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
                                 </div>
-                                <div class="chapter-body">
-                                    <div class="chapter-title">Chapter {{ ch.chapter }}</div>
-                                    <div class="chapter-meta">{{ formatDuration(ch.durationSec) }}</div>
-                                </div>
-                                <button class="btn btn-sm btn-dark rounded-pill"
-                                    (click)="playChapter(ch.chapter); $event.stopPropagation()">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                            </div>
-                        }
-                    </div>
-                } @else {
-                    <div class="bg-secondary rounded-4 p-4 text-center text-gray-400">
-                        No chapters available yet.
-                    </div>
-                }
-                @if (loadingAudio() === true) {
-                    <div class="p-3 text-center small text-gray-400">
-                        Loading please wait...
-                    </div>
-                }
-                @if (errorMessageObj) {
-                    <div class="p-3 text-center text-info">
-                        {{ errorMessageObj }}
-                    </div>
-                }
-            </div>
+                            }
+                        </div>
+                    } @else {
+                        <div class="bg-secondary rounded-4 p-4 text-center text-gray-400">
+                            No chapters available yet.
+                        </div>
+                    }
+                    @if (loadingAudio() === true) {
+                        <div class="p-3 text-center small text-gray-400">
+                            Loading please wait...
+                        </div>
+                    }
+                    @if (errorMessageObj) {
+                        <div class="p-3 text-center text-info">
+                            {{ errorMessageObj }}
+                        </div>
+                    }
+                </div>
+            }
         </div>
     
     </div>

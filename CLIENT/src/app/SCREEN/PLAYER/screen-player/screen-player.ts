@@ -34,12 +34,14 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     // Time
     currentTime = signal<string>('0:00');
     totalTime = signal<string>('0:00');
-    currentSeconds = 64;
-    totalSeconds = 209;
+    currentSeconds = 0;
+    totalSeconds = 0;
     progressPercent = signal<number>(0);
 
     // Playback
     playbackSpeed = 1.0;
+    private readonly playbackSpeedOptions = [0.75, 1, 1.25, 1.5, 1.75, 2];
+    private readonly sleepTimerOptionsMin = [0, 5, 10, 15, 30, 45, 60];
 
     // Chapter info
     currentChapter = -1;
@@ -52,9 +54,15 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     //  Audio playing
     selectedChapterIndex = signal<number>(0);
     private intervalId: any;
+    private sleepTimerIntervalId: any;
     protected audioElement: HTMLAudioElement | null = null;
     protected audioUrl: string | null = null;
     loadingAudio = signal<boolean>(false);
+    sleepTimerRemainingSec = signal<number>(0);
+    private pendingChapterProgressPercent: number | null = null;
+    private initialProgressAppliedForCurrentSource = false;
+    private lastHistorySyncAt = 0;
+    private lastHistorySyncedProgress = -1;
 
     //  Flags 
     loading = signal<boolean>(true);
@@ -98,6 +106,8 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         if (this.intervalId) {
             clearInterval(this.intervalId);
         }
+        this.syncListeningHistory(true);
+        this.clearSleepTimer(false);
         if (this.audioUrl) {
             URL.revokeObjectURL(this.audioUrl);
             this.audioUrl = null;
@@ -142,14 +152,23 @@ export class ScreenPlayer implements OnInit, OnDestroy {
 
     getListeningProgress(callback: any) {
         const audiobookId = this.audiobookId();
-        if (audiobookId) {
-            this.iUser.userGetListeningHistory(audiobookId, (response: any) => {
-                if (response && response.success) {
-                    this.listeningProgress.set(response.history)
-                }
-                callback()
-            })
+        const chapterNumber = this.chapterNumber();
+        if (!audiobookId || !chapterNumber) {
+            if (callback) callback();
+            return;
         }
+        this.iUser.userGetListeningHistory(audiobookId, chapterNumber, (response: any) => {
+            if (response && response.success) {
+                const history = this.normalizeListeningHistory(response.history);
+                this.listeningProgress.set(history);
+                this.pendingChapterProgressPercent = this.extractChapterProgressPercent(history, chapterNumber);
+                this.progressPercent.set(this.pendingChapterProgressPercent);
+                this.applyPendingChapterProgress();
+            } else {
+                this.pendingChapterProgressPercent = null;
+            }
+            if (callback) callback();
+        })
     }
     
     subscriptionGetMine(callback: any) {
@@ -175,8 +194,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     }
 
     calculateProgress(): number {
-        // Calculate stroke-dashoffset for circular progress
-        // Total circumference = 2 * π * radius = 2 * π * 130 ≈ 816.8
+        // Total circumference = 2 * pi * radius = 2 * pi * 130 ~= 816.8
         const circumference = 816.8;
         const progress = (this.currentSeconds / this.totalSeconds) * 100;
         return circumference - (circumference * progress) / 100;
@@ -283,21 +301,28 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     protected initAudioElement() {
         if (this.audioElement) return;
         this.audioElement = new Audio();
+        this.audioElement.playbackRate = this.playbackSpeed;
         this.audioElement.addEventListener('timeupdate', () => {
             if (!this.audioElement) return;
             this.currentSeconds = Math.floor(this.audioElement.currentTime);
             this.totalSeconds = Math.floor(this.audioElement.duration || 0);
             this.updateTime();
             this.updateWaveform();
+            this.syncListeningHistory(false);
         });
         this.audioElement.addEventListener('loadedmetadata', () => {
             if (!this.audioElement) return;
             this.totalSeconds = Math.floor(this.audioElement.duration || 0);
+            this.applyPendingChapterProgress();
             this.updateTime();
             this.audioLoaded.set(true);
         });
         this.audioElement.addEventListener('ended', () => {
             this.isPlaying = false;
+            this.syncListeningHistory(true);
+        });
+        this.audioElement.addEventListener('pause', () => {
+            this.syncListeningHistory(true);
         });
     }
 
@@ -306,20 +331,26 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         if (!audiobookId) return;
 
         this.loadingAudio.set(true);
+        this.audioLoaded.set(false);
         this.iAudiobook.audiobookGetChapterAudio(audiobookId, chapterNumber, (buffer: ArrayBuffer | null) => {
             this.loadingAudio.set(false);
             if (!buffer || !this.audioElement) {
                 this.toast.show('Audio not available');
                 return;
             }
-            this.audioLoaded.set(false);
             if (this.audioUrl) {
                 URL.revokeObjectURL(this.audioUrl);
             }
             const blob = new Blob([buffer], { type: 'audio/mpeg' });
             this.audioUrl = URL.createObjectURL(blob);
             this.audioElement.src = this.audioUrl;
+            this.audioElement.playbackRate = this.playbackSpeed;
+            this.initialProgressAppliedForCurrentSource = false;
+            this.lastHistorySyncAt = 0;
+            this.lastHistorySyncedProgress = -1;
             this.audioElement.load();
+            this.audiobookNotAvailableForThisUser.set(true);
+            this.audioLoaded.set(true);
             if (callback) callback();
         });
     }
@@ -333,6 +364,10 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         }
         this.audioUrl = url;
         this.audioElement.src = url;
+        this.audioElement.playbackRate = this.playbackSpeed;
+        this.initialProgressAppliedForCurrentSource = false;
+        this.lastHistorySyncAt = 0;
+        this.lastHistorySyncedProgress = -1;
         this.audioElement.load();
         if (autoplay) {
             this.audioElement.play().then(() => {
@@ -347,19 +382,67 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         }
     }
 
-    openChapters() {
-        console.log('Open chapters modal');
-        // Open chapters list modal/bottom sheet
-    }
-
     openSpeed() {
-        console.log('Open speed selector');
-        // Open playback speed selector
+        const idx = this.playbackSpeedOptions.indexOf(this.playbackSpeed);
+        const nextIdx = idx >= 0 ? (idx + 1) % this.playbackSpeedOptions.length : 1;
+        this.playbackSpeed = this.playbackSpeedOptions[nextIdx];
+        if (this.audioElement) {
+            this.audioElement.playbackRate = this.playbackSpeed;
+        }
+        this.toast.show(`Speed: ${this.playbackSpeed}x`);
     }
 
     openTimer() {
-        console.log('Open sleep timer');
-        // Open sleep timer modal
+        const currentMin = this.sleepTimerRemainingSec() > 0 ? Math.ceil(this.sleepTimerRemainingSec() / 60) : 0;
+        const currentIdx = this.sleepTimerOptionsMin.indexOf(currentMin);
+        const nextIdx = currentIdx >= 0 ? (currentIdx + 1) % this.sleepTimerOptionsMin.length : 1;
+        const nextMin = this.sleepTimerOptionsMin[nextIdx];
+
+        if (nextMin === 0) {
+            this.clearSleepTimer();
+            return;
+        }
+        this.startSleepTimer(nextMin);
+    }
+
+    getSleepTimerLabel(): string {
+        const remaining = this.sleepTimerRemainingSec();
+        if (remaining <= 0) return 'Timer';
+        const minutes = Math.ceil(remaining / 60);
+        return `Timer ${minutes}m`;
+    }
+
+    private startSleepTimer(minutes: number) {
+        const totalSeconds = minutes * 60;
+        this.clearSleepTimer(false);
+        this.sleepTimerRemainingSec.set(totalSeconds);
+        this.toast.show(`Sleep timer: ${minutes}m`);
+        this.sleepTimerIntervalId = setInterval(() => {
+            const next = this.sleepTimerRemainingSec() - 1;
+            if (next <= 0) {
+                this.sleepTimerRemainingSec.set(0);
+                this.clearSleepTimer(false);
+                if (this.audioElement) {
+                    this.audioElement.pause();
+                }
+                this.isPlaying = false;
+                this.toast.show('Sleep timer ended');
+                return;
+            }
+            this.sleepTimerRemainingSec.set(next);
+        }, 1000);
+    }
+
+    private clearSleepTimer(showMessage: boolean = true) {
+        if (this.sleepTimerIntervalId) {
+            clearInterval(this.sleepTimerIntervalId);
+            this.sleepTimerIntervalId = null;
+        }
+        const hadTimer = this.sleepTimerRemainingSec() > 0;
+        this.sleepTimerRemainingSec.set(0);
+        if (showMessage && hadTimer) {
+            this.toast.show('Sleep timer off');
+        }
     }
 
     getInternetAudiobook() {
@@ -368,6 +451,57 @@ export class ScreenPlayer implements OnInit, OnDestroy {
 
     getRouter() {
         return this.router;
+    }
+
+    private normalizeListeningHistory(raw: any): ListeningProgressModel[] {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw;
+        return [raw];
+    }
+
+    private extractChapterProgressPercent(history: ListeningProgressModel[], chapterNumber: number): number {
+        const item = history.find((h) => Number(h.chapterNumber) === Number(chapterNumber));
+        if (!item || typeof item.progressPercent !== 'number') return 0;
+        return Math.max(0, Math.min(99.5, item.progressPercent));
+    }
+
+    private applyPendingChapterProgress() {
+        if (!this.audioElement) return;
+        if (this.initialProgressAppliedForCurrentSource) return;
+        if (this.pendingChapterProgressPercent === null) return;
+        if (!this.audioElement.duration || !Number.isFinite(this.audioElement.duration)) return;
+        if (this.pendingChapterProgressPercent <= 0) {
+            this.initialProgressAppliedForCurrentSource = true;
+            return;
+        }
+        const targetSeconds = (this.audioElement.duration * this.pendingChapterProgressPercent) / 100;
+        try {
+            this.audioElement.currentTime = Math.max(0, targetSeconds);
+            this.currentSeconds = Math.floor(this.audioElement.currentTime);
+            this.totalSeconds = Math.floor(this.audioElement.duration);
+            this.updateTime();
+            this.updateWaveform();
+            this.initialProgressAppliedForCurrentSource = true;
+        } catch (ex) {
+            // ignore seek failures
+        }
+    }
+
+    private syncListeningHistory(force: boolean) {
+        const audiobookId = this.audiobookId();
+        const chapterNumber = this.chapterNumber();
+        if (!audiobookId || !chapterNumber) return;
+        const progress = this.progressPercent();
+        if (!Number.isFinite(progress)) return;
+        const clamped = Math.max(0, Math.min(100, progress));
+        const now = Date.now();
+        const enoughTime = now - this.lastHistorySyncAt >= 5000;
+        const enoughProgress = Math.abs(clamped - this.lastHistorySyncedProgress) >= 2;
+        if (!force && !enoughTime && !enoughProgress) return;
+        this.lastHistorySyncAt = now;
+        this.lastHistorySyncedProgress = clamped;
+        const completed = clamped >= 99;
+        this.iUser.userSetListeningHistory(audiobookId, chapterNumber, clamped, completed, () => {});
     }
     
 }

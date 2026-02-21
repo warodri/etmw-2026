@@ -54,6 +54,7 @@ const UpdateMyProfile = require('./tasks/user_update');
 //  USER
 //
 const UserGetListeningHistory = require("./tasks/user_get_listening_history");
+const UserSetListeningHistory = require("./tasks/user_set_listening_history");
 
 //
 //  MISC
@@ -89,6 +90,7 @@ const TasksRegistry = {
     FindAuthor,
     
     //  USER
+    UserSetListeningHistory,
     UserGetListeningHistory,
     
     //  SUBSCRIPTIONS

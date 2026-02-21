@@ -1439,6 +1439,7 @@ circle {
     color: var(--color-gray-400);
     margin-top: 14px;
     line-height: 1.6;
+    text-align: justify;
 }
 
 .chapter-list {

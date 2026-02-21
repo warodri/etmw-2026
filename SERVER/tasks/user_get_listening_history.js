@@ -1,14 +1,13 @@
-const User = require('../models/user');
-
 async function run(data, req, res) {
     try {
         const {
-            audiobookId
+            audiobookId,
+            chapterNumber,
         } = data;
 
         //  Validate user
         const userId = req.userId || null;
-        if (!userId) {
+        if (!userId || !audiobookId || !chapterNumber) {
             return res.status(200).json({
                 success: false,
                 message: 'Invalid user'
@@ -20,6 +19,7 @@ async function run(data, req, res) {
         const history = await ListeningProgress.find({
             userId,
             audiobookId,
+            chapterNumber,
             enabled: true
         })
 
@@ -27,6 +27,7 @@ async function run(data, req, res) {
             success: true,
             history,
         })
+
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)

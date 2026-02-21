@@ -62,14 +62,17 @@ export class ScreenItemDetail implements OnInit {
 
     getListeningProgress(callback: any) {
         const audiobookId = this.audiobookId();
-        if (audiobookId) {
-            this.iUser.userGetListeningHistory(audiobookId, (response: any) => {
-                if (response && response.success) {
-                    this.listeningProgress.set(response.history)
-                }
-                callback()
-            })
+        const chapterNumber = this.getSelectedChapterNumber();
+        if (!audiobookId || !chapterNumber) {
+            if (callback) callback();
+            return;
         }
+        this.iUser.userGetListeningHistory(audiobookId, chapterNumber, (response: any) => {
+            if (response && response.success) {
+                this.listeningProgress.set(this.normalizeListeningHistory(response.history))
+            }
+            if (callback) callback()
+        })
     }
 
     goBack() {
@@ -129,6 +132,7 @@ export class ScreenItemDetail implements OnInit {
 
     selectChapter(index: number) {
         this.selectedChapterIndex.set(index);
+        this.getListeningProgress(() => {});
     }
 
     playSelectedChapter() {
@@ -149,6 +153,20 @@ export class ScreenItemDetail implements OnInit {
         if (audiobookId) {
             this.router.navigate(['app/player/' + audiobookId + '/' + chapter]);
         }
+    }
+
+    private getSelectedChapterNumber(): number {
+        const chapters = this.getChapters();
+        const idx = this.selectedChapterIndex();
+        const chapter = chapters[idx]?.chapter;
+        if (typeof chapter === 'number' && chapter > 0) return chapter;
+        return chapters[0]?.chapter || 1;
+    }
+
+    private normalizeListeningHistory(raw: any): ListeningProgressModel[] {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw;
+        return [raw];
     }
 
 }

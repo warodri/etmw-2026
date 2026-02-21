@@ -30,13 +30,13 @@
                         <div class="detail-info">
                             <div class="detail-title">{{ audiobook()?.title }}</div>
                             <div class="detail-author">by {{ audiobook()?.authorName }}</div>
-                            <div class="detail-meta">
+                            <div class="mt-3 detail-meta">
                                 <span class="chip chip-primary">{{ getPrimaryCategory() }}</span>
                                 <span class="chip">{{ formatDuration(audiobook()?.totalAudioDurationSec || 0) }}</span>
                                 <span class="chip">{{ getChapters().length }} chapters</span>
                                 <span class="chip">{{ getStatusLabel() }}</span>
                             </div>
-                            <p class="detail-desc">
+                            <p class="mt-4 detail-desc word-break">
                                 {{ audiobook()?.description || 'No description available.' }}
                             </p>
                             <div class="d-flex gap-2 mt-3">
