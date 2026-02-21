@@ -55,7 +55,9 @@
                 </button>
             </div>
             <div class="mt-3  overflow-hidden" style="width: 100%;">
-                <app-categories></app-categories>
+                <app-categories
+                    (onCategorySelected)="gotoFindByCategory($event)"
+                ></app-categories>
             </div>
         </div>
 
@@ -64,7 +66,7 @@
         -->
         <div class="mt-5">
             <app-homepage-categories-and-books
-                section="picked-for-you"
+                section="for-you"
             ></app-homepage-categories-and-books>
         </div>
         
@@ -73,7 +75,7 @@
         -->
         <div class="mt-5">
             <app-homepage-categories-and-books
-                section="popular"
+                section="trending"
             ></app-homepage-categories-and-books>
         </div>
 

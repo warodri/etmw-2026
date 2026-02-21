@@ -2,6 +2,7 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { AudiobookModel } from '../../../models/audiobook';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { UtilsService } from '../../../utils/utils-service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-homepage-categories-and-books',
@@ -11,13 +12,14 @@ import { UtilsService } from '../../../utils/utils-service';
 })
 export class HomepageCategoriesAndBooks implements OnInit {
 
-    @Input() section: 'picked-for-you' | 'popular' | null = null;
+    @Input() section: 'for-you' | 'trending' | null = null;
 
     audiobooks = signal<AudiobookModel[]>([]);
 
     constructor(
         private iAudiobook: InternetAudiobookService,
-        private utils: UtilsService
+        private utils: UtilsService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
@@ -25,23 +27,17 @@ export class HomepageCategoriesAndBooks implements OnInit {
     }
 
     loadAudiobooks() {
-        this.iAudiobook.audiobookFind({
-            query: null,
-            categories: [],
-            myAudiobooks: false,
-            published: true,
-            pipelineStatus: [],
-            limit: 5,
-            skip: 0
-        },
-            (response: any) => {
+        if (this.section) {
+            this.iAudiobook.audiobookFindBySection(this.section, (response: any) => {
+                console.log('audiobookFindBySection', response);
                 if (response && response.success) {
                     for (let item of response.audiobooks) {
                         item.coverFileFull = this.getCoverUrl(item);
                     }
-                    this.audiobooks.set( response.audiobooks || [] );
+                    this.audiobooks.set(response.audiobooks);
                 }
-            });
+            })
+        }
     }
 
     getCoverUrl(audiobook: AudiobookModel): string {
@@ -58,5 +54,12 @@ export class HomepageCategoriesAndBooks implements OnInit {
         return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231e293b'/><stop offset='1' stop-color='%230f172a'/></linearGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/><text x='50%25' y='50%25' fill='%23e2e8f0' font-family='Arial' font-size='18' text-anchor='middle'>${safeTitle}</text></svg>`;
     }
 
+    gotoBookDetail(id: string) {
+        this.router.navigate(['app/audiobook/view', id])
+    }
 
+    gotoSection(section: 'for-you' | 'trending') {
+        this.router.navigate(['app/search/section', section])
+    }
+    
 }

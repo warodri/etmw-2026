@@ -49,6 +49,7 @@ export class ScreenAuthors implements OnInit {
 
     getAllCategories() {
         this.iCategory.getAllCategories((response: any) => {
+            console.log('getAllCategories', response);
             if (response && response.success) {
                 const all = response.categories || [];
                 const topLevel = all.filter((cat: CategoryModel) => {

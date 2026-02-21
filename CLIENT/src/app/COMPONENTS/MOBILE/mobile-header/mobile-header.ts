@@ -19,6 +19,8 @@ export class MobileHeader implements OnInit {
     email = signal<string | null>(null);
     code = signal<number | null>(null);
 
+    query = signal<string | null>(null);
+
     isLoggedIn = signal<boolean>(false);
     showLogin = signal<boolean>(false);
     askForCode = signal<boolean>(false);
@@ -109,6 +111,13 @@ export class MobileHeader implements OnInit {
         const myUser = this.myUser();
         if (myUser && myUser._id) {
             this.router.navigate(['app/user-profile', myUser._id])
+        }
+    }
+
+    executeSearch() {
+        const query = this.query();
+        if (query) {
+            this.router.navigate(['app/search/query', query])
         }
     }
 

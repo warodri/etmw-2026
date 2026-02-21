@@ -2,18 +2,13 @@ const Category = require('../models/categories');
 
 async function run(data, req, res) {
     try {
-        const {
-        } = data;
-
-        const userId = req.userId || null;
-
         const categories = await Category.find({
             enabled: true
         }).populate('parentId');
 
         const Audiobook = require('../models/audiobook');
         const categoryCounts = await Audiobook.aggregate([
-            { $match: { enabled: true } },
+            { $match: { enabled: true, published: true } },
             { $unwind: '$categories' },
             { $group: { _id: '$categories', count: { $sum: 1 } } }
         ]);
@@ -22,7 +17,7 @@ async function run(data, req, res) {
         );
 
         const authorCounts = await Audiobook.aggregate([
-            { $match: { enabled: true } },
+            { $match: { enabled: true, published: true } },
             { $unwind: '$categories' },
             { $group: { _id: '$categories', authors: { $addToSet: '$authorId' } } },
             { $project: { authorCount: { $size: '$authors' } } }
@@ -33,13 +28,21 @@ async function run(data, req, res) {
         );
 
         const authorIdsByCategory = await Audiobook.aggregate([
-            { $match: { enabled: true } },
+            { $match: { enabled: true, published: true } },
             { $unwind: '$categories' },
             { $group: { _id: '$categories', authors: { $addToSet: '$authorId' } } }
         ]);
 
         const authorIdsMap = new Map(
             authorIdsByCategory.map((item) => [String(item._id), item.authors || []])
+        );
+
+        const authorWorks = await Audiobook.aggregate([
+            { $match: { enabled: true, published: true } },
+            { $group: { _id: '$authorId', totalAudiobooks: { $sum: 1 } } }
+        ]);
+        const worksByAuthorId = new Map(
+            authorWorks.map((item) => [String(item._id), Number(item.totalAudiobooks || 0)])
         );
 
         const allAuthorIds = Array.from(
@@ -67,20 +70,34 @@ async function run(data, req, res) {
                 .filter((authorDoc) => authorDoc && authorDoc.userId)
                 .map((authorDoc) => {
                     const user = authorDoc.userId;
+                    const totalAudiobooks = worksByAuthorId.get(String(authorDoc._id)) || 0;
                     return {
                         _id: String(authorDoc._id),
+                        penName: authorDoc.penName || '',
                         firstName: user.firstName,
                         lastName: user.lastName,
                         profilePicture: user.profilePicture,
+                        coverPicture: user.coverPicture,
                         city: user.city,
                         country: user.country,
-                        bio: user.bio,
-                        languages: user.languages,
+                        bio: authorDoc.bio || user.bio,
+                        languages: authorDoc.languages || user.languages || [],
+                        categories: authorDoc.categories || user.categories || [],
                         connected: user.connected,
                         forceStatus: user.forceStatus,
                         totalFollowers: user.totalFollowers,
-                        totalFollowing: user.totlaFollowing
+                        totalFollowing: user.totalFollowing,
+                        totalAudiobooks,
+                        totalCompletions: Number(authorDoc.totalCompletions || 0),
+                        isVerified: !!authorDoc.isVerified,
+                        createdAt: authorDoc.createdAt
                     };
+                })
+                .sort((a, b) => {
+                    if (b.totalAudiobooks !== a.totalAudiobooks) {
+                        return b.totalAudiobooks - a.totalAudiobooks;
+                    }
+                    return (b.totalFollowers || 0) - (a.totalFollowers || 0);
                 });
             return {
                 ...obj,

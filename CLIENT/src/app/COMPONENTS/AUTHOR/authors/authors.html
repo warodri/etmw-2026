@@ -1,7 +1,8 @@
 @for (item of latestAuthors(); track item ) {
     <div class="mt-4 d-flex justify-content-start align-items-center gap-3" style="width: 280px;">
         <div>
-            <img [src]="item.userId.profilePicture" style="width:70px; height:70px; object-fit:cover" class="rounded-circle shadow overflow-hidden" />
+            <img [src]="item.userId.profilePicture" style="width:70px; height:70px; object-fit:cover" 
+                class="rounded-circle shadow overflow-hidden pointer" (click)="gotoAuthor(item._id)" />
         </div>
         <div>
             <h5><b>
@@ -9,7 +10,7 @@
                 {{ item.userId.lastName }}
             </b></h5>
             <div class="mt-1 text-gray-400">
-                {{ item.userId.updatedAt | date }}
+                <small>Last upload:</small> {{ item.userId.updatedAt | date }}
             </div>
         </div>
     </div>

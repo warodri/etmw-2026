@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { UserModel } from '../../../models/user';
+import { CategoryModel } from '../../../models/categories';
 
 @Component({
     selector: 'app-screen-mobile-main',
@@ -33,6 +34,10 @@ export class ScreenMobileMain implements OnInit {
 
     gotoStories() {
         this.router.navigate(['app/stories'])
+    }
+
+    gotoFindByCategory(category: CategoryModel) {
+        this.router.navigate(['app/search/category', category.name])
     }
 
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { InternetAuthorService } from '../../../SERVICES/internet-author.service';
 import { AuthorModel } from '../../../models/author';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-authors',
@@ -14,6 +15,7 @@ export class Authors implements OnInit {
 
     constructor(
         private iAuthor: InternetAuthorService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
@@ -27,6 +29,10 @@ export class Authors implements OnInit {
                 this.latestAuthors.set(response.authors)
             }
         })
+    }
+
+    gotoAuthor(id: string) {
+        this.router.navigate(['app/search/author', id])
     }
 
 }
