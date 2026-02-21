@@ -227,6 +227,11 @@ body {
     height: 0;
 }
 
+/* Shared story primitives across ADMIN/STORIES screens */
+.story-image {
+    object-fit: cover;
+}
+
 /* ==============================================
    HERO SECTION
    ============================================== */

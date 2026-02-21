@@ -1,23 +1,41 @@
 const fs = require('fs');
 const path = require('path');
 
+function sanitizeRequestedId(rawId) {
+    const decoded = decodeURIComponent(String(rawId || ''));
+    // normalize slashes and drop query-style leading slash
+    let safe = decoded.replace(/\\/g, '/').replace(/^\/+/, '');
+    // prevent path traversal
+    safe = safe.replace(/\.\.(\/|\\)/g, '');
+    return safe.trim();
+}
+
 async function run(req, res) {
     try {
-        const id = req.params.id;    // e.g. "1764835843945.png" or "audiobooks/story/images/999999/1764835843945.png" or "audiobooks/story/99999999/story_1_0.mp3"
-        const mimeBase64 = req.params.mimetype;  
-        const mimetype = Buffer.from(mimeBase64, 'base64').toString('utf8');
+        const rawId = req.params.id || req.query.id; // supports /file/:id and /file?id=...
+        const id = sanitizeRequestedId(rawId);
+        const mimeBase64 = req.params.mimetype;
+        let mimetype = '';
+        if (mimeBase64) {
+            try {
+                mimetype = Buffer.from(mimeBase64, 'base64').toString('utf8');
+            } catch {
+                mimetype = '';
+            }
+        }
 
-        if (!id || !mimetype) {
+        if (!id) {
             return res.send("Missing data");
         }
 
-        //  If contains "audiobooks/" then it's asking for an image or an audio from a story
-        const isStory = (id.indexOf('audiobooks/') > -1);
+        // If starts with "audiobooks/" then it's asking for a story/chapter asset
+        const isStory = id.startsWith('audiobooks/');
         
         // Absolute path to "uploads" or "audiobooks" folder
         let filePath = path.join(__dirname, '..', 'uploads', id);
         if (isStory) {
-            filePath = path.join(__dirname, '..', 'audiobooks', id);
+            const relativeInAudiobooks = id.replace(/^audiobooks\/+/, '');
+            filePath = path.join(__dirname, '..', 'audiobooks', relativeInAudiobooks);
         }
 
         /**
@@ -38,8 +56,12 @@ async function run(req, res) {
         // Load file into memory
         const fileContent = fs.readFileSync(filePath);
 
-        // Set MIME type (fallback to octet-stream)
-        res.setHeader("Content-Type", mimetype || "application/octet-stream");
+        // MIME type is optional in URL. If absent, infer from file extension.
+        if (mimetype) {
+            res.setHeader("Content-Type", mimetype);
+        } else {
+            res.type(filePath);
+        }
 
         // Optional: inline or download?
         // res.setHeader("Content-Disposition", "inline");  // show in browser

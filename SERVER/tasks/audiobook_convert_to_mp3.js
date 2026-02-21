@@ -16,10 +16,15 @@ const client = new OpenAI({ apiKey: config.OPEN_AI.API_KEY });
 async function run(data, req, res) {
     try {
         const payload = (req.body && req.body.data) ? req.body.data : (req.body || data || {});
-        const {
-            audiobookId,
-            params,
-        } = payload;
+        const audiobookId = payload.audiobookId || req.body?.audiobookId;
+        let params = payload.params || req.body?.params || {};
+        if (typeof params === 'string') {
+            try {
+                params = JSON.parse(params);
+            } catch {
+                params = {};
+            }
+        }
 
         /**
          * params is:
@@ -43,6 +48,12 @@ async function run(data, req, res) {
             return res.json({ 
                 success: false, 
                 message: 'Missing parameters' 
+            });
+        }
+        if (!params.text || typeof params.text !== 'string' || !params.text.trim()) {
+            return res.json({
+                success: false,
+                message: 'Missing chapter text'
             });
         }
 
@@ -78,18 +89,23 @@ async function run(data, req, res) {
             });
         }
 
-        //  If params.targetLanguage is different than params.sourceLanguage,
-        //  then ask OpenAI to translate.
-        if (params.targetLanguage && params.sourceLanguage && params.targetLanguage != params.sourceLanguage) {
+        // Resolve conversion language (locale-aware)
+        const sourceLanguage = params.sourceLanguage || audiobook.sourceLanguage || 'en';
+        const targetLanguage = params.targetLanguage || audiobook.targetLanguage || sourceLanguage;
+        params.sourceLanguage = sourceLanguage;
+        params.targetLanguage = targetLanguage;
+        params.language = targetLanguage;
+
+        // Translate only when base language really changes (en -> es, not es-ES -> es-AR)
+        if (shouldTranslate(sourceLanguage, targetLanguage)) {
             params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
-            params.language = params.targetLanguage;
         }
 
         //  Must continue with the translated text from here on.
         //  The user uploded a book in one language but he wants another now.
 
-        //  Convert to audio
-        const audioBuffer = await elevenLabsUtils.textToSpeech(params);
+        // Convert to audio (ElevenLabs max text length per request: 30000 chars)
+        const audioBuffer = await convertTextToSpeechChunked(params);
 
         // Create directory for audiobook if it doesn't exist
         const audiobookDir = path.join(__dirname, '../audiobooks', audiobookId);
@@ -482,10 +498,10 @@ function buildImagePrompt(audiobook, params, title, quote) {
     const bookTitle = audiobook?.title || 'Untitled';
     const authorName = audiobook?.authorName || '';
     const chapterNumber = params?.chapterNumber || '';
-    return `Create a cinematic, story-driven illustration for a mobile screen (portrait 9:16). 
+    return `Create a cinematic, story-driven illustration for a mobile screen (portrait 9:16). Ready for social networking. Influencer style.
 Book title: "${bookTitle}". Author: "${authorName}". Chapter: ${chapterNumber}.
 Inspiration title: "${title}". Quote: "${quote}".
-Style: high-detail, moody lighting, evocative, no text or lettering, no logos, no watermarks, no borders.`;
+Style: Hyperrealism, high-detail, evocative, no text or lettering, no logos, no watermarks, no borders.`;
 }
 
 function trimPromptText(text, maxChars) {
@@ -617,6 +633,43 @@ function splitTextIntoChunks(text, maxChars) {
     }
     if (current.trim()) chunks.push(current.trim());
     return chunks;
+}
+
+function getBaseLanguageCode(code) {
+    return String(code || '').trim().toLowerCase().split('-')[0];
+}
+
+function shouldTranslate(sourceLanguage, targetLanguage) {
+    const sourceBase = getBaseLanguageCode(sourceLanguage);
+    const targetBase = getBaseLanguageCode(targetLanguage);
+    if (!sourceBase || !targetBase) return false;
+    return sourceBase !== targetBase;
+}
+
+async function convertTextToSpeechChunked(params) {
+    const text = String(params?.text || '').trim();
+    if (!text) {
+        throw new Error('Empty text for TTS');
+    }
+
+    // Keep margin below 30000 hard limit
+    const chunks = splitTextIntoChunks(text, 28000);
+    if (chunks.length === 1) {
+        return elevenLabsUtils.textToSpeech({ ...params, text });
+    }
+
+    const buffers = [];
+    for (let i = 0; i < chunks.length; i++) {
+        const chunkText = chunks[i];
+        const chunkAudio = await elevenLabsUtils.textToSpeech({
+            ...params,
+            text: chunkText
+        });
+        buffers.push(chunkAudio);
+    }
+
+    // MP3 byte-stream concatenation works for sequential playback
+    return Buffer.concat(buffers);
 }
 
 async function upsertStoryDocument(audiobook, author, params, chapterPieces) {

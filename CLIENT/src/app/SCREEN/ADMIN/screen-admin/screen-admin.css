@@ -61,9 +61,7 @@
 }
 
 .story-image {
-    width: 120px;
-    height: 160px;
-    object-fit: cover;
+    width: 230px;
     border-radius: 8px;
     border: 1px solid var(--color-border);
 }

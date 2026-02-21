@@ -467,9 +467,22 @@ async function textToSpeech(params) {
     } = params;
 
     try {
+        const targetLanguageRaw = params?.targetLanguage || params?.language || '';
+        const targetLanguage = String(targetLanguageRaw).toLowerCase();
+        const baseLanguage = targetLanguage.includes('-')
+            ? targetLanguage.split('-')[0]
+            : targetLanguage;
+
+        // Avoid english-biased pronunciation for non-English content
+        let resolvedModelId = modelId;
+        if (baseLanguage && baseLanguage !== 'en' && modelId === 'eleven_turbo_v2') {
+            resolvedModelId = 'eleven_multilingual_v2';
+            console.log(`[ElevenLabs] Switched model to ${resolvedModelId} for target language "${targetLanguageRaw}"`);
+        }
+
         const payload = {
             text: text,
-            model_id: modelId,
+            model_id: resolvedModelId,
             voice_settings: {
                 stability: stability,
                 similarity_boost: similarity,

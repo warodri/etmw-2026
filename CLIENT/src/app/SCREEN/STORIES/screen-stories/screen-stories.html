@@ -11,16 +11,16 @@
                     (touchmove)="onTouchMove($event, story._id)"
                     (touchend)="onTouchEnd($event, story._id)">
                     
-                    <div class="story-slider"
-                         [style.width.%]="slideCount(story) * 100"
-                         [style.transform]="'translateX(' + (-story.slideIndex * 100) + '%)'">
-                        <!-- Slide 1: Image + quote -->
+                    <div class="story-slider" [style.width.%]="slideCount(story) * 100" [style.transform]="'translateX(' + (-story.slideIndex * 100) + '%)'">
+                        <!-- THIS IS THE COVER FOR THE STORY -->
                         <div class="story-slide">
-                            <img class="story-image" [src]="story.image" [alt]="story.author">
-                            <div class="story-overlay" style="max-width: 50%;">
+                            <img class="story-image" [src]="story.image" [alt]="story.author" style="max-width: 35%;">
+                            <div class="story-overlay" style="max-width: 35%;">
                                 <div class="story-title">{{ story.title }}</div>
                                 <div class="story-subtitle">{{ story.subtitle }}</div>
-                                <div class="story-language">{{ languageLabel(story.language) }}</div>
+                                <div class="story-language pt-1 pb-1">
+                                    {{ languageLabel(story.language) }}
+                                </div>
                                 <div class="story-quote">{{ story.quote }}</div>
                                 <div class="story-actions">
                                     <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
@@ -30,26 +30,34 @@
                             </div>
                         </div>
                         
+                        <!-- SHOW EACH PIECE OF THE CHAPTER -->
                         @for (piece of displayPieces(story); track $index) {
                             @if (!piece.audioUrl) {
+                                <!-- SHOW THIS WHEN NO MORE CHAPTERS OR END OF THE AUDIOBOOK -->
                                 <div class="story-slide">
                                     @if (story.chapterNumber == story.totalChapters) {
-                                        <img class="story-image" src="the-end.png" alt="The End!" style="max-width: 30%;">
+                                        <!-- END OF THE AUDIOBOOK -->
+                                        <img class="story-image" src="the-end.png" alt="The End!" style="max-width: 35%;">
                                     } @else {
-                                        <img class="story-image" src="more-chapters-to-come.png" alt="More chapters to come!" style="max-width: 30%;">
-                                        <div class="story-overlay text-center" style="max-width: 26%; top:75%">
-                                            <h1 class="fw-bold text-primary">{{ piece.title }}</h1>
+                                        <!-- MORE CHAPTERS TO COME -->
+                                        <img class="story-image" src="more-chapters-to-come.png" alt="More chapters to come!" style="max-width: 35%;">
+                                        <div class="story-overlay text-center" style="max-width: 35%; top:73%">
+                                            <h1 class="pt-4 fw-bold text-primary">{{ piece.title }}</h1>
                                             <h3>{{ piece.quote }}</h3>
                                             <h3>{{ piece.readingText }}</h3>
                                         </div>
                                     }
                                 </div>
                             } @else {
+                                <!-- THIS IS THE CHAPTER WITH IMAGE, AUDIO AND TEXT TO READ -->
                                 <div class="story-slide">
-                                    <img class="story-image" [src]="piece.audioImage" [alt]="story.author">
+                                    <!-- The Image -->
+                                    <img class="story-image" [src]="piece.audioImage" [alt]="story.author" style="max-width: 35%;">
+                                    <!-- The button to mute -->
                                     <button class="story-audio-fab" (click)="toggleMute(story._id, $index)">
                                         <i class="bi" [class.bi-volume-up]="!piece.isMuted" [class.bi-volume-mute]="piece.isMuted"></i>
                                     </button>
+                                    <!-- The content -->
                                     <div class="story-overlay story-overlay-compact" style="max-width: 34%;">
                                         <div class="mb-3 story-audio-bar">
                                             <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(story._id, $index)">
@@ -58,10 +66,14 @@
                                             <div class="story-audio-progress">
                                                 <div class="story-audio-progress-fill" [style.width.%]="piece.progress"></div>
                                             </div>
-                                        </div>    
+                                        </div>
+                                        @if (errorMessage()) {
+                                            <div class="small text-warning mb-2">{{ errorMessage() }}</div>
+                                        }
                                         <div class="story-title">{{ piece.title }}</div>
-                                        <div class="story-subtitle">{{ story.title }}</div>
-                                        <div class="story-language">{{ languageLabel(story.language) }}</div>
+                                        <div class="story-language pt-1 pb-1">
+                                            {{ languageLabel(story.language) }}
+                                        </div>
                                         <div class="story-quote">{{ piece.quote }}</div>
                                         <div class="story-body story-body-scroll"
                                              [class.expanded]="piece.expanded"

@@ -111,6 +111,14 @@ SharedMongoose.initMongoose( async () => {
     })
 
     //  Downloads the content of a file
+    app.get('/file', apiLimiter, (req, res) => {
+        const GetFile = require('./tasks/get-file');
+        GetFile.run(req, res);
+    })
+    app.get('/file/:id', apiLimiter, (req, res) => {
+        const GetFile = require('./tasks/get-file');
+        GetFile.run(req, res);
+    })
     app.get('/file/:id/:mimetype', apiLimiter, (req, res) => {
         const GetFile = require('./tasks/get-file');
         GetFile.run(req, res);

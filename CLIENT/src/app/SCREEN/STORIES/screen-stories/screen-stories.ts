@@ -3,6 +3,7 @@ import { UserModel } from '../../../models/user';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetStoryService } from '../../../SERVICES/internet-stories.service';
 import { Config } from '../../../utils/config';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 
 type ChapterPiece = {
     title: string,
@@ -50,7 +51,7 @@ export class ScreenStories implements OnInit {
 
     stories = signal<Story[]>([])
 
-    SERVER_FOR_IMAGES = Config.dev ? Config.SERVER.local : Config.SERVER.remote
+    SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote
 
     /**
      * Delete once all is working nicely
@@ -249,12 +250,14 @@ export class ScreenStories implements OnInit {
     private touchStoryId: string | null = null;
     private observer: IntersectionObserver | null = null;
     private audioMap = new Map<string, HTMLAudioElement>();
+    private chapterAccessMap = new Map<string, boolean>();
     private storageKey = 'etmw_last_story_id';
     private muteKey = 'etmw_story_muted';
 
     constructor(
         private iUser: InternetUserService,
-        private iStory: InternetStoryService
+        private iStory: InternetStoryService,
+        private iAudiobook: InternetAudiobookService
     ) {}
 
     ngOnInit(): void {
@@ -299,14 +302,17 @@ export class ScreenStories implements OnInit {
                     if (!item.image) {
                         item.image = 'story-fallback-img.jpeg';
                     } else {
-                        item.image = this.SERVER_FOR_IMAGES + '/file/' + item.image;
+                        item.image = this.toServerFileUrl(item.image);
                     }
                     for (let subItem of item.chapterPieces) {
                         if (!subItem.audioImage) {
                             subItem.audioImage = 'story-fallback-img.jpeg';
                         } else {
-                            subItem.audioImage = this.SERVER_FOR_IMAGES + '/file/' + subItem.audioImage;
-                        }                        
+                            subItem.audioImage = this.toServerFileUrl(subItem.audioImage);
+                        }
+                        if (subItem.audioUrl) {
+                            subItem.audioUrl = this.toServerFileUrl(subItem.audioUrl);
+                        }
                     }
                 }
                 this.stories.set(response.stories);
@@ -426,20 +432,29 @@ export class ScreenStories implements OnInit {
         const piece = story.chapterPieces[pieceIndex];
         if (!piece) return;
         if (!piece.audioUrl) return;
-        const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
 
         if (piece.isPlaying) {
+            const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
             audio.pause();
             this.updatePiece(storyId, pieceIndex, { isPlaying: false });
             return;
         }
 
-        this.stopAllAudio(this.audioKey(storyId, pieceIndex));
-        audio.muted = piece.isMuted;
-        audio.play().then(() => {
-            this.updatePiece(storyId, pieceIndex, { isPlaying: true });
-        }).catch(() => {
-            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+        this.withChapterAccess(story, (allowed) => {
+            if (!allowed) {
+                this.errorMessage.set('You can’t play this chapter right now.');
+                this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+                return;
+            }
+            this.errorMessage.set(null);
+            const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl!);
+            this.stopAllAudio(this.audioKey(storyId, pieceIndex));
+            audio.muted = piece.isMuted;
+            audio.play().then(() => {
+                this.updatePiece(storyId, pieceIndex, { isPlaying: true });
+            }).catch(() => {
+                this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+            });
         });
     }
 
@@ -527,6 +542,18 @@ export class ScreenStories implements OnInit {
         return `${storyId}:${pieceIndex}`;
     }
 
+    private toServerFileUrl(path: string): string {
+        if (!path) return path;
+        if (/^(https?:|blob:|data:)/i.test(path)) return path;
+        if (path.includes('/file?id=')) {
+            if (path.startsWith('/')) {
+                return `${this.SERVER}${path}`;
+            }
+            return `${this.SERVER}/${path.replace(/^\/+/, '')}`;
+        }
+        return `${this.SERVER}/file?id=${path}`;
+    }
+
     private getAudio(id: string, url: string) {
         let audio = this.audioMap.get(id);
         if (!audio) {
@@ -608,30 +635,38 @@ export class ScreenStories implements OnInit {
         const piece = story.chapterPieces[pieceIndex];
         if (!piece) return;
         if (!piece.audioUrl) return;
-        const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl);
-        const resume = this.getStoredResume(storyId, pieceIndex);
-        if (!resume) return;
-
-        const seek = () => {
-            try {
-                audio.currentTime = Math.max(0, Math.min(audio.duration || resume.duration || 0, resume.time));
-            } catch (ex) {
-                // ignore
-            }
-            this.stopAllAudio(this.audioKey(storyId, pieceIndex));
-            audio.play().then(() => {
-                this.updatePiece(storyId, pieceIndex, { isPlaying: true });
-            }).catch(() => {
+        this.withChapterAccess(story, (allowed) => {
+            if (!allowed) {
+                this.errorMessage.set('You can’t play this chapter right now.');
                 this.updatePiece(storyId, pieceIndex, { isPlaying: false });
-            });
-        };
+                return;
+            }
+            this.errorMessage.set(null);
+            const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl!);
+            const resume = this.getStoredResume(storyId, pieceIndex);
+            if (!resume) return;
 
-        if (audio.readyState >= 1) {
-            seek();
-        } else {
-            audio.addEventListener('loadedmetadata', () => seek(), { once: true });
-            audio.load();
-        }
+            const seek = () => {
+                try {
+                    audio.currentTime = Math.max(0, Math.min(audio.duration || resume.duration || 0, resume.time));
+                } catch (ex) {
+                    // ignore
+                }
+                this.stopAllAudio(this.audioKey(storyId, pieceIndex));
+                audio.play().then(() => {
+                    this.updatePiece(storyId, pieceIndex, { isPlaying: true });
+                }).catch(() => {
+                    this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+                });
+            };
+
+            if (audio.readyState >= 1) {
+                seek();
+            } else {
+                audio.addEventListener('loadedmetadata', () => seek(), { once: true });
+                audio.load();
+            }
+        });
     }
 
     private scrollToStoredStory() {
@@ -721,14 +756,52 @@ export class ScreenStories implements OnInit {
         const piece = story.chapterPieces[pieceIndex];
         if (!piece || piece.isMuted) return;
         if (!piece.audioUrl) return;
-        const key = this.audioKey(storyId, pieceIndex);
-        const audio = this.getAudio(key, piece.audioUrl);
-        this.stopAllAudio(key);
-        audio.muted = piece.isMuted;
-        audio.play().then(() => {
-            this.updatePiece(storyId, pieceIndex, { isPlaying: true });
-        }).catch(() => {
-            this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+        this.withChapterAccess(story, (allowed) => {
+            if (!allowed) {
+                this.errorMessage.set('You can’t play this chapter right now.');
+                this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+                return;
+            }
+            this.errorMessage.set(null);
+            const key = this.audioKey(storyId, pieceIndex);
+            const audio = this.getAudio(key, piece.audioUrl!);
+            this.stopAllAudio(key);
+            audio.muted = piece.isMuted;
+            audio.play().then(() => {
+                this.updatePiece(storyId, pieceIndex, { isPlaying: true });
+            }).catch(() => {
+                this.updatePiece(storyId, pieceIndex, { isPlaying: false });
+            });
         });
     }
+
+    isChapterAllowed(story: Story, chapterNumber: number, callback: any) {
+        const audiobookId = story.audiobookId;
+        if (!audiobookId) {
+            callback(false);
+            return;
+        }
+        this.iAudiobook.audiobookGetChapterAudioIsAvailable(audiobookId, chapterNumber, (response: any) => {
+            callback(!!(response && response.success));
+        });
+    }
+
+    errorMessage = signal<string | null>(null);
+
+    private chapterAccessKey(story: Pick<Story, '_id' | 'chapterNumber'>) {
+        return `${story._id}:${story.chapterNumber}`;
+    }
+
+    private withChapterAccess(story: Story, callback: (allowed: boolean) => void) {
+        const key = this.chapterAccessKey(story);
+        if (this.chapterAccessMap.has(key)) {
+            callback(this.chapterAccessMap.get(key) === true);
+            return;
+        }
+        this.isChapterAllowed(story, story.chapterNumber, (allowed: boolean) => {
+            this.chapterAccessMap.set(key, allowed);
+            callback(allowed);
+        });
+    }
+
 }

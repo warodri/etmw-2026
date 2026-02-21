@@ -30,6 +30,8 @@ type PromoForm = {
 })
 export class ScreenAdmin implements OnInit, OnDestroy {
 
+    SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+    
     activeSection = signal<'promo' | 'audiobooks'>('audiobooks');
 
     promoCodes = signal<PromoCode[]>([]);
