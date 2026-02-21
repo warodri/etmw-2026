@@ -53,28 +53,19 @@ export class CategoryWithAudiobooks implements OnInit, OnChanges {
     loadAudiobooksForThisCategory(callback: any) {
         if (!this.category) return;
 
-        const audiobookId = null;
-        const query  = null;
-        const authorIds: string[] = [];
         const categories = this.getCategoryNamesForQuery(this.category);
-        const latest = true;
-        const myAudiobooks = false;
-        const published = true;
-        const pipelineStatus: string[] = [];
         const limit = this.limit()
         const skip = this.skip();
 
-        this.iAudiobook.audiobookFind(
-            audiobookId, 
-            query, 
-            authorIds,
+        this.iAudiobook.audiobookFind({
+            query: null,
             categories,
-            latest,
-            myAudiobooks,
-            published,
-            pipelineStatus,
+            myAudiobooks: false,
+            published: true,
+            pipelineStatus: [],
             limit,
-            skip,
+            skip
+        },
             (response: any) => {
                 if (response && response.success) {
                     const current = this.audiobooks();
@@ -87,7 +78,7 @@ export class CategoryWithAudiobooks implements OnInit, OnChanges {
                     this.hasMore.set(!!response.hasMore);
                 }
                 callback();
-            }) 
+            });
     }
 
     private getCategoryNamesForQuery(category: CategoryModel & { children?: CategoryModel[] }): string[] {

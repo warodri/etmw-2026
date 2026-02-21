@@ -1,7 +1,21 @@
 import { Injectable } from '@angular/core';
 import { LangUtils } from "../utils/lang";
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { InternetService } from './internet.service';
+
+export interface AudiobookFindPayload {
+    audiobookId?: string | null;
+    query?: string | null;
+    authorIds?: string[] | null;
+    categories?: string[] | null;
+    section?: 'trending' | 'for-you' | string | null;
+    latest?: boolean | null;
+    myAudiobooks?: boolean | null;
+    published?: boolean | null;
+    pipelineStatus?: string[] | null;
+    limit?: number | null;
+    skip?: number | null;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -9,9 +23,9 @@ import { InternetService } from './internet.service';
 export class InternetAudiobookService extends InternetService {
 
     constructor(
-        httpClient: HttpClient  // Add this
+        httpClient: HttpClient  
     ) {
-        super(httpClient)  // Pass to parent
+        super(httpClient)  
     }   
 
     getVoicesByTier(locale: string | null, forceRefresh: boolean, callback: any) {
@@ -74,66 +88,6 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    audiobookFindById(audiobookId: string, callback: any) {
-        const query = null;
-        const authorIds= null;
-        const categories = null;
-        const latest = true;
-        const myAudiobooks = false;
-        const published = null;
-        const pipelineStatus = null;
-        const limit = 1;
-        const skip = 0
-        const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
-            action: 'AudiobookFindById',
-            lang,
-            data: {
-                audiobookId,
-                query,
-                authorIds,
-                categories,
-                latest,
-                myAudiobooks,
-                published,
-                pipelineStatus,
-                limit,
-                skip
-            }
-        }, callback);
-    }
-
-    audiobookFind(
-        audiobookId: string | null, 
-        query: string | null, 
-        authorIds: string[],
-        categories: string[],
-        latest: boolean,
-        myAudiobooks: boolean,
-        published: boolean,
-        pipelineStatus: string[],
-        limit: number,
-        skip: number,
-        callback: any) {
-        const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
-            action: 'AudiobookFind',
-            lang,
-            data: {
-                audiobookId,
-                query,
-                authorIds,
-                categories,
-                latest,
-                myAudiobooks,
-                published,
-                pipelineStatus,
-                limit,
-                skip
-            }
-        }, callback);
-    }
-
     audiobookGetChapterAudioIsAvailable(audiobookId: string, chapterNumber: number, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
@@ -158,6 +112,91 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
     
+    //  FIND
+
+    audiobookFind(payload: AudiobookFindPayload, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFind',
+            lang,
+            data: payload || {}
+        }, callback);
+    }
+    
+    audiobookFindById(audiobookId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindById',
+            lang,
+            data: {
+                audiobookId,
+            }
+        }, callback);
+    }
+
+    audiobookFindByQuery(
+        query: string | null,
+        authorIds: string[] | null,
+        categories: string[] | null,
+        callback: any
+    ) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindByQuery',
+            lang,
+            data: {
+                query,
+                authorIds,
+                categories,
+            }
+        }, callback);
+    }
+
+    audiobookFindByCategory(categories: string[], callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindByCategory',
+            lang,
+            data: {
+                categories,
+            }
+        }, callback);
+    }
+
+    audiobookFindBySection(section: 'trending' | 'for-you', callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindBySection',
+            lang,
+            data: {
+                section,
+            }
+        }, callback);
+    }
+
+    audiobookFindByAuthor(authorIds: string[], callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindByAuthor',
+            lang,
+            data: {
+                authorIds
+            }
+        }, callback);
+    }
+
+    audiobookFindLatest(categories: string[] | null, authorIds: string[] | null, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookFindLatest',
+            lang,
+            data: {
+                categories,
+                authorIds,
+            }
+        }, callback);
+    }
+
     
 
 }

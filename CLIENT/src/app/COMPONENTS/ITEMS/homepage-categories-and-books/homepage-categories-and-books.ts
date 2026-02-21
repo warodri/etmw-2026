@@ -25,28 +25,15 @@ export class HomepageCategoriesAndBooks implements OnInit {
     }
 
     loadAudiobooks() {
-        const audiobookId = null;
-        const query  = null;
-        const authorIds: string[] = [];
-        const categories: string[] = [];
-        const latest = true;
-        const myAudiobooks = false;
-        const published = true;
-        const pipelineStatus: string[] = [];
-        const limit = 5;
-        const skip = 0;
-
-        this.iAudiobook.audiobookFind(
-            audiobookId, 
-            query, 
-            authorIds,
-            categories,
-            latest,
-            myAudiobooks,
-            published,
-            pipelineStatus,
-            limit,
-            skip,
+        this.iAudiobook.audiobookFind({
+            query: null,
+            categories: [],
+            myAudiobooks: false,
+            published: true,
+            pipelineStatus: [],
+            limit: 5,
+            skip: 0
+        },
             (response: any) => {
                 if (response && response.success) {
                     for (let item of response.audiobooks) {
@@ -54,7 +41,7 @@ export class HomepageCategoriesAndBooks implements OnInit {
                     }
                     this.audiobooks.set( response.audiobooks || [] );
                 }
-            }) 
+            });
     }
 
     getCoverUrl(audiobook: AudiobookModel): string {

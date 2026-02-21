@@ -24,14 +24,24 @@ const routes: Routes = [
     { path: 'app', component: ScreenMobileMain },
     { path: 'app/inbox', component: ScreenInbox },
     { path: 'app/user-profile/:id', component: ScreenUserProfile },
+    
+    //  Search audiobooks
     { path: 'app/search', component: ScreenSearch },
+    { path: 'app/search/query/:query', component: ScreenSearch },
+    { path: 'app/search/section/:section', component: ScreenSearch },
+    { path: 'app/search/author/:authorId', component: ScreenSearch },
+    { path: 'app/search/category/:category', component: ScreenSearch },
+    { path: 'app/search/:term', component: ScreenSearch },
+
     { path: 'app/player/:audiobookId/:chapterNumber', component: ScreenPlayer },
     { path: 'app/debate', component: ScreenDebates },
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
     { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
+   
     //  Audiobook Detail
     { path: 'app/audiobook/view/:id', component: ScreenItemDetail },
+   
     //  Payment
     { path: 'payment/success', component: ScreenPaymentSuccess },
     { path: 'payment/failed', component: ScreenPaymentFailed },

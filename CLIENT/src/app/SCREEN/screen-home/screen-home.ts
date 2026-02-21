@@ -29,8 +29,8 @@ export class ScreenHome implements OnInit {
     }
 
     getLatest() {
-        this.iAudiobook.audiobookFind(null, null, [], [], true, false, true, [], 4, 0, (response: any) => {
-            console.log('audiobookFind', response);
+        this.iAudiobook.audiobookFindLatest(null, null, (response: any) => {
+            console.log('audiobookFindLatest', response);
             if (response && response.success) {
                 this.latestAudiobooks.set(response.audiobooks)
             }

@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CategoryModel } from '../../../models/categories';
-import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { AudiobookFindPayload, InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { AudiobookModel } from '../../../models/audiobook';
 
 @Component({
     selector: 'app-item-list',
@@ -9,10 +10,19 @@ import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.s
     templateUrl: './item-list.html',
     styleUrl: './item-list.css',
 })
-export class ItemList implements OnInit {
+export class ItemList implements OnInit, OnChanges {
+    @Input() initialQuery: string | null = null;
+    @Input() initialAuthorId: string | null = null;
+    @Input() initialSection: 'trending' | 'for-you' | null = null;
+    @Input() initialCategory: string | null = null;
+    
+    @ViewChild('categoryResultsAnchor') categoryResultsAnchor?: ElementRef<HTMLElement>;
 
     searchQuery = '';
     searchResultCount = 0;
+    searchResultLabel = '';
+    searchResultPrefix = 'Results';
+    forceShowSearchResults = false;
     activeFilters: string[] = [];
     searchResults = signal<Array<any>>([]);
     private searchDebounce: any = null;
@@ -46,6 +56,9 @@ export class ItemList implements OnInit {
     //  User selects a category to show
     selectedCategory = signal<(CategoryModel & { children: CategoryModel[] }) | null>(null)
     
+    audiobooksTrendingNow = signal<AudiobookModel[]>([]);
+    private lastExternalSearchKey = '';
+
     constructor(
         private router: Router,
         private iAudiobook: InternetAudiobookService
@@ -53,6 +66,14 @@ export class ItemList implements OnInit {
 
     ngOnInit(): void {
         this.getCategories();
+        this.getTrendingNow();
+        this.applyInitialSearchFromRoute();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['initialQuery'] || changes['initialAuthorId'] || changes['initialSection'] || changes['initialCategory']) {
+            this.applyInitialSearchFromRoute();
+        }
     }
 
     getCategories() {
@@ -66,6 +87,15 @@ export class ItemList implements OnInit {
 
                 this.categories.set(normalized);
                 this.categoryCards.set(this.buildCategoryCards(normalized));
+            }
+        })
+    }
+
+    getTrendingNow() {
+        this.iAudiobook.audiobookFindBySection('trending', (response: any) => {
+            console.log('trending', response)
+            if (response && response.success) {
+                this.audiobooksTrendingNow.set(response.audiobooks);
             }
         })
     }
@@ -119,61 +149,140 @@ export class ItemList implements OnInit {
         this.filterPipelineStatus = '';
         this.filterCategory = '';
         this.activeFilters = [];
+        this.forceShowSearchResults = false;
         this.performSearch(true);
     }
 
     performSearch(force: boolean) {
         const q = (this.searchQuery || '').trim();
         if (q.length < 2 && !force) {
-            this.searchResults.set([]);
-            this.searchResultCount = 0;
+            this.resetSearchResults();
             return;
         }
 
-        const audiobookId = null;
-        const query = q.length >= 2 ? q : null;
-        const authorIds: string[] = [];
-        const categories: string[] = this.filterCategory ? [this.filterCategory] : [];
-        const latest = this.filterLatest;
-        const myAudiobooks = this.filterMyAudiobooks;
-        const published = this.filterPublished as any;
-        const pipelineStatus: string[] = this.filterPipelineStatus ? [this.filterPipelineStatus] : [];
-        const limit = this.searchLimit;
-        const skip = 0;
+        this.activeFilters = this.buildActiveFilters();
 
-        this.activeFilters = [];
-        if (this.filterCategory) this.activeFilters.push(this.filterCategory);
-        if (this.filterPipelineStatus) this.activeFilters.push(`Status: ${this.filterPipelineStatus}`);
-        if (this.filterMyAudiobooks) this.activeFilters.push('My Audiobooks');
-        if (this.filterPublished === true) this.activeFilters.push('Published');
-        if (this.filterPublished === false) this.activeFilters.push('Unpublished');
+        const payload: AudiobookFindPayload = {
+            query: q.length >= 2 ? q : null,
+            categories: this.filterCategory ? [this.filterCategory] : [],
+            latest: this.filterLatest,
+            myAudiobooks: this.filterMyAudiobooks,
+            published: this.filterPublished,
+            pipelineStatus: this.filterPipelineStatus ? [this.filterPipelineStatus] : [],
+            limit: this.searchLimit,
+            skip: 0
+        };
+        this.searchResultPrefix = 'Results for';
+        this.searchResultLabel = q.length >= 2 ? `"${q}"` : 'all audiobooks';
+        this.forceShowSearchResults = true;
 
-        this.iAudiobook.audiobookFind(
-            audiobookId,
-            query,
-            authorIds,
-            categories,
-            latest,
-            myAudiobooks,
-            published,
-            pipelineStatus,
-            limit,
-            skip,
-            (response: any) => {
-                if (response && response.success) {
-                    const list = response.audiobooks || [];
-                    this.searchResults.set(list);
-                    this.searchResultCount = list.length;
-                } else {
-                    this.searchResults.set([]);
-                    this.searchResultCount = 0;
-                }
+        this.fetchSearchResults(payload);
+    }
+
+    private buildActiveFilters(): string[] {
+        const filters: string[] = [];
+        if (this.filterCategory) filters.push(this.filterCategory);
+        if (this.filterPipelineStatus) filters.push(`Status: ${this.filterPipelineStatus}`);
+        if (this.filterMyAudiobooks) filters.push('My Audiobooks');
+        if (this.filterPublished === true) filters.push('Published');
+        if (this.filterPublished === false) filters.push('Unpublished');
+        return filters;
+    }
+
+    private resetSearchResults() {
+        this.searchResults.set([]);
+        this.searchResultCount = 0;
+    }
+
+    shouldShowResults(): boolean {
+        return this.forceShowSearchResults || !!(this.searchQuery && this.searchQuery.length > 0);
+    }
+
+    private applyInitialSearchFromRoute() {
+        const key = JSON.stringify({
+            q: (this.initialQuery || '').trim(),
+            section: this.initialSection || '',
+            authorId: (this.initialAuthorId || '').trim(),
+            category: (this.initialCategory || '').trim()
+        });
+        if (key === this.lastExternalSearchKey) return;
+        this.lastExternalSearchKey = key;
+
+        const section = this.initialSection || null;
+        const authorId = (this.initialAuthorId || '').trim() || null;
+        const category = (this.initialCategory || '').trim() || null;
+        const query = (this.initialQuery || '').trim() || null;
+
+        if (section) {
+            this.searchQuery = '';
+            this.searchResultPrefix = 'Section';
+            this.searchResultLabel = section;
+            this.forceShowSearchResults = true;
+            this.fetchSearchResults({
+                section,
+                published: true,
+                limit: this.searchLimit,
+                skip: 0
+            });
+            return;
+        }
+
+        if (authorId) {
+            this.searchQuery = '';
+            this.searchResultPrefix = 'Author';
+            this.searchResultLabel = 'selected author';
+            this.forceShowSearchResults = true;
+            this.fetchSearchResults({
+                authorIds: [authorId],
+                published: true,
+                limit: this.searchLimit,
+                skip: 0
+            });
+            return;
+        }
+
+        if (category) {
+            this.searchQuery = '';
+            this.filterCategory = category;
+            this.activeFilters = this.buildActiveFilters();
+            this.searchResultPrefix = 'Category';
+            this.searchResultLabel = category;
+            this.forceShowSearchResults = true;
+            this.fetchSearchResults({
+                categories: [category],
+                published: true,
+                limit: this.searchLimit,
+                skip: 0
+            });
+            return;
+        }
+
+        if (query) {
+            this.searchQuery = query;
+            this.performSearch(true);
+        }
+    }
+
+    private fetchSearchResults(payload: AudiobookFindPayload) {
+        this.iAudiobook.audiobookFind(payload, (response: any) => {
+            if (response && response.success) {
+                const list = response.audiobooks || [];
+                this.searchResults.set(list);
+                this.searchResultCount = list.length;
+                return;
             }
-        );
+            this.resetSearchResults();
+        });
     }
 
     selectCategory(category: CategoryModel & { children: CategoryModel[] }) {
         this.selectedCategory.set(category);
+        setTimeout(() => {
+            this.categoryResultsAnchor?.nativeElement?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 0);
     }
 
     goHome() {

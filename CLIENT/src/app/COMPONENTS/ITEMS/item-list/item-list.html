@@ -78,17 +78,16 @@
             }
         </div>
     
-        <div>
-    
+        <div>    
             <!--
                 SEARCH RESULTS
             -->
-            @if (searchQuery && searchQuery.length > 0) {
+            @if (shouldShowResults()) {
                 <div class="mt-4 bg-secondary rounded-4 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="text-gray-400">Results for</span> 
-                            <span class="fw-bold text-primary">"{{ searchQuery }}"</span>
+                            <span class="text-gray-400">{{ searchResultPrefix }}</span> 
+                            <span class="fw-bold text-primary">{{ searchResultLabel }}</span>
                         </div>
                         <span class="badge bg-slate-800 px-3 py-2">{{ searchResultCount }} found</span>
                     </div>
@@ -126,45 +125,40 @@
                 }
             }
     
+
+            <!--
+                User selected a category to search books from
+            -->
+            @if (selectedCategoryObj) {
+                <div #categoryResultsAnchor class="pb-5">
+                    <app-category-with-audiobooks
+                        [category]="selectedCategoryObj"
+                    ></app-category-with-audiobooks>
+                </div>
+            }
+
+
             <!--
                 FEATURED / TRENDING SECTION
             -->
-            @if (!searchQuery || searchQuery.length === 0) {
+            @if (audiobooksTrendingNow().length > 0) {
                 <div class="mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="fw-bold m-0">
                             <i class="bi bi-fire text-danger"></i> Trending Now
                         </h4>
-                        <button class="btn btn-sm btn-dark rounded-pill px-3">
-                            View All <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-                    
+                    </div>                    
                     <!-- Horizontal scrolling cards -->
                     <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
-                        <div class="flex-shrink-0" style="width: 450px;">
-                            <app-item template="md"></app-item>
-                        </div>
-                        <div class="flex-shrink-0" style="width: 450px;">
-                            <app-item template="md"></app-item>
-                        </div>
-                        <div class="flex-shrink-0" style="width: 450px;">
-                            <app-item template="md"></app-item>
-                        </div>
+                        @for (item of audiobooksTrendingNow(); track item) {
+                            <div class="flex-shrink-0" style="width: 450px;">
+                                <app-item [audiobook]="item" template="md"></app-item>
+                            </div>
+                        }
                     </div>
                 </div>
             }
     
-            <!--
-                CATEGORY CONTENT SECTIONS
-            -->
-            @if (selectedCategoryObj) {
-                <app-category-with-audiobooks
-                    [category]="selectedCategoryObj"
-                ></app-category-with-audiobooks>
-            }
-
-
             <!--
                 CATEGORIES SECTION
             -->
@@ -233,8 +227,6 @@
                 RECENTLY PLAYED / CONTINUE LISTENING
             -->
             <app-continue-listening></app-continue-listening>
-            
-    
         </div>
     
         <div class="py-5"></div>
