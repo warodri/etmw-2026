@@ -67,8 +67,8 @@
                                                 <div class="story-audio-progress-fill" [style.width.%]="piece.progress"></div>
                                             </div>
                                         </div>
-                                        @if (errorMessage()) {
-                                            <div class="small text-warning mb-2">{{ errorMessage() }}</div>
+                                        @if (piece.playbackError) {
+                                            <div class="small text-warning mb-2">{{ piece.playbackError }}</div>
                                         }
                                         <div class="story-title">{{ piece.title }}</div>
                                         <div class="story-language pt-1 pb-1">

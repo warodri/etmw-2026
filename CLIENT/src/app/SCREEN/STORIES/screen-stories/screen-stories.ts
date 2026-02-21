@@ -17,7 +17,8 @@ type ChapterPiece = {
     progress: number,
     expanded: boolean,
     hasResume: boolean,
-    resumeTime: number
+    resumeTime: number,
+    playbackError?: string | null
 };
 
 type Story = {
@@ -344,6 +345,11 @@ export class ScreenStories implements OnInit {
         const dy = touch.clientY - this.touchStartY;
         this.touchStoryId = null;
 
+        // Stop audio on any swipe direction once gesture is meaningful.
+        if (Math.abs(dx) >= 30 || Math.abs(dy) >= 30) {
+            this.stopAllAudio();
+        }
+
         if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
         if (dx < 0) {
             const story = this.getStory(storyId);
@@ -442,11 +448,11 @@ export class ScreenStories implements OnInit {
 
         this.withChapterAccess(story, (allowed) => {
             if (!allowed) {
-                this.errorMessage.set('You can’t play this chapter right now.');
+                this.setPieceError(storyId, pieceIndex, 'You can’t play this chapter right now.');
                 this.updatePiece(storyId, pieceIndex, { isPlaying: false });
                 return;
             }
-            this.errorMessage.set(null);
+            this.setPieceError(storyId, pieceIndex, null);
             const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl!);
             this.stopAllAudio(this.audioKey(storyId, pieceIndex));
             audio.muted = piece.isMuted;
@@ -637,11 +643,11 @@ export class ScreenStories implements OnInit {
         if (!piece.audioUrl) return;
         this.withChapterAccess(story, (allowed) => {
             if (!allowed) {
-                this.errorMessage.set('You can’t play this chapter right now.');
+                this.setPieceError(storyId, pieceIndex, 'You can’t play this chapter right now.');
                 this.updatePiece(storyId, pieceIndex, { isPlaying: false });
                 return;
             }
-            this.errorMessage.set(null);
+            this.setPieceError(storyId, pieceIndex, null);
             const audio = this.getAudio(this.audioKey(storyId, pieceIndex), piece.audioUrl!);
             const resume = this.getStoredResume(storyId, pieceIndex);
             if (!resume) return;
@@ -758,11 +764,11 @@ export class ScreenStories implements OnInit {
         if (!piece.audioUrl) return;
         this.withChapterAccess(story, (allowed) => {
             if (!allowed) {
-                this.errorMessage.set('You can’t play this chapter right now.');
+                this.setPieceError(storyId, pieceIndex, 'You can’t play this chapter right now.');
                 this.updatePiece(storyId, pieceIndex, { isPlaying: false });
                 return;
             }
-            this.errorMessage.set(null);
+            this.setPieceError(storyId, pieceIndex, null);
             const key = this.audioKey(storyId, pieceIndex);
             const audio = this.getAudio(key, piece.audioUrl!);
             this.stopAllAudio(key);
@@ -786,7 +792,9 @@ export class ScreenStories implements OnInit {
         });
     }
 
-    errorMessage = signal<string | null>(null);
+    private setPieceError(storyId: string, pieceIndex: number, message: string | null) {
+        this.updatePiece(storyId, pieceIndex, { playbackError: message });
+    }
 
     private chapterAccessKey(story: Pick<Story, '_id' | 'chapterNumber'>) {
         return `${story._id}:${story.chapterNumber}`;
