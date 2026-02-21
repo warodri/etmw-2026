@@ -5,6 +5,8 @@ import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { ToastService } from '../../../SERVICES/toast';
 import { InternetService } from '../../../SERVICES/internet.service';
 import { UtilsService } from '../../../utils/utils-service';
+import { AVAILABLE_LANGUAGES } from '../../../DATA/country-list';
+import { AudiobookModel } from '../../../models/audiobook';
 
 @Component({
     selector: 'app-screen-user-profile',
@@ -23,32 +25,22 @@ export class ScreenUserProfile implements OnInit {
     coverPhoto = signal<File | null>(null);
 
     selectedLanguageToAdd = '';
-    availableLanguages = [
-        { code: 'en', name: 'English', flag: '🇬🇧' },
-        { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-        { code: 'fr', name: 'French', flag: '🇫🇷' },
-        { code: 'de', name: 'German', flag: '🇩🇪' },
-        { code: 'it', name: 'Italian', flag: '🇮🇹' },
-        { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
-        { code: 'zh', name: 'Chinese', flag: '🇨🇳' },
-        { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
-        { code: 'ko', name: 'Korean', flag: '🇰🇷' },
-        { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
-        { code: 'ru', name: 'Russian', flag: '🇷🇺' },
-        { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-        { code: 'pl', name: 'Polish', flag: '🇵🇱' },
-        { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
-        { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
-        { code: 'sv', name: 'Swedish', flag: '🇸🇪' },
-        { code: 'da', name: 'Danish', flag: '🇩🇰' },
-        { code: 'no', name: 'Norwegian', flag: '🇳🇴' },
-        { code: 'fi', name: 'Finnish', flag: '🇫🇮' },
-        { code: 'cs', name: 'Czech', flag: '🇨🇿' }
-    ];
+    availableLanguages = AVAILABLE_LANGUAGES;
+
+    //  Followers
+    totalFollowers = signal<number>(0);
+    totalFollowing = signal<number>(0);
+
+    //  This user's work
+    audiobooks = signal<AudiobookModel[]>([]);
 
     //  Flags
     working = signal<boolean>(false);
     isMine = signal<boolean>(false);
+    isFollowing = signal<boolean>(false);
+    //  FUTURE FEATURES
+    showRecentActivity = signal<boolean>(false);
+    showAchivements = signal<boolean>(false);
 
     constructor(
         private router: Router,
@@ -66,9 +58,31 @@ export class ScreenUserProfile implements OnInit {
                 this.loadMyUser(() => {
                     this.checkIfMyUser();
                     this.checkForcedStatus();
+                    this.getMyFollowingInfo();
+                    this.getUserWork();
                 });
             })
         })
+    }
+
+    getMyFollowingInfo() {
+        const userId = this.userId();
+        this.internet.followGetMine(userId, (response: any) => {
+            console.log('followGetMine', response)
+            this.totalFollowers.set(response.followers);
+            this.totalFollowing.set(response.following);
+            this.isFollowing.set(response.followingThisUser);
+        })
+    }
+    
+    getUserWork() {
+        const userId = this.userId();
+        if (userId) {
+            this.iUser.userGetWork(userId, (response: any) => {
+                console.log('userGetWork', response)
+                this.audiobooks.set(response.audiobooks);
+            })
+        }
     }
 
     loadUser(callback: any) {
@@ -197,6 +211,22 @@ export class ScreenUserProfile implements OnInit {
             console.log('updateMyProfile', response)
             this.toast.show('User updated!')
         })
+    }
+
+    toggleFollow() {
+        const userId = this.userId();
+        if (userId) {
+            this.isFollowing.set(!this.isFollowing());
+            this.internet.followUpsert(userId, (response: any) => {
+                if (response && response.success) {
+                    if (this.isFollowing()) {
+                        this.totalFollowers.set( this.totalFollowers() + 1);
+                    } else {
+                        this.totalFollowers.set( this.totalFollowers() - 1);
+                    }
+                }
+            })
+        }
     }
 
 }

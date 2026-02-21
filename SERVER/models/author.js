@@ -38,15 +38,6 @@ const model = new Schema({
         type: String
     },
 
-    totalAudiobooks: {
-        type: Number,
-        default: 0
-    },
-
-    totalCompletions: {
-        type: Number,
-        default: 0
-    },
     isVerified: {
         type: Boolean,
         default: false,

@@ -1,6 +1,7 @@
 @let userObj = user();
 @let profilePhotoObj = profilePhoto();
 @let coverPhotoObj = coverPhoto();
+@let audiobooksObj = audiobooks();
 
 @if (userObj) {
     <div class="container-fluid p-0 min-vh-100 d-flex align-items-start">
@@ -44,12 +45,12 @@
                 <!-- Author Badge -->
                 @if (userObj.isAuthor) {
                     <div class="d-inline-flex align-items-center gap-2 mb-3">
-                        <span class="author-badge">
+                        <div class="author-badge p-2 px-3">
                             <i class="bi bi-pencil-fill"></i> AUTHOR
-                        </span>
-                        <span class="author-badge" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
-                            <i class="bi bi-shield-check"></i> VERIFIED
-                        </span>
+                        </div>
+                        <div class="author-badge bg-dark p-2 px-3">
+                            <i class="bi bi-shield-check"></i> NOT VERIFIED
+                        </div>
                     </div>
                 }
 
@@ -60,31 +61,45 @@
                         {{ userObj.bio }}
                     }
                     @if (userObj.city || userObj.country) {
-                        🌍 Based in {{ userObj.city }} {{ userObj.country }}
+                        <div CLASS="mt-3">
+                            🌍 Based in {{ userObj.city }} {{ userObj.country }}
+                        </div>
                     }                        
                 </div>
 
                 <!-- Quick Stats Grid -->
                 <div class="d-flex justify-content-center gap-3 mb-4">
                     <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
-                        <div class="text-primary fw-bold text-2xl mb-1">24</div>
+                        <div class="text-primary fw-bold text-2xl mb-1">
+                            {{ audiobooksObj.length }}
+                        </div>
                         <div class="text-gray-400 small">Works</div>
                     </div>
                     <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
-                        <div class="text-primary fw-bold text-2xl mb-1">1.2K</div>
+                        <div class="text-primary fw-bold text-2xl mb-1">
+                            {{ totalFollowers() | number }}
+                        </div>
                         <div class="text-gray-400 small">Followers</div>
                     </div>
                     <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
-                        <div class="text-primary fw-bold text-2xl mb-1">342</div>
+                        <div class="text-primary fw-bold text-2xl mb-1">
+                            {{ totalFollowing() | number }}
+                        </div>
                         <div class="text-gray-400 small">Following</div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
-                    <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
-                        <i class="bi bi-heart-fill"></i> Follow
-                    </button>
+                    @if (isFollowing()) {
+                        <button class="btn btn-primary rounded-pill px-4 py-2 fw-semibold" (click)="toggleFollow()">
+                            <i class="bi bi-heart-fill"></i> Following
+                        </button>
+                    } @else {
+                        <button class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold" (click)="toggleFollow()">
+                            <i class="bi bi-heart-fill"></i> Follow
+                        </button>
+                    }
                     <button class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold">
                         <i class="bi bi-chat-dots-fill"></i> Message
                     </button>
@@ -161,45 +176,47 @@
             <!-- 
                 ACHIEVEMENTS / BADGES
             -->
-            <div class="mt-4 bg-secondary rounded-4 p-4">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-trophy-fill text-primary"></i> Achievements
-                </h5>
-                <div class="d-flex flex-wrap gap-3">
-                    <div class="text-center" style="width: 70px;">
-                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); aspect-ratio: 1;">
-                            <div class="d-flex align-items-center justify-content-center h-100">
-                                <i class="bi bi-star-fill" style="font-size: 1.5rem; color: white;"></i>
+            @if (showAchivements()) {
+                <div class="mt-4 bg-secondary rounded-4 p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-trophy-fill text-primary"></i> Achievements
+                    </h5>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="text-center" style="width: 70px;">
+                            <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); aspect-ratio: 1;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-star-fill" style="font-size: 1.5rem; color: white;"></i>
+                                </div>
                             </div>
+                            <div class="small text-gray-400">First Work</div>
                         </div>
-                        <div class="small text-gray-400">First Work</div>
-                    </div>
-                    <div class="text-center" style="width: 70px;">
-                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); aspect-ratio: 1;">
-                            <div class="d-flex align-items-center justify-content-center h-100">
-                                <i class="bi bi-people-fill" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="text-center" style="width: 70px;">
+                            <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); aspect-ratio: 1;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-people-fill" style="font-size: 1.5rem; color: white;"></i>
+                                </div>
                             </div>
+                            <div class="small text-gray-400">1K Followers</div>
                         </div>
-                        <div class="small text-gray-400">1K Followers</div>
-                    </div>
-                    <div class="text-center" style="width: 70px;">
-                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); aspect-ratio: 1;">
-                            <div class="d-flex align-items-center justify-content-center h-100">
-                                <i class="bi bi-fire" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="text-center" style="width: 70px;">
+                            <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); aspect-ratio: 1;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-fire" style="font-size: 1.5rem; color: white;"></i>
+                                </div>
                             </div>
+                            <div class="small text-gray-400">10 Day Streak</div>
                         </div>
-                        <div class="small text-gray-400">10 Day Streak</div>
-                    </div>
-                    <div class="text-center" style="width: 70px;">
-                        <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); aspect-ratio: 1;">
-                            <div class="d-flex align-items-center justify-content-center h-100">
-                                <i class="bi bi-book-fill" style="font-size: 1.5rem; color: white;"></i>
+                        <div class="text-center" style="width: 70px;">
+                            <div class="rounded-3 mb-2 p-2" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); aspect-ratio: 1;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-book-fill" style="font-size: 1.5rem; color: white;"></i>
+                                </div>
                             </div>
+                            <div class="small text-gray-400">10 Works</div>
                         </div>
-                        <div class="small text-gray-400">10 Works</div>
                     </div>
                 </div>
-            </div>
+            }
 
             <!-- 
                 PUBLISHED WORKS
@@ -209,63 +226,63 @@
                     <h5 class="fw-bold m-0">
                         <i class="bi bi-book-fill text-primary"></i> &nbsp;Published Works
                     </h5>
-                    <span class="badge bg-slate-800 text-primary px-3 py-2">24 Total</span>
+                    <span class="badge bg-slate-800 text-primary px-3 py-2">
+                        {{ audiobooksObj.length }} Total
+                    </span>
                 </div>
                 
                 <!-- Horizontal Scroll Container -->
                 <div class="d-flex flex-nowrap gap-3" style="overflow-x: auto; padding-bottom: 1rem;">
-                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
-                        <app-item></app-item>
-                    </div>
-                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
-                        <app-item></app-item>
-                    </div>
-                    <div class="flex-shrink-0 debate-item rounded-4 p-3" style="width: 280px;">
-                        <app-item></app-item>
-                    </div>
+                    @for (item of audiobooks(); track item) {
+                        <div class="flex-shrink-0 debate-item rounded-4 p-3">
+                            <app-item [audiobook]="item"></app-item>
+                        </div>
+                    } 
                 </div>
             </div>
 
             <!-- 
                 ACTIVITY / RECENT INTERACTIONS
             -->
-            <div class="mt-4 bg-secondary rounded-4 p-4">
-                <h5 class="fw-bold mb-3">
-                    <i class="bi bi-clock-history text-primary"></i> &nbsp;Recent Activity
-                </h5>
-                
-                <div class="d-flex flex-column gap-3">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-upload text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold small">Published new work</div>
-                            <div class="text-gray-400 small">"How to stop feeling like sh*t" • 2 hours ago</div>
-                        </div>
-                    </div>
+            @if (showRecentActivity()) {
+                <div class="mt-4 bg-secondary rounded-4 p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-clock-history text-primary"></i> &nbsp;Recent Activity
+                    </h5>
                     
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-chat-fill text-primary"></i>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-upload text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small">Published new work</div>
+                                <div class="text-gray-400 small">"How to stop feeling like sh*t" • 2 hours ago</div>
+                            </div>
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold small">Replied to a debate</div>
-                            <div class="text-gray-400 small">In "Philosophy of Life" • 5 hours ago</div>
+                        
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-chat-fill text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small">Replied to a debate</div>
+                                <div class="text-gray-400 small">In "Philosophy of Life" • 5 hours ago</div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-heart-fill text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold small">Gained 50 new followers</div>
-                            <div class="text-gray-400 small">Yesterday</div>
+                        
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-3 bg-slate-800 p-2 flex-shrink-0" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-heart-fill text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small">Gained 50 new followers</div>
+                                <div class="text-gray-400 small">Yesterday</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
 
             <!-- 
                 EDIT PROFILE SECTION (Only visible to profile owner)

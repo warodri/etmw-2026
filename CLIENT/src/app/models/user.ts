@@ -16,10 +16,6 @@ export interface UserModel {
     connected: boolean,
     forceStatus: 'connected' | 'disconnected',
 
-    //  Social
-    totalFollowers: number,
-    totalFollowing: number,
-
     //  Notifications
     lastCheckTime: number,
     lastUnreadMessages: number,

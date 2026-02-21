@@ -70,7 +70,6 @@ async function run(data, req, res) {
             doc.languages = u.languages;
             doc.country = u.country;
             doc.totalAudiobooks = 1;
-            doc.totalCompletions = 0;
             a = await doc.save();
         }
         if (!a) {

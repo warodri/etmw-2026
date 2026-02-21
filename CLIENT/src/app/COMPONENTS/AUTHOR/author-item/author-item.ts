@@ -132,11 +132,6 @@ export class AuthorItem implements OnInit {
         return a?.totalAudiobooks || 0;
     }
 
-    getTotalCompletions(): number {
-        const a: any = this.author;
-        return a?.totalCompletions || 0;
-    }
-
     getTotalFollowers(): number | null {
         const a: any = this.author;
         const value = a?.totalFollowers ?? a?.userId?.totalFollowers;

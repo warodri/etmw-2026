@@ -8,8 +8,6 @@ async function run(data, req, res) {
             bio,
             languages,
             country,
-            totalAudiobooks,
-            totalCompletions,
             enabled
         } = data;
         const userId = req.userId || null;
@@ -26,8 +24,6 @@ async function run(data, req, res) {
         if (bio !== undefined) updateData.bio = bio;
         if (languages !== undefined) updateData.languages = languages;
         if (country !== undefined) updateData.country = country;
-        if (totalAudiobooks !== undefined) updateData.totalAudiobooks = totalAudiobooks;
-        if (totalCompletions !== undefined) updateData.totalCompletions = totalCompletions;
         if (enabled !== undefined) updateData.enabled = enabled;
 
         const author = await Author.findByIdAndUpdate(id, updateData, { new: true });

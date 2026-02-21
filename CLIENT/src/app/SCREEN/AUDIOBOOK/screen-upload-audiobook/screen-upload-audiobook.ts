@@ -8,6 +8,7 @@ import { PromoCodeModel } from '../../../models/promo-codes';
 import { UtilClass } from '../../../utils/utils';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { Language, ProcessedVoice } from '../../../models/voices';
+import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
 
 @Component({
     selector: 'app-screen-upload-audiobook',
@@ -725,102 +726,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     getLocaleLabel(code: string): string {
         if (!code) return '';
         const [lang, region] = code.split('-');
-        const languageMap: Record<string, string> = {
-            ar: 'Arabic',
-            bg: 'Bulgarian',
-            ceb: 'Cebuano',
-            cmn: 'Mandarin Chinese',
-            cs: 'Czech',
-            da: 'Danish',
-            de: 'German',
-            el: 'Greek',
-            en: 'English',
-            es: 'Spanish',
-            fi: 'Finnish',
-            fil: 'Filipino',
-            fr: 'French',
-            hi: 'Hindi',
-            hr: 'Croatian',
-            hu: 'Hungarian',
-            id: 'Indonesian',
-            ilo: 'Ilocano',
-            it: 'Italian',
-            ja: 'Japanese',
-            jv: 'Javanese',
-            ko: 'Korean',
-            li: 'Limburgish',
-            ms: 'Malay',
-            nl: 'Dutch',
-            no: 'Norwegian',
-            pl: 'Polish',
-            pt: 'Portuguese',
-            ro: 'Romanian',
-            ru: 'Russian',
-            sk: 'Slovak',
-            sv: 'Swedish',
-            ta: 'Tamil',
-            tr: 'Turkish',
-            uk: 'Ukrainian',
-            vi: 'Vietnamese'
-        };
-        const regionMap: Record<string, string> = {
-            EG: 'Egypt',
-            KW: 'Kuwait',
-            LB: 'Lebanon',
-            MA: 'Morocco',
-            SA: 'Saudi Arabia',
-            BG: 'Bulgaria',
-            PH: 'Philippines',
-            CN: 'China',
-            TW: 'Taiwan',
-            CZ: 'Czech Republic',
-            DK: 'Denmark',
-            AT: 'Austria',
-            DE: 'Germany',
-            GR: 'Greece',
-            AU: 'Australia',
-            CA: 'Canada',
-            FI: 'Finland',
-            GB: 'United Kingdom',
-            IE: 'Ireland',
-            IN: 'India',
-            JM: 'Jamaica',
-            KR: 'Korea',
-            MY: 'Malaysia',
-            NG: 'Nigeria',
-            NZ: 'New Zealand',
-            RU: 'Russia',
-            SG: 'Singapore',
-            US: 'United States',
-            ZA: 'South Africa',
-            AR: 'Argentina',
-            CL: 'Chile',
-            CO: 'Colombia',
-            ES: 'Spain',
-            MX: 'Mexico',
-            PE: 'Peru',
-            VE: 'Venezuela',
-            BE: 'Belgium',
-            CH: 'Switzerland',
-            FR: 'France',
-            TN: 'Tunisia',
-            HR: 'Croatia',
-            HU: 'Hungary',
-            ID: 'Indonesia',
-            IT: 'Italy',
-            JP: 'Japan',
-            NL: 'Netherlands',
-            NO: 'Norway',
-            PL: 'Poland',
-            BR: 'Brazil',
-            PT: 'Portugal',
-            RO: 'Romania',
-            SK: 'Slovakia',
-            SE: 'Sweden',
-            TR: 'Turkey',
-            UA: 'Ukraine',
-            VN: 'Vietnam'
-        };
+        const languageMap: Record<string, string> = LANGUAGE_MAP;
+        const regionMap: Record<string, string> = REGION_MAP;
 
         const languageName = languageMap[lang] || lang;
         const regionName = regionMap[region] || region;

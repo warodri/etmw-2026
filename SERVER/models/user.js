@@ -58,16 +58,6 @@ const model = new Schema({
         default: null
     },
 
-    //  Social
-    totalFollowers: {
-        type: Number,
-        default: 0
-    },
-    totalFollowing: {
-        type: Number,
-        default: 0
-    },
-
     //  Notifications
     lastCheckTime: {        //  when was the last timestamp we checked for unread
         type: Number,

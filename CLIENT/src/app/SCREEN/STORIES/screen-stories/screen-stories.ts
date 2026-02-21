@@ -4,6 +4,7 @@ import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetStoryService } from '../../../SERVICES/internet-stories.service';
 import { Config } from '../../../utils/config';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { LANGUAGE_MAP } from '../../../DATA/country-list';
 
 type ChapterPiece = {
     title: string,
@@ -489,39 +490,7 @@ export class ScreenStories implements OnInit {
     languageLabel(code: string): string {
         if (!code) return 'Language: Unknown';
         const base = code.toLowerCase().split(/[-_]/)[0];
-        const labels: Record<string, string> = {
-            en: 'English',
-            es: 'Spanish',
-            fr: 'French',
-            de: 'German',
-            it: 'Italian',
-            pt: 'Portuguese',
-            nl: 'Dutch',
-            sv: 'Swedish',
-            no: 'Norwegian',
-            da: 'Danish',
-            fi: 'Finnish',
-            pl: 'Polish',
-            cs: 'Czech',
-            hu: 'Hungarian',
-            ro: 'Romanian',
-            el: 'Greek',
-            tr: 'Turkish',
-            ru: 'Russian',
-            uk: 'Ukrainian',
-            ar: 'Arabic',
-            he: 'Hebrew',
-            hi: 'Hindi',
-            bn: 'Bengali',
-            ur: 'Urdu',
-            th: 'Thai',
-            vi: 'Vietnamese',
-            id: 'Indonesian',
-            ms: 'Malay',
-            zh: 'Chinese',
-            ja: 'Japanese',
-            ko: 'Korean'
-        };
+        const labels: Record<string, string> = LANGUAGE_MAP;
         const label = labels[base];
         return label ? `Language: ${label}` : `Language: ${code.toUpperCase()}`;
     }

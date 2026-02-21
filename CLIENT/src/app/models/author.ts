@@ -9,8 +9,6 @@ export interface AuthorModel {
     languages: Array<string>,
     categories: Array<string>,
     country: string,
-    totalAudiobooks: number,
-    totalCompletions: number,
     isVerified: boolean,
     enabled: boolean,
     createdAt: number,

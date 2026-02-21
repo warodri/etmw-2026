@@ -27,11 +27,4 @@ module.exports = {
         );
     },
 
-    async incrementCompletions(authorId, amount = 1) {
-        return Author.updateOne(
-            { _id: authorId },
-            { $inc: { totalCompletions: amount } }
-        );
-    }
-
 };

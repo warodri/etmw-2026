@@ -134,7 +134,7 @@ export class InternetUserService extends InternetService {
 
     userSetListeningHistory(audiobookId: string, chapterNumber: number, progressPercent: number, completed: boolean, callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPostArrayBuffer(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'UserSetListeningHistory',
             lang,
             data: {
@@ -142,6 +142,17 @@ export class InternetUserService extends InternetService {
                 chapterNumber,
                 progressPercent,
                 completed
+            }
+        }, callback);
+    }
+
+    userGetWork(userId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
+            action: 'UserGetWork',
+            lang,
+            data: {
+                userId,
             }
         }, callback);
     }

@@ -221,7 +221,7 @@ export class ScreenItemDetail implements OnInit {
         const audiobookId = this.audiobookId()
         if (audiobookId) {
             this.isBookmarked.set(false);
-            this.internet.bookmarkUpsertGetMine((response: any) => {
+            this.internet.bookmarkGetMine((response: any) => {
                 console.log('bookmarkUpsertGetMine', response)
                 for (let item of response.bookmarks) {
                     if (item.targetId == audiobookId) {

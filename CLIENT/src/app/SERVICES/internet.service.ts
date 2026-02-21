@@ -105,12 +105,36 @@ export class InternetService {
         }, callback);
     }
 
-    bookmarkUpsertGetMine(callback: any) {
+    bookmarkGetMine(callback: any) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
-            action: 'BookmarkUpsertGetMine',
+            action: 'BookmarkGetMine',
             lang,
             data: {
+            }
+        }, callback);
+    }
+    
+    //  FOLLOW
+    
+    followUpsert(followingUserId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'FollowUpsert',
+            lang,
+            data: {
+                followingUserId
+            }
+        }, callback);
+    }
+
+    followGetMine(userIdFollowing: string | null, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'FollowGetMine',
+            lang,
+            data: {
+                userIdFollowing
             }
         }, callback);
     }

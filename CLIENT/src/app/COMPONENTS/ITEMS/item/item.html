@@ -1,40 +1,39 @@
 @if (audiobook) {
     @if (template == 'default') {
         
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="work-card">
-                <div class="work-content">
-                    <div class="d-flex justify-content-start align-items-start gap-3">
-                        <img [src]="getCoverUrl()"  
-                            [alt]="audiobook.title" class="mt-1 work-cover rounded-4" style="width:110px; height:160px; object-fit: cover;" />
-                        <div>
-                            <div class="btn btn-sm btn-secondary rounded-pill">
-                                {{ getPrimaryCategory() }}
-                            </div>
-                            <div class="mt-2 work-title">
-                                {{ audiobook.title }}
-                            </div>
-                            <div class="work-author m-1">
-                                by {{ audiobook.authorName }}
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <div class="work-meta-item">
-                                    <i class="bi bi-clock"></i>
-                                    <span>{{ getDurationLabel() }}</span>
-                                </div>
-                                <div class="work-meta-item">
-                                    <i class="bi bi-book"></i>
-                                    <span>{{ getChapterCount() }} chapters</span>
-                                </div>
-                                <div class="work-meta-item" [class.text-warning]="getStatusLabel() === 'Published'">
-                                    <i class="bi bi-check-circle"></i>
-                                    <span>{{ getStatusLabel() }}</span>
-                                </div>
-                            </div>
-                            <button class="mt-3 btn btn-sm btn-primary rounded-pill" (click)="viewItem()">
-                                View Details
-                            </button>
+        <div class="work-card">
+            <div class="work-content">
+                <div class="d-flex justify-content-start align-items-start gap-3">
+                    <img [src]="getCoverUrl()"  
+                        [alt]="audiobook.title" class="mt-1 work-cover rounded-4" 
+                            style="max-width: 100px; height:160px; object-fit: cover;" />
+                    <div>
+                        <div class="btn btn-sm btn-secondary rounded-pill">
+                            {{ getPrimaryCategory() }}
                         </div>
+                        <div class="mt-2 work-title">
+                            {{ audiobook.title }}
+                        </div>
+                        <div class="work-author m-1">
+                            by {{ audiobook.authorName }}
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="work-meta-item">
+                                <i class="bi bi-clock"></i>
+                                <span>{{ getDurationLabel() }}</span>
+                            </div>
+                            <div class="work-meta-item">
+                                <i class="bi bi-book"></i>
+                                <span>{{ getChapterCount() }} chapters</span>
+                            </div>
+                            <div class="work-meta-item" [class.text-warning]="getStatusLabel() === 'Published'">
+                                <i class="bi bi-check-circle"></i>
+                                <span>{{ getStatusLabel() }}</span>
+                            </div>
+                        </div>
+                        <button class="mt-3 btn btn-sm btn-primary rounded-pill" (click)="viewItem()">
+                            View Details
+                        </button>
                     </div>
                 </div>
             </div>

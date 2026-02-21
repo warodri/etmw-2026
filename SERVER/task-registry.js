@@ -1,9 +1,15 @@
 
 //
+//  FOLLOW
+//
+FollowUpsert = require('./tasks/follow_upsert');
+FollowGetMine = require('./tasks/follow_get_mine');
+
+//
 //  BOOKMARKS
 //
 BookmarkUpsert = require('./tasks/bookmark_upsert');
-BookmarkUpsertGetMine = require('./tasks/bookmark_get_mine');
+BookmarkGetMine = require('./tasks/bookmark_get_mine');
 
 //
 //  STORIES
@@ -68,6 +74,7 @@ const UpdateMyProfile = require('./tasks/user_update');
 //
 const UserGetListeningHistory = require("./tasks/user_get_listening_history");
 const UserSetListeningHistory = require("./tasks/user_set_listening_history");
+const UserGetWork = require("./tasks/user_get_work");
 
 //
 //  MISC
@@ -94,9 +101,13 @@ const FindAuthor = require('./tasks/author_find');
 
 const TasksRegistry = {
 
+    //  FOLLOW
+    FollowUpsert,
+    FollowGetMine,
+
     //  BOOKMARKS
     BookmarkUpsert,
-    BookmarkUpsertGetMine,
+    BookmarkGetMine,
 
     //  STORIES
     UpdateAudiobookStory,
@@ -108,6 +119,7 @@ const TasksRegistry = {
     FindAuthor,
     
     //  USER
+    UserGetWork,
     UserSetListeningHistory,
     UserGetListeningHistory,
     

@@ -85,10 +85,6 @@ async function run(data, req, res) {
                         categories: authorDoc.categories || user.categories || [],
                         connected: user.connected,
                         forceStatus: user.forceStatus,
-                        totalFollowers: user.totalFollowers,
-                        totalFollowing: user.totalFollowing,
-                        totalAudiobooks,
-                        totalCompletions: Number(authorDoc.totalCompletions || 0),
                         isVerified: !!authorDoc.isVerified,
                         createdAt: authorDoc.createdAt
                     };
