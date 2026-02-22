@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
-import { InternetDebateServices } from '../../../SERVICES/internet-comments.services';
 import { UserModel } from '../../../models/user';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { AudiobookModel } from '../../../models/audiobook';
 import { Config } from '../../../utils/config';
+import { InternetDebateService } from '../../../SERVICES/internet-debate.services';
+import { DebateCommentModel } from '../../../models/debate-comment';
 
 @Component({
     selector: 'app-screen-debates',
@@ -20,77 +21,28 @@ export class ScreenDebates implements OnInit, OnDestroy {
 
     audiobook = signal<AudiobookModel | null>(null);
 
-    debate = {
-        totalMessages: 247,
-        enabled: true
-    };
+    bookSearchQuery = '';
 
     viewMode: 'timeline' | 'threads' | 'podcast' = 'timeline';
 
-
-    popularThreads = [
-        {
-            _id: 't1',
-            userName: 'Sarah Johnson',
-            userProfile: 'https://i.pravatar.cc/150?img=5',
-            text: 'What was your favorite chapter and why? For me it was Chapter 7 - it really resonated with my personal journey.',
-            replyCount: 45,
-            likes: 89,
-            timeAgo: '3h ago'
-        },
-        {
-            _id: 't2',
-            userName: 'Lucas Silva',
-            userProfile: 'https://i.pravatar.cc/150?img=15',
-            text: 'Can we discuss the symbolism in the final chapter? I think I missed something important.',
-            replyCount: 32,
-            likes: 67,
-            timeAgo: '6h ago'
-        }
-    ];
-
-    recentThreads = [
-        {
-            _id: 't3',
-            userName: 'Emma Wilson',
-            userProfile: 'https://i.pravatar.cc/150?img=45',
-            text: 'Just finished the book and wow! Ready to discuss all my thoughts with you all.',
-            replyCount: 5,
-            likes: 12,
-            timeAgo: '1h ago'
-        }
-    ];
-
-    // Input state
-    newCommentText = '';
-    isRecording = false;
-    recordingDuration = '0:00';
-    private recordingInterval: any;
-    private recordingSeconds = 0;
-
-    // Podcast state
-    podcastGenerated = false;
-    podcastPlaying = false;
-    podcastProgress = 0;
-    podcastCurrentTime = '0:00';
-    podcastDuration = '45:32';
-    estimatedDuration = '~45m';
-
-    podcastSections = [
-        { id: 1, title: 'Introduction & Overview', speaker: 'AI Narrator', duration: '3:24', timestamp: 0 },
-        { id: 2, title: 'Top Comment Discussion', speaker: 'Maria González', duration: '5:12', timestamp: 204 },
-        { id: 3, title: 'Author Response', speaker: 'Mariano E Rodriguez', duration: '4:38', timestamp: 516 },
-        { id: 4, title: 'Community Insights', speaker: 'Multiple Speakers', duration: '8:45', timestamp: 794 }
-    ];
+    audiobooksFound = signal<AudiobookModel[]>([]);
+    commentsRefreshToken = signal<number>(0);
+    selectedReply = signal<DebateCommentModel | null>(null);
+    selectedThreadFromPopular = signal<string | null>(null);
 
     SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+
+    debate = {
+        totalMessages: 0,
+        enabled: true
+    };
 
     //  Flags
     loading = signal<boolean>(true);
 
     constructor(
         private iAudiobook: InternetAudiobookService,
-        private iDebate: InternetDebateServices,
+        private iDebate: InternetDebateService,
         private route: ActivatedRoute,
         private iUser: InternetUserService,
         private router: Router
@@ -101,6 +53,7 @@ export class ScreenDebates implements OnInit, OnDestroy {
             this.audiobookId.set(params.get('audiobookId'));
             this.getMyUser(() => {
                 this.loadAudiobook(() => {
+                    this.countComments();
                     this.loading.set(false);
                 })
             })
@@ -124,95 +77,38 @@ export class ScreenDebates implements OnInit, OnDestroy {
                 console.log('audiobookFindById', response)
                 if (response && response.success && response.audiobooks && Array.isArray(response.audiobooks) && response.audiobooks.length > 0) {
                     this.audiobook.set(response.audiobooks[0]);
-                    callback();
+                } else {
+                    this.audiobook.set(null);
                 }
+                callback();
             })
+            return;
         }
+        this.audiobook.set(null);
+        callback();
     }
 
     ngOnDestroy() {
-        this.stopRecording();
     }
 
     goBack() {
         this.router.navigate(['app'])
     }
 
-
-
-    // Input actions
-    toggleRecording() {
-        if (this.isRecording) {
-            this.stopRecording();
-        } else {
-            this.startRecording();
-        }
+    hasAudiobookInRoute(): boolean {
+        return !!this.audiobookId();
     }
 
-    startRecording() {
-        this.isRecording = true;
-        this.recordingSeconds = 0;
-        this.recordingInterval = setInterval(() => {
-            this.recordingSeconds++;
-            const minutes = Math.floor(this.recordingSeconds / 60);
-            const seconds = this.recordingSeconds % 60;
-            this.recordingDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }, 1000);
-        
-        // Start actual recording
-        console.log('Start recording audio');
-    }
-
-    stopRecording() {
-        if (this.recordingInterval) {
-            clearInterval(this.recordingInterval);
-            this.recordingInterval = null;
-        }
-        this.isRecording = false;
-        this.recordingSeconds = 0;
-        this.recordingDuration = '0:00';
-        
-        // Stop actual recording
-        console.log('Stop recording audio');
-    }
-
-    attachFile() {
-        console.log('Attach file');
-        // Open file picker
-    }
-
-    enhanceWithAI() {
-        console.log('Enhance with AI');
-        // Use AI to improve/expand comment
-    }
-
-    canSend(): boolean {
-        return this.newCommentText.trim().length > 0 || this.isRecording;
-    }
-
-    sendComment() {
-        if (this.canSend()) {
-            console.log('Send comment:', this.newCommentText);
-            // Send comment to API
-            this.newCommentText = '';
-        }
-    }
-
-    // Podcast actions
-    generatePodcast() {
-        console.log('Generate podcast');
-        // Call API to generate podcast
-        this.podcastGenerated = true;
-    }
-
-    togglePodcast() {
-        this.podcastPlaying = !this.podcastPlaying;
-        // Implement actual podcast playback
-    }
-
-    seekPodcast(timestamp: number) {
-        console.log('Seek to:', timestamp);
-        // Seek podcast to timestamp
+    goToSearchBooks() {
+        const query = (this.bookSearchQuery || '').trim();
+        if (!query) return;
+        this.iAudiobook.audiobookFindByQuery(query, null, null, (response: any) => {
+            console.log('audiobookFindByQuery', response);
+            if (response && response.success) {
+                this.audiobooksFound.set(response.audiobooks);
+                this.bookSearchQuery = '';
+            }
+        })
     }
 
     shareDebate() {
@@ -230,9 +126,55 @@ export class ScreenDebates implements OnInit, OnDestroy {
         }
     }
 
-    openThread(comment: any) {
-        console.log('Open thread:', comment);
-        // Navigate to thread detail view
+    searchAgain() {
+        this.audiobooksFound.set([])
+    }
+
+    countComments() {
+        const audiobookId = this.audiobookId();
+        if (audiobookId) {
+            this.iDebate.debateCountComments(audiobookId, (response: any) => {
+                console.log('debateCountComments', response);
+                if (response && response.success) {
+                    this.debate.totalMessages = response.totalComments;
+                }
+            })
+        }        
+    }
+
+    onCommentSaved(response: { totalComments?: number }) {
+        if (response?.totalComments !== undefined && response?.totalComments !== null) {
+            this.debate.totalMessages = Number(response.totalComments) || 0;
+        } else {
+            this.countComments();
+        }
+        this.selectedReply.set(null);
+        this.commentsRefreshToken.set(this.commentsRefreshToken() + 1);
+    }
+
+    onReplyRequested(comment: DebateCommentModel) {
+        this.selectedReply.set(comment);
+    }
+
+    clearReplyTarget() {
+        this.selectedReply.set(null);
+    }
+
+    getReplyToLabel(): string {
+        const reply = this.selectedReply();
+        if (!reply) return 'comment';
+        const user: any = reply.userId;
+        if (user && typeof user === 'object') {
+            const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            return fullName || user.email || 'comment';
+        }
+        return 'comment';
+    }
+
+    onOpenPopularThread(comment: DebateCommentModel) {
+        this.selectedThreadFromPopular.set(comment._id);
+        this.viewMode = 'timeline';
+        this.commentsRefreshToken.set(this.commentsRefreshToken() + 1);
     }
 
 }

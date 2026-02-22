@@ -1,35 +1,27 @@
-const Reaction = require('../models/reaction');
-
 async function run(data, req, res) {
     try {
         const {
-            targetId,
-            targetType,
-            reaction
+            audiobookId,
         } = data;
-        const userId = req.userId || null;
 
-        if (!userId) {
+        if (!audiobookId) {
             return res.status(200).json({
                 success: false,
-                message: 'invalid data'
+                message: 'Invalid data'
             })
         }
 
-        const reactionDoc = new Reaction({
-            userId,
-            targetId,
-            targetType,
-            reaction,
-            createdAt: Date.now()
-        });
-
-        await reactionDoc.save();
-
+        const DebateComments = require('../models/debate_comment');
+        const totalComments = await DebateComments.countDocuments({
+            audiobookId,
+            enabled: true
+        })
+        
         return res.status(200).json({
             success: true,
-            data: reactionDoc
+            totalComments
         })
+
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)

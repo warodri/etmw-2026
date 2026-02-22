@@ -56,6 +56,7 @@ import { DebateRecentThreads } from './COMPONENTS/DEBATE/debate-recent-threads/d
 import { DebatePodcast } from './COMPONENTS/DEBATE/debate-podcast/debate-podcast';
 import { DebateComments } from './COMPONENTS/DEBATE/debate-comments/debate-comments';
 import { FollowUsRow } from './COMPONENTS/MAIN/follow-us-row/follow-us-row';
+import { DebateAddComment } from './COMPONENTS/DEBATE/debate-add-comment/debate-add-comment';
 
 @NgModule({
     declarations: [
@@ -106,6 +107,7 @@ import { FollowUsRow } from './COMPONENTS/MAIN/follow-us-row/follow-us-row';
         DebatePodcast,
         DebateComments,
         FollowUsRow,
+        DebateAddComment,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

@@ -50,16 +50,13 @@
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <div class="fw-bold">AI Summary</div>
-                                <div class="small text-gray-400">3 unread conversations</div>
+                                <div class="small">3 unread conversations</div>
                             </div>
-                            <button class="btn btn-sm btn-secondary rounded-pill px-3">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
                         </div>
-                        <div class="text-gray-300 lh-175 small">
-                            <strong class="text-white">Maria</strong> sent you a first message about collaboration opportunities. 
-                            <strong class="text-white">Tony</strong> is asking about your book "Away" and wants a signed copy. 
-                            <strong class="text-white">Romain</strong> responded to your question about pricing.
+                        <div class="text-light lh-175 small">
+                            Maria sent you a first message about collaboration opportunities. 
+                            Tony is asking about your book "Away" and wants a signed copy. 
+                            Romain responded to your question about pricing.
                         </div>
                     </div>
                 </div>
@@ -70,16 +67,16 @@
             QUICK ACTIONS
         -->
         <div class="mx-4 mt-3">
-            <div class="d-flex gap-2 overflow-x-auto pb-2">
+            <div class="d-flex justify-content-center align-items-center gap-2 pb-2">
                 <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
                     <i class="bi bi-pencil-square"></i> New Message
                 </button>
                 <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
                     <i class="bi bi-check-all"></i> Mark All Read
                 </button>
-                <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
+                <!-- <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
                     <i class="bi bi-funnel"></i> Filter
-                </button>
+                </button> -->
             </div>
         </div>
     
@@ -131,30 +128,13 @@
                             <div class="small text-gray-400 text-truncate" 
                                  [class.text-white]="item.unreadCount > 0"
                                  [class.fw-semibold]="item.unreadCount > 0">
-                                @if (item.isTyping) {
-                                    <span class="text-primary">
-                                        <i class="bi bi-three-dots"></i> typing...
-                                    </span>
-                                } @else {
-                                    @if (item.lastMessageType === 'voice') {
-                                        <i class="bi bi-mic-fill text-primary"></i>
-                                    } @else if (item.lastMessageType === 'image') {
-                                        <i class="bi bi-image-fill text-primary"></i>
-                                    }
-                                    {{ item.lastMessage }}
+                                @if (item.lastMessageType === 'voice') {
+                                    <i class="bi bi-mic-fill text-primary"></i>
+                                } @else if (item.lastMessageType === 'image') {
+                                    <i class="bi bi-image-fill text-primary"></i>
                                 }
+                                {{ item.lastMessage }}
                             </div>
-                            
-                            <!-- Quick reaction or tags -->
-                            @if (item.tags && item.tags.length > 0) {
-                                <div class="d-flex gap-1 mt-2">
-                                    @for (tag of item.tags; track tag) {
-                                        <span class="badge bg-slate-800 text-gray-400 px-2 py-1" style="font-size: 0.7rem;">
-                                            {{ tag }}
-                                        </span>
-                                    }
-                                </div>
-                            }
                         </div>
     
                         <!-- Actions and unread badge -->
@@ -164,26 +144,19 @@
                                      style="min-width: 28px; height: 28px; font-size: 0.75rem; padding: 0 8px;">
                                     {{ item.unreadCount }}
                                 </div>
-                            }
-                            
-                            <!-- Quick actions dropdown -->
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-secondary rounded-circle p-1" 
-                                        style="width: 28px; height: 28px; line-height: 1;" 
-                                        data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots-vertical" style="font-size: 0.875rem;"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-check-all"></i> Mark as Read</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-star"></i> Star</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-archive"></i> Archive</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-bell-slash"></i> Mute</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash"></i> Delete</a></li>
-                                </ul>
-                            </div>
+                            }                            
                         </div>
                     </div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-end align-items-center gap-2" >
+                            <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i> Delete</button>
+                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-star"></i></button>
+                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-archive"></i></button>
+                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-check-all"></i> Mark as Read</button>
+                        </div>
+
+                    </div>
+
                 </div>
             }
     

@@ -71,4 +71,10 @@ export class Item {
         }
     }
 
+    gotoDebate() {
+        if (this.audiobook) {
+            this.router.navigate(['app/debate', this.audiobook._id])
+        }
+    }
+
 }

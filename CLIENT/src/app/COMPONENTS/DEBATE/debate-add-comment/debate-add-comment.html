@@ -1,0 +1,110 @@
+<div class="container-fluid">
+    <input
+        #attachmentInput
+        type="file"
+        class="invisible"
+        (change)="onAttachmentSelected($event)"
+    />
+
+    @if (parentMessageId) {
+        <div class="mb-2 px-3 py-2 rounded-4 bg-secondary d-flex justify-content-between align-items-center">
+            <div class="small">
+                <i class="bi bi-reply-fill text-primary"></i>
+                Replying to {{ replyToLabel || 'comment' }}
+            </div>
+            <button class="btn btn-sm btn-secondary rounded-pill" (click)="cancelReply()">
+                Cancel
+            </button>
+        </div>
+    }
+
+    <div class="d-flex gap-2 align-items-end">
+        <!-- Record Voice Button -->
+        <button class="btn btn-secondary rounded-circle flex-shrink-0" 
+                [class.btn-danger]="isRecording"
+                (click)="toggleRecording()"
+                style="width: 48px; height: 48px;">
+            <i class="bi" [class.bi-mic-fill]="!isRecording" [class.bi-stop-circle]="isRecording"></i>
+        </button>
+
+        <!-- Text Input -->
+        <div class="flex-grow-1 position-relative">
+            <textarea
+                      #commentTextArea
+                      class="form-control rounded-4 bg-secondary border-0 text-white input-light-placeholder debate-comment-textarea"
+                      [(ngModel)]="newCommentText"
+                      [placeholder]="parentMessageId ? 'Write your reply...' : 'Share your thoughts...'"
+                      rows="1"
+                      (input)="onTextareaInput(commentTextArea)"></textarea>
+        </div>
+        <!-- Attachment Button -->
+        <button class="btn btn-lg btn-secondary rounded-circle text-gray-400" (click)="attachFile()">
+            <i class="bi bi-paperclip"></i>
+        </button>
+
+        <!-- Send Button -->
+        <button class="btn btn-primary rounded-circle flex-shrink-0" 
+                [disabled]="!canSend() || submitting"
+                (click)="sendComment()"
+                style="width: 48px; height: 48px;">
+            @if (submitting) {
+                <span class="spinner-border spinner-border-sm"></span>
+            } @else {
+                <i class="bi bi-send-fill"></i>
+            }
+        </button>
+    </div>
+
+    <!-- Recording Indicator -->
+    @if (isRecording) {
+        <div class="mt-2 d-flex align-items-center gap-2 text-danger">
+            <div class="spinner-grow spinner-grow-sm"></div>
+            <span class="small">Recording... {{ recordingDuration }}</span>
+        </div>
+    }
+
+    @if (mediaError) {
+        <div class="mt-2 small text-danger">
+            {{ mediaError }}
+        </div>
+    }
+
+    @if (recordedAudioFile) {
+        <div class="mt-2 p-3 bg-secondary rounded-4">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div class="small">
+                    <i class="bi bi-mic-fill text-primary"></i>
+                    {{ recordedAudioFile.name }} ({{ formatFileSize(recordedAudioFile.size) }})
+                </div>
+                <button class="btn btn-sm btn-secondary rounded-pill" (click)="removeRecordedAudio()">
+                    Remove
+                </button>
+            </div>
+            @if (recordedAudioUrl) {
+                <audio controls class="w-100" [src]="recordedAudioUrl"></audio>
+            }
+        </div>
+    }
+
+    @if (attachedFile) {
+        <div class="mt-2 p-3 bg-secondary rounded-4">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div class="small">
+                    <i class="bi bi-paperclip text-primary"></i>
+                    {{ attachedFile.name }} ({{ formatFileSize(attachedFile.size) }})
+                </div>
+                <button class="btn btn-sm btn-secondary rounded-pill" (click)="removeAttachment()">
+                    Remove
+                </button>
+            </div>
+
+            @if (attachedFileType === 'image' && attachedFileUrl) {
+                <img [src]="attachedFileUrl" class="img-fluid rounded-3 debate-attachment-preview" alt="Attachment preview" />
+            }
+
+            @if (attachedFileType === 'video' && attachedFileUrl) {
+                <video controls [src]="attachedFileUrl" class="w-100 rounded-3 debate-attachment-preview"></video>
+            }
+        </div>
+    }
+</div>

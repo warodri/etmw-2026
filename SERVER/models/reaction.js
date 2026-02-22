@@ -9,26 +9,31 @@ const model = new Schema({
         index: true,
         required: true
     },
-
     targetId: {
         type: Schema.Types.ObjectId,
         index: true,
         required: true
     },
-
     targetType: {
         type: String,
-        enum: ['author', 'audiobook', 'comment'],
+        enum: ['user', 'author', 'audiobook', 'comment', 'debate', 'debate-comment'],
         index: true
     },
-
     reaction: {
         type: String,
         enum: ['like', 'love', 'insightful', 'angry', 'sad', 'wow'],
         index: true
     },
 
+    enabled: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
+        type: Number,
+        default: Date.now
+    },
+    updatedAt: {
         type: Number,
         default: Date.now
     }

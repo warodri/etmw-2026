@@ -1,0 +1,11 @@
+.debate-comment-textarea {
+    resize: none;
+    min-height: 48px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.debate-attachment-preview {
+    max-height: 220px;
+    object-fit: cover;
+}

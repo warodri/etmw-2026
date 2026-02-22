@@ -46,9 +46,14 @@
                 <div style="max-width: 70%; overflow: hidden;" class="fw-bold">
                     {{ audiobook.title }}
                 </div>
-                <button class="btn btn-dark rounded-pill" (click)="viewItem()">
-                    <i class="bi bi-play-fill"></i> Play
-                </button>
+                <div class="d-flex justify-content-end align-items-center gap-2">
+                    <button class="btn btn-dark rounded-pill" (click)="gotoDebate()">
+                        💬 &nbsp;Debate
+                    </button>
+                    <button class="btn btn-dark rounded-pill" (click)="viewItem()">
+                        <i class="bi bi-play-fill"></i> Play
+                    </button>
+                </div>
             </div>
             <div class="mt-1 d-flex justify-content-start align-items-center gap-3">
                 <div>

@@ -1,11 +1,67 @@
-@for (comment of comments; track comment._id) {
-    <app-debate-comment-card></app-debate-comment-card>
+@let selectedParentObj = selectedParentComment();
+@let threadRepliesObj = threadReplies();
+
+@if (loading() && comments().length === 0) {
+    <div class="text-center py-4 text-gray-400">Loading comments...</div>
+}
+
+@if (error()) {
+    <div class="text-center py-3 text-danger small">{{ error() }}</div>
+}
+
+@if (!loading() && comments().length === 0 && !error()) {
+    <div class="text-center py-4 text-gray-400">No comments yet. Be the first one.</div>
+}
+
+@if (isThreadOpen() && selectedParentObj) {
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="small text-gray-400">Thread view</div>
+        <button class="btn btn-sm btn-secondary rounded-pill" (click)="closeThread()">
+            <i class="bi bi-arrow-left"></i> Back to all comments
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <h3>Parent message</h3>
+    </div>
+    <app-debate-comment-card
+        [comment]="selectedParentObj"
+        [replyCount]="getReplyCount(selectedParentObj._id)"
+        [showThreadButton]="false"
+        (onReply)="onReplyRequested($event)"
+        (onToggleLike)="onLikeToggled($event)"
+    ></app-debate-comment-card>
+
+    <div class="mb-3 mt-3">
+        <h3>Replies</h3>
+    </div>
+    @if (threadRepliesObj.length === 0) {
+        <div class="small text-gray-400 mb-3">No replies yet.</div>
+    }
+    @for (comment of threadRepliesObj; track comment._id) {
+        <app-debate-comment-card
+            [comment]="comment"
+            [showThreadButton]="false"
+            (onReply)="onReplyRequested($event)"
+            (onToggleLike)="onLikeToggled($event)"
+        ></app-debate-comment-card>
+    }
+} @else {
+    @for (comment of visibleTopLevelComments(); track comment._id) {
+        <app-debate-comment-card
+            [comment]="comment"
+            [replyCount]="getReplyCount(comment._id)"
+            (onReply)="onReplyRequested($event)"
+            (onOpenThread)="openThread($event)"
+            (onToggleLike)="onLikeToggled($event)"
+        ></app-debate-comment-card>
+    }
 }
 
 <!-- Load More -->
-@if (hasMore) {
+@if (!isThreadOpen() && hasMore()) {
     <div class="text-center mt-4">
-        <button class="btn btn-secondary rounded-pill px-5 py-2" (click)="loadMore()">
+        <button class="btn btn-secondary rounded-pill px-5 py-2" [disabled]="loading()" (click)="loadMore()">
             <i class="bi bi-arrow-down-circle"></i> Load More
         </button>
     </div>

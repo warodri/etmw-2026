@@ -1,4 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
+import { Config } from '../../../utils/config';
+import { DebateCommentAttachment, DebateCommentModel } from '../../../models/debate-comment';
+import { UserModel } from '../../../models/user';
 
 @Component({
     selector: 'app-debate-comment-card',
@@ -7,40 +11,22 @@ import { Component } from '@angular/core';
     styleUrl: './debate-comment-card.css',
 })
 export class DebateCommentCard {
+    @Input() comment!: DebateCommentModel;
+    @Input() replyCount = 0;
+    @Input() showThreadButton = true;
+    @Output() onReply = new EventEmitter<DebateCommentModel>();
+    @Output() onOpenThread = new EventEmitter<DebateCommentModel>();
+    @Output() onToggleLike = new EventEmitter<DebateCommentModel>();
 
-    comment = {
-        _id: '3',
-        userName: 'Alex Chen',
-        userProfile: 'https://i.pravatar.cc/150?img=68',
-        isAuthor: true,
-        isVerified: false,
-        timeAgo: '1d ago',
-        text: 'The chapter about mirror confrontation made me cry. Has anyone else felt this way?',
-        audioUrl: 'https://images.unsplash.com/photo-1516589091380-5d8e87df6999',
-        hasAttachments: true,
-        attachments: [
-            { url: 'https://images.unsplash.com/photo-1516589091380-5d8e87df6999', type: 'image' }
-        ],
-        audioDuration: null,
-        likes: 34,
-        isLiked: true,
-        replyCount: 12
-    }
-    comments: any;
+    private SERVER = Config.SERVER.dev ? Config.SERVER.local : Config.SERVER.remote;
 
-    // Comment actions
-    openThread(comment: any) {
+    constructor(
+        private router: Router
+    ) {}
+
+    openThread(comment: DebateCommentModel) {
         console.log('Open thread:', comment);
         // Navigate to thread detail view
-    }
-    
-    toggleAudio(event: Event, commentId: string) {
-        event.stopPropagation();
-        const comment = this.comments.find((c:any) => c._id === commentId);
-        if (comment) {
-            comment.isPlaying = !comment.isPlaying;
-            // Implement actual audio playback
-        }
     }
 
     viewAttachment(event: Event, attachment: any) {
@@ -49,19 +35,19 @@ export class DebateCommentCard {
         // Open attachment in modal/fullscreen
     }
 
-    replyTo(event: Event, comment: any) {
+    replyTo(event: Event, comment: DebateCommentModel) {
         event.stopPropagation();
-        console.log('Reply to:', comment);
-        // Open reply modal or focus input with @mention
+        this.onReply.emit(comment);
     }
 
-    toggleLike(event: Event, commentId: string) {
+    openThreadView(event: Event, comment: DebateCommentModel) {
         event.stopPropagation();
-        const comment = this.comments.find((c:any) => c._id === commentId);
-        if (comment) {
-            comment.isLiked = !comment.isLiked;
-            comment.likes += comment.isLiked ? 1 : -1;
-        }
+        this.onOpenThread.emit(comment);
+    }
+
+    toggleLike(event: Event, comment: DebateCommentModel) {
+        event.stopPropagation();
+        this.onToggleLike.emit(comment);
     }
 
     shareComment(event: Event, commentId: string) {
@@ -70,7 +56,83 @@ export class DebateCommentCard {
     }
 
     gotoUserProfile() {
-        
+        const user = this.user();
+        if (user?._id) {
+            this.router.navigate(['app/user-profile', user._id]);
+        }
+    }
+
+    user(): UserModel | null {
+        const raw = this.comment?.userId;
+        if (!raw || typeof raw === 'string') return null;
+        return raw as UserModel;
+    }
+
+    userName(): string {
+        const user = this.user();
+        if (user) {
+            return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'User';
+        }
+        return 'User';
+    }
+
+    userProfile(): string {
+        return this.user()?.profilePicture || 'nouser.png';
+    }
+
+    isAuthor(): boolean {
+        return !!this.user()?.isAuthor;
+    }
+
+    isVerified(): boolean {
+        return false;
+    }
+
+    timeAgo(): string {
+        const createdAt = Number(this.comment?.createdAt || 0);
+        if (!createdAt) return '';
+        const diffMs = Date.now() - createdAt;
+        const minutes = Math.floor(diffMs / 60000);
+        if (minutes < 1) return 'just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
+    }
+
+    audioUrl(): string | null {
+        const audio = this.comment?.audioUrl;
+        if (!audio) return null;
+        if (audio.startsWith('http://') || audio.startsWith('https://')) return audio;
+        return `${this.SERVER}/file?id=${audio}`;
+    }
+
+    attachments(): DebateCommentAttachment[] {
+        const raw = this.comment?.attachments as any;
+        const list = Array.isArray(raw)
+            ? raw
+            : (raw && typeof raw === 'object' ? Object.values(raw) : []);
+        return list.map((item: any) => {
+            if (typeof item === 'string') {
+                return { filename: item };
+            }
+            return item || {};
+        });
+    }
+
+    attachmentUrl(attachment: DebateCommentAttachment): string {
+        if (attachment.url) return attachment.url;
+        if (!attachment.filename) return '';
+        return `${this.SERVER}/file?id=${attachment.filename}`;
+    }
+
+    isImageAttachment(attachment: DebateCommentAttachment): boolean {
+        return !!attachment.mimetype && attachment.mimetype.startsWith('image/');
+    }
+
+    isVideoAttachment(attachment: DebateCommentAttachment): boolean {
+        return !!attachment.mimetype && attachment.mimetype.startsWith('video/');
     }
 
 

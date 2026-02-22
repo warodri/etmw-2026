@@ -1,8 +1,21 @@
 //
+//  REACTIONS
+//
+ReactionUpsert = require('./tasks/reaction_upsert');
+ReactionGetMine = require('./tasks/reaction_get_mine');
+
+//
 //  DEBATE
 //
 DebateAdd = require('./tasks/debate_add');
 DebateGetById = require('./tasks/debate_get_by_id');
+DebateCountComments = require('./tasks/debate_count_comments');
+DebateGetComments = require('./tasks/debate_get_comments');
+DebateCommentAdd = require('./tasks/debate_comment_add');
+DebateGetpopularThreads = require('./tasks/debate_get_popular_threads');
+DebateGetRecentThreads = require('./tasks/debate_get_recent_threads');
+DebateGeneratePodcast = require('./tasks/debate_generate_podcast');
+DebatePodcastGet = require('./tasks/debate_podcast_get');
 
 //
 //  FOLLOW
@@ -106,7 +119,18 @@ const FindAuthor = require('./tasks/author_find');
 
 const TasksRegistry = {
 
+    //  REACTIONS
+    ReactionUpsert,
+    ReactionGetMine,
+
     //  DEBATE
+    DebateGetpopularThreads,
+    DebateGetRecentThreads,
+    DebateGeneratePodcast,
+    DebatePodcastGet,
+    DebateCommentAdd,
+    DebateGetComments,
+    DebateCountComments,
     DebateGetById,
     DebateAdd,
 
