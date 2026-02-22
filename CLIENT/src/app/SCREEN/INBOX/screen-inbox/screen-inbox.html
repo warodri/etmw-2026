@@ -62,12 +62,22 @@
                                 <div class="fw-bold">AI Summary</div>
                                 <div class="small">{{ getUnreadConversationsCount() }} unread conversations</div>
                             </div>
+                            <button class="btn btn-sm btn-secondary rounded-pill px-2 py-1" [disabled]="aiSummaryLoading()" (click)="refreshAiSummary(true)">
+                                @if (aiSummaryLoading()) {
+                                    ...
+                                } @else {
+                                    Refresh
+                                }
+                            </button>
                         </div>
                         <div class="text-light lh-175 small">
-                            Maria sent you a first message about collaboration opportunities. 
-                            Tony is asking about your book "Away" and wants a signed copy. 
-                            Romain responded to your question about pricing.
+                            {{ aiSummary() }}
                         </div>
+                        @if (aiSummaryMeta()) {
+                            <div class="small text-gray-400 mt-2">
+                                {{ aiSummaryMeta() }}
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

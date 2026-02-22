@@ -43,6 +43,11 @@ export class ScreenInbox implements OnInit {
     readonly channels = signal<InboxChannel[]>([]);
     readonly loading = signal<boolean>(false);
     readonly activeFilter = signal<'all' | 'unread'>('all');
+    readonly aiSummary = signal<string>(
+        'Maria sent you a first message about collaboration opportunities. Tony is asking about your book "Away" and wants a signed copy. Romain responded to your question about pricing.'
+    );
+    readonly aiSummaryLoading = signal<boolean>(false);
+    readonly aiSummaryMeta = signal<string>('');
 
     hasMore = false;
     private myUserId = '';
@@ -59,6 +64,7 @@ export class ScreenInbox implements OnInit {
             if (response?.success && response.user?._id) {
                 this.myUserId = String(response.user._id);
                 this.loadThreads();
+                this.refreshAiSummary(false);
             } else {
                 this.channels.set([]);
             }
@@ -88,6 +94,7 @@ export class ScreenInbox implements OnInit {
         this.iComments.commentMarkRead(null, null, (response: any) => {
             if (response?.success) {
                 this.loadThreads();
+                this.refreshAiSummary(false);
                 this.toast.show('All messages marked as read');
                 return;
             }
@@ -117,9 +124,38 @@ export class ScreenInbox implements OnInit {
         this.iComments.commentMarkRead(item._id, null, (response: any) => {
             if (response?.success) {
                 this.loadThreads();
+                this.refreshAiSummary(false);
             } else {
                 this.toast.show(response?.message || this.toast.getMessageErrorUnexpected());
             }
+        });
+    }
+
+    refreshAiSummary(forceRefresh: boolean) {
+        this.aiSummaryLoading.set(true);
+        this.iComments.commentAiSummary(forceRefresh, (response: any) => {
+            this.aiSummaryLoading.set(false);
+
+            if (response?.success) {
+                const summaryText = String(response.summary || '').trim();
+                if (summaryText) {
+                    this.aiSummary.set(summaryText);
+                }
+                const remaining = Number(response.remainingToday ?? 0);
+                this.aiSummaryMeta.set(`AI summaries left today: ${remaining}`);
+                return;
+            }
+
+            if (response?.limited) {
+                const fallback = String(response.summary || '').trim();
+                if (fallback) {
+                    this.aiSummary.set(fallback);
+                }
+                this.aiSummaryMeta.set('Daily AI summary limit reached (5/5).');
+                return;
+            }
+
+            this.aiSummaryMeta.set('');
         });
     }
 

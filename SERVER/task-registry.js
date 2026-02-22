@@ -109,6 +109,7 @@ const CommentFind = require('./tasks/comment_find');
 const CommentGetById = require('./tasks/comment_get_by_id');
 const CommentUpdate = require('./tasks/comment_update');
 const CommentMarkRead = require('./tasks/comment_mark_read');
+const CommentAiSummary = require('./tasks/comment_ai_summary');
 
 //
 //  ADMIN
@@ -206,6 +207,7 @@ const TasksRegistry = {
     CommentGetById,
     CommentUpdate,
     CommentMarkRead,
+    CommentAiSummary,
     
     //  LOGIN
     SendCode,

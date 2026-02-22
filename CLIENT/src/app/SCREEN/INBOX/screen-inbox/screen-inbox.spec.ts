@@ -32,7 +32,8 @@ describe('ScreenInbox', () => {
               cb: any
             ) => cb({ success: true, comments: [] })
             ,
-            commentMarkRead: (_conversationWithUserId: string | null, _messageId: string | null, cb: any) => cb({ success: true, updated: 0 })
+            commentMarkRead: (_conversationWithUserId: string | null, _messageId: string | null, cb: any) => cb({ success: true, updated: 0 }),
+            commentAiSummary: (_forceRefresh: boolean, cb: any) => cb({ success: true, summary: 'Mock summary', remainingToday: 5 })
           }
         },
         {

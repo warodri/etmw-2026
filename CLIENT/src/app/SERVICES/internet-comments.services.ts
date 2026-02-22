@@ -71,4 +71,15 @@ export class InternetCommentsServices extends InternetService {
         }, callback);
     }
 
+    commentAiSummary(forceRefresh: boolean, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'CommentAiSummary',
+            lang,
+            data: {
+                forceRefresh
+            }
+        }, callback);
+    }
+
 }
