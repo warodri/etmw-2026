@@ -132,13 +132,35 @@ function buildFallbackScript({ audiobook, authorName, authorBio, commentsBlock }
     return `${intro}\n\nCommunity discussion highlights:\n${commentsBlock}`;
 }
 
+function buildFallbackScriptWithMode({
+    audiobook,
+    authorName,
+    authorBio,
+    commentsBlock,
+    shortIntro
+}) {
+    if (shortIntro) {
+        const title = String(audiobook.title || 'Untitled Audiobook').trim();
+        const intro = `Welcome back to the debate podcast for "${title}". Here are the latest community highlights.`;
+        return `${intro}\n\nCommunity discussion highlights:\n${commentsBlock}`;
+    }
+
+    return buildFallbackScript({
+        audiobook,
+        authorName,
+        authorBio,
+        commentsBlock
+    });
+}
+
 async function generateScriptWithOpenAI(params) {
     const {
         audiobook,
         authorName,
         authorBio,
         commentsBlock,
-        language
+        language,
+        shortIntro
     } = params;
 
     const systemPrompt = `You are a podcast writer.
@@ -147,6 +169,9 @@ async function generateScriptWithOpenAI(params) {
 - Language: ${language || 'English'}.
 - If comments are weak or repetitive, avoid over-claiming and keep intro factual.
 - Include: brief book intro, brief author intro, short synthesis of the debate, then curated conversational highlights.
+- Intro mode: ${shortIntro ? 'SHORT' : 'FULL'}.
+- If SHORT: keep intro to 1-2 lines max, do not repeat long author bio or full book description.
+- If FULL: include a richer intro with book context and concise author context.
 - No markdown, no bullet points, no stage directions, no XML, no JSON.
 - Keep profanity toned down while preserving intent.
 - End with a short closing line.`;
@@ -246,7 +271,8 @@ async function run(data, req, res) {
             audiobookId,
             includeUserNames = true,
             voiceId,
-            modelId
+            modelId,
+            chapterNumber
         } = payload;
 
         const userId = req.userId;
@@ -296,6 +322,11 @@ async function run(data, req, res) {
             audiobookId: audiobook._id,
             enabled: true
         }).sort({ createdAt: -1 });
+
+        const existingPodcastCount = await DebatePodcast.countDocuments({
+            audiobookId: audiobook._id,
+            enabled: true
+        });
 
         let boundaryCreatedAt = 0;
         if (latestPodcast?.lastCommentId) {
@@ -354,6 +385,12 @@ async function run(data, req, res) {
         }
 
         const commentsBlock = buildCommentsBlock(normalizedComments, !!includeUserNames);
+        const requestedChapter = Number(chapterNumber || 0);
+        const effectiveChapterNumber = requestedChapter > 0
+            ? requestedChapter
+            : (existingPodcastCount + 1);
+        const useShortIntro = effectiveChapterNumber > 1;
+
         let podcastScript = '';
         try {
             podcastScript = await generateScriptWithOpenAI({
@@ -361,7 +398,8 @@ async function run(data, req, res) {
                 authorName,
                 authorBio,
                 commentsBlock,
-                language: bookLanguage
+                language: bookLanguage,
+                shortIntro: useShortIntro
             });
         } catch (ex) {
             console.log('OpenAI script generation failed, using fallback script');
@@ -369,11 +407,12 @@ async function run(data, req, res) {
         }
 
         if (!podcastScript) {
-            podcastScript = buildFallbackScript({
+            podcastScript = buildFallbackScriptWithMode({
                 audiobook,
                 authorName,
                 authorBio,
-                commentsBlock
+                commentsBlock,
+                shortIntro: useShortIntro
             });
         }
 
@@ -416,7 +455,9 @@ async function run(data, req, res) {
             success: true,
             podcast: podcastDoc,
             commentsUsed: comments.length,
-            filePath: relativeAudioPath
+            filePath: relativeAudioPath,
+            chapterNumber: effectiveChapterNumber,
+            introMode: useShortIntro ? 'short' : 'full'
         });
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename);

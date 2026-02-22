@@ -1,4 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Config } from '../../../utils/config';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+
+interface ContinueListeningItem {
+    _id: string;
+    chapterNumber: number;
+    progressPercent: number;
+    book: {
+        _id: string;
+        title?: string;
+        coverFile?: string;
+        authorName?: string;
+    };
+}
 
 @Component({
     selector: 'app-continue-listening',
@@ -6,27 +21,45 @@ import { Component } from '@angular/core';
     templateUrl: './continue-listening.html',
     styleUrl: './continue-listening.css',
 })
-export class ContinueListening {
+export class ContinueListening implements OnInit {
 
-    recentlyPlayed = [
-        {
-            id: '1',
-            title: 'The Anatomy of a Body',
-            author: 'Mariano E Rodriguez',
-            cover: 'https://images.squarespace-cdn.com/content/v1/624da83e75ca872f189ffa42/aa45e942-f55d-432d-8217-17c7d98105ce/image001.jpg',
-            progress: 45,
-            currentTime: '2:34:12',
-            totalTime: '6:21:00'
-        },
-        {
-            id: '2',
-            title: 'Away',
-            author: 'Sarah Johnson',
-            cover: 'https://images.squarespace-cdn.com/content/v1/624da83e75ca872f189ffa42/aa45e942-f55d-432d-8217-17c7d98105ce/image001.jpg',
-            progress: 12,
-            currentTime: '0:48:30',
-            totalTime: '7:12:00'
-        }
-    ];
+    readonly SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+    readonly recentlyPlayed = signal<ContinueListeningItem[]>([]);
+
+    constructor(
+        private iAudiobook: InternetAudiobookService,
+        private router: Router
+    ) {}
+
+    ngOnInit(): void {
+        this.loadContinueListening();
+    }
+
+    loadContinueListening() {
+        this.iAudiobook.audiobookGetContineListening((response: any) => {
+            if (response && response.success && Array.isArray(response.listening)) {
+                this.recentlyPlayed.set(response.listening);
+                return;
+            }
+            this.recentlyPlayed.set([]);
+        });
+    }
+
+    getCoverUrl(item: ContinueListeningItem): string {
+        const file = item?.book?.coverFile;
+        if (!file) return '';
+        return `${this.SERVER}/file?id=${file}`;
+    }
+
+    openAudiobook(item: ContinueListeningItem) {
+        const id = item?.book?._id;
+        if (!id) return;
+        this.router.navigate(['app/audiobook/view', id]);
+    }
+
+    progressLabel(item: ContinueListeningItem): string {
+        const value = Math.max(0, Math.min(100, Number(item?.progressPercent || 0)));
+        return `${Math.round(value)}%`;
+    }
     
 }

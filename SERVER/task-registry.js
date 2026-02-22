@@ -72,6 +72,7 @@ const AudiobookFindLatest = require("./tasks/audiobook_find_latest");
 
 const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 const AudiobookGetChapterAudioIsAvailable = require("./tasks/audiobook_get_chapter_audio_is_available");
+const AudiobookGetContineListening = require("./tasks/audiobook_get_contine_listening");
 
 //
 //  VOICES
@@ -171,6 +172,7 @@ const TasksRegistry = {
     AudiobookFindLatest,
     AudiobookUploadCover,
     AudiobookTranslate,
+    AudiobookGetContineListening,
     AudiobookGetChapterAudio,
     AudiobookGetChapterAudioIsAvailable,
     ConvertToMP3,
