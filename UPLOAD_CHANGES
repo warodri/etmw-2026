@@ -1,0 +1,6 @@
+
+# UPLOAD AND RESTART SERVER
+sshpass -p '197503&LaraCar0lina' rsync -av --exclude 'node_modules' --exclude 'config.js' /Users/warodriguez/Downloads/WALTER/ETMW-2026/SERVER/* root@entertomyworld.com:/var/www/entertomyworld.com/SERVER/ && \
+sshpass -p '197503&LaraCar0lina' ssh root@entertomyworld.com "/usr/bin/pm2 reload etmw"
+
+

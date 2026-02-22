@@ -1,5 +1,5 @@
 declare var window: any;
-import * as CryptoJS from 'crypto-js';
+// import * as CryptoJS from 'crypto-js';
 import { Config } from './config';
 
 export class UtilClass {
@@ -94,9 +94,9 @@ export class UtilClass {
         });
     }
 
-    public static encrypt(text: string, password: string): string {
-        return CryptoJS.AES.encrypt(text, password).toString();
-    }
+    // public static encrypt(text: string, password: string): string {
+    //     return CryptoJS.AES.encrypt(text, password).toString();
+    // }
 
     public static capitalizeFirstLetter(value: string): string {
         if (!value) return value;
