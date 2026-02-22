@@ -31,6 +31,7 @@ async function run(data, req, res) {
             success: true,
             data: debate
         })
+        
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)

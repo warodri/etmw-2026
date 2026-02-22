@@ -1,3 +1,8 @@
+//
+//  DEBATE
+//
+DebateAdd = require('./tasks/debate_add');
+DebateGetById = require('./tasks/debate_get_by_id');
 
 //
 //  FOLLOW
@@ -100,6 +105,10 @@ const SendContactForm = require('./tasks/contact_add');
 const FindAuthor = require('./tasks/author_find');
 
 const TasksRegistry = {
+
+    //  DEBATE
+    DebateGetById,
+    DebateAdd,
 
     //  FOLLOW
     FollowUpsert,

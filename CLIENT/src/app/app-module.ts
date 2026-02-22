@@ -50,6 +50,12 @@ import { HomepageCategoriesAndBooks } from './COMPONENTS/ITEMS/homepage-categori
 import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
 import { CommonModule } from '@angular/common';
 import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
+import { DebateCommentCard } from './COMPONENTS/DEBATE/debate-comment-card/debate-comment-card';
+import { DebatePopularThreads } from './COMPONENTS/DEBATE/debate-popular-threads/debate-popular-threads';
+import { DebateRecentThreads } from './COMPONENTS/DEBATE/debate-recent-threads/debate-recent-threads';
+import { DebatePodcast } from './COMPONENTS/DEBATE/debate-podcast/debate-podcast';
+import { DebateComments } from './COMPONENTS/DEBATE/debate-comments/debate-comments';
+import { FollowUsRow } from './COMPONENTS/MAIN/follow-us-row/follow-us-row';
 
 @NgModule({
     declarations: [
@@ -94,6 +100,12 @@ import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
         Categories,
         HomepageCategoriesAndBooks,
         ScreenAdminComponent,
+        DebateCommentCard,
+        DebatePopularThreads,
+        DebateRecentThreads,
+        DebatePodcast,
+        DebateComments,
+        FollowUsRow,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

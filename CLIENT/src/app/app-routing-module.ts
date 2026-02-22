@@ -23,6 +23,8 @@ const routes: Routes = [
     { path: '', component: ScreenHome },
     { path: 'app', component: ScreenMobileMain },
     { path: 'app/inbox', component: ScreenInbox },
+    
+    //  User profile
     { path: 'app/user-profile/:id', component: ScreenUserProfile },
     
     //  Search audiobooks
@@ -34,10 +36,13 @@ const routes: Routes = [
     { path: 'app/search/:term', component: ScreenSearch },
 
     { path: 'app/player/:audiobookId/:chapterNumber', component: ScreenPlayer },
-    { path: 'app/debate', component: ScreenDebates },
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
     { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
+    
+    //  Debate
+    { path: 'app/debate', component: ScreenDebates },
+    { path: 'app/debate/:audiobookId', component: ScreenDebates },
    
     //  Audiobook Detail
     { path: 'app/audiobook/view/:id', component: ScreenItemDetail },

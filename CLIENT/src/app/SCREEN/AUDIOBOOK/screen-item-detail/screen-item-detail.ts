@@ -232,4 +232,12 @@ export class ScreenItemDetail implements OnInit {
             })
         }        
     }
+
+    gotoDebate() {
+        const book = this.audiobook();
+        if (book) {
+            this.router.navigate(['app/debate', book._id])
+        }
+    }
+    
 }

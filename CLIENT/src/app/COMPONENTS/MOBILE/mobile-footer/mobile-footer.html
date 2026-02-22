@@ -8,11 +8,11 @@
         <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'fav'" [class.btn-dark]="selected != 'fav'" style="width:60px; height:54px;">
             <h3 class="m-0"><i class="bi bi-heart"></i></h3>
         </button>
-        <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'user'" [class.btn-dark]="selected != 'user'" style="width:60px; height:54px;">
+        <button class="btn btn-lg rounded-circle" [class.btn-light]="selected == 'user'" [class.btn-dark]="selected != 'user'" style="width:60px; height:54px;" (click)="gotoMyProfile()">
             <h3 class="m-0"><i class="bi bi-person-lines-fill"></i></h3>
         </button>
-        <button class="btn btn-lg btn-dark rounded-circle" style="width:60px; height:54px;">
-            <h3 class="m-0"><i class="bi bi-three-dots"></i></h3>
+        <button class="btn btn-lg btn-dark rounded-circle" style="width:60px; height:54px;" (click)="goto('app/debate')">
+            <h3 class="m-0"><i class="bi bi-megaphone"></i></h3>
         </button>
     </div>
 </div>

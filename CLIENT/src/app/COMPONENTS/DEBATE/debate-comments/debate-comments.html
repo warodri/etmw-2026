@@ -1,0 +1,12 @@
+@for (comment of comments; track comment._id) {
+    <app-debate-comment-card></app-debate-comment-card>
+}
+
+<!-- Load More -->
+@if (hasMore) {
+    <div class="text-center mt-4">
+        <button class="btn btn-secondary rounded-pill px-5 py-2" (click)="loadMore()">
+            <i class="bi bi-arrow-down-circle"></i> Load More
+        </button>
+    </div>
+}

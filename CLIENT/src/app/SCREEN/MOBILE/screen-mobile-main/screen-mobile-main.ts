@@ -40,4 +40,8 @@ export class ScreenMobileMain implements OnInit {
         this.router.navigate(['app/search/category', category.name])
     }
 
+    gotoFindBooks() {
+        this.router.navigate(['app/search'])
+    }
+
 }

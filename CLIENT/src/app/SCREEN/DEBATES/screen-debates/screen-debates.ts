@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
+import { InternetDebateServices } from '../../../SERVICES/internet-comments.services';
+import { UserModel } from '../../../models/user';
+import { ActivatedRoute, Router } from '@angular/router';
+import { InternetUserService } from '../../../SERVICES/internet-user.service';
+import { AudiobookModel } from '../../../models/audiobook';
+import { Config } from '../../../utils/config';
 
 @Component({
     selector: 'app-screen-debates',
@@ -8,11 +15,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 })
 export class ScreenDebates implements OnInit, OnDestroy {
 
-    audiobook = {
-        title: 'The Anatomy of a Body',
-        author: 'Mariano E Rodriguez',
-        cover: 'https://images.squarespace-cdn.com/content/v1/624da83e75ca872f189ffa42/aa45e942-f55d-432d-8217-17c7d98105ce/image001.jpg'
-    };
+    myUser = signal<UserModel | null>(null);
+    audiobookId = signal<string | null>(null);
+
+    audiobook = signal<AudiobookModel | null>(null);
 
     debate = {
         totalMessages: 247,
@@ -21,68 +27,6 @@ export class ScreenDebates implements OnInit, OnDestroy {
 
     viewMode: 'timeline' | 'threads' | 'podcast' = 'timeline';
 
-    // Comments data
-    comments = [
-        {
-            _id: '1',
-            userName: 'Maria González',
-            userProfile: 'https://i.pravatar.cc/150?img=1',
-            isAuthor: false,
-            isVerified: true,
-            timeAgo: '2h ago',
-            text: 'This book completely changed my perspective on body image. The way the author describes the journey of self-acceptance is truly powerful.',
-            audioUrl: null,
-            hasAttachments: false,
-            attachments: [],
-            isPlaying: false,
-            audioProgress: 0,
-            audioDuration: '1:23',
-            audioSpeed: '1.0',
-            likes: 42,
-            isLiked: false,
-            replyCount: 8
-        },
-        {
-            _id: '2',
-            userName: 'Mariano E Rodriguez',
-            userProfile: 'https://i.pravatar.cc/150?img=12',
-            isAuthor: true,
-            isVerified: true,
-            timeAgo: '5h ago',
-            text: 'Thank you all for the incredible discussions! Your insights inspire me to keep writing.',
-            audioUrl: 'https://example.com/audio.mp3',
-            hasAttachments: false,
-            attachments: [],
-            isPlaying: false,
-            audioProgress: 0,
-            audioDuration: '2:14',
-            audioSpeed: '1.0',
-            likes: 156,
-            isLiked: true,
-            replyCount: 23
-        },
-        {
-            _id: '3',
-            userName: 'Alex Chen',
-            userProfile: 'https://i.pravatar.cc/150?img=68',
-            isAuthor: false,
-            isVerified: false,
-            timeAgo: '1d ago',
-            text: 'The chapter about mirror confrontation made me cry. Has anyone else felt this way?',
-            audioUrl: null,
-            hasAttachments: true,
-            attachments: [
-                { url: 'https://images.unsplash.com/photo-1516589091380-5d8e87df6999', type: 'image' }
-            ],
-            isPlaying: false,
-            audioProgress: 0,
-            audioDuration: null,
-            audioSpeed: '1.0',
-            likes: 34,
-            isLiked: false,
-            replyCount: 12
-        }
-    ];
 
     popularThreads = [
         {
@@ -117,8 +61,6 @@ export class ScreenDebates implements OnInit, OnDestroy {
         }
     ];
 
-    hasMore = true;
-
     // Input state
     newCommentText = '';
     isRecording = false;
@@ -141,64 +83,62 @@ export class ScreenDebates implements OnInit, OnDestroy {
         { id: 4, title: 'Community Insights', speaker: 'Multiple Speakers', duration: '8:45', timestamp: 794 }
     ];
 
+    SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+
+    //  Flags
+    loading = signal<boolean>(true);
+
+    constructor(
+        private iAudiobook: InternetAudiobookService,
+        private iDebate: InternetDebateServices,
+        private route: ActivatedRoute,
+        private iUser: InternetUserService,
+        private router: Router
+    ) {}
+
     ngOnInit() {
-        // Initialize
+        this.route.paramMap.subscribe(params => {
+            this.audiobookId.set(params.get('audiobookId'));
+            this.getMyUser(() => {
+                this.loadAudiobook(() => {
+                    this.loading.set(false);
+                })
+            })
+        })
+    }
+
+    getMyUser(callback: any) {
+        this.iUser.getMyUser((response: any) => {
+            console.log('getMyUser', response)
+            if (response && response.success) {
+                this.myUser.set(response.user);
+            }
+            callback()
+        })
+    }
+
+    loadAudiobook(callback: any) {
+        const audiobookId = this.audiobookId();
+        if (audiobookId) {
+            this.iAudiobook.audiobookFindById(audiobookId, (response: any) => {
+                console.log('audiobookFindById', response)
+                if (response && response.success && response.audiobooks && Array.isArray(response.audiobooks) && response.audiobooks.length > 0) {
+                    this.audiobook.set(response.audiobooks[0]);
+                    callback();
+                }
+            })
+        }
     }
 
     ngOnDestroy() {
         this.stopRecording();
     }
 
-    // Navigation
     goBack() {
-        console.log('Navigate back');
+        this.router.navigate(['app'])
     }
 
-    // Comment actions
-    openThread(comment: any) {
-        console.log('Open thread:', comment);
-        // Navigate to thread detail view
-    }
 
-    toggleAudio(event: Event, commentId: string) {
-        event.stopPropagation();
-        const comment = this.comments.find(c => c._id === commentId);
-        if (comment) {
-            comment.isPlaying = !comment.isPlaying;
-            // Implement actual audio playback
-        }
-    }
-
-    replyTo(event: Event, comment: any) {
-        event.stopPropagation();
-        console.log('Reply to:', comment);
-        // Open reply modal or focus input with @mention
-    }
-
-    toggleLike(event: Event, commentId: string) {
-        event.stopPropagation();
-        const comment = this.comments.find(c => c._id === commentId);
-        if (comment) {
-            comment.isLiked = !comment.isLiked;
-            comment.likes += comment.isLiked ? 1 : -1;
-        }
-    }
-
-    shareComment(event: Event, commentId: string) {
-        event.stopPropagation();
-        console.log('Share comment:', commentId);
-    }
-
-    viewAttachment(event: Event, attachment: any) {
-        event.stopPropagation();
-        console.log('View attachment:', attachment);
-        // Open attachment in modal/fullscreen
-    }
-
-    loadMore() {
-        console.log('Load more comments');
-        // Load more comments from API
-    }
 
     // Input actions
     toggleRecording() {
@@ -283,34 +223,16 @@ export class ScreenDebates implements OnInit, OnDestroy {
         console.log('Report debate');
     }
 
+    gotoBook() {
+        const audiobookId = this.audiobookId();
+        if (audiobookId) {
+            this.router.navigate(['app/audiobook/view', audiobookId])
+        }
+    }
+
+    openThread(comment: any) {
+        console.log('Open thread:', comment);
+        // Navigate to thread detail view
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

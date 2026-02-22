@@ -77,13 +77,13 @@
                     </div>
                     <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
                         <div class="text-primary fw-bold text-2xl mb-1">
-                            {{ totalFollowers() | number }}
+                            {{ formatCompactCount(totalFollowers()) }}
                         </div>
                         <div class="text-gray-400 small">Followers</div>
                     </div>
                     <div class="bg-secondary rounded-4 px-4 py-3 flex-grow-1" style="max-width: 120px;">
                         <div class="text-primary fw-bold text-2xl mb-1">
-                            {{ totalFollowing() | number }}
+                            {{ formatCompactCount(totalFollowing()) }}
                         </div>
                         <div class="text-gray-400 small">Following</div>
                     </div>
@@ -103,7 +103,7 @@
                     <button class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold">
                         <i class="bi bi-chat-dots-fill"></i> Message
                     </button>
-                    <button class="btn btn-secondary rounded-pill px-3 py-2">
+                    <button class="btn btn-secondary rounded-pill px-3 py-2" (click)="shareCurrentUrl()">
                         <i class="bi bi-share-fill"></i>
                     </button>
                 </div>

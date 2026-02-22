@@ -3,21 +3,33 @@ const Schema = mongoose.Schema;
 
 const model = new Schema({
 
-    audiobookId: {
-        type: Schema.Types.ObjectId,
-        ref: "etmw2026_audiobooks",
+    debateId: {
+        type: String,
         index: true,
         required: true
     },
-    authorId: {
+    userId: {
         type: Schema.Types.ObjectId,
-        ref: "etmw2026_authors"
+        ref: "etmw2026_users",
+        required: true
     },
-    totalMessages: {
-        type: Number,
-        default: 0
+    text: {
+        type: String,
     },
-    
+    audioUrl: {
+        type: String,
+    },
+    hasAttachments: {
+        type: Boolean,
+    },
+    attachments: {
+        type: Object,
+        default: []
+    },
+    parentMessageId: {
+        type: String
+    },
+
     enabled: {
         type: Boolean,
         default: true,
@@ -36,4 +48,4 @@ const model = new Schema({
 
 });
 
-module.exports = mongoose.model("etmw2026_debates", model);
+module.exports = mongoose.model("etmw2026_debate_comment", model);

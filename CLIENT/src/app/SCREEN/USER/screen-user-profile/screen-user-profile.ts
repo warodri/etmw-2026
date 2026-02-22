@@ -229,4 +229,34 @@ export class ScreenUserProfile implements OnInit {
         }
     }
 
+    formatCompactCount(value: number | null | undefined): string {
+        const safeValue = Number(value || 0);
+        if (!Number.isFinite(safeValue)) return '0';
+        if (Math.abs(safeValue) < 1000) return `${safeValue}`;
+        const formatted = new Intl.NumberFormat('en', {
+            notation: 'compact',
+            maximumFractionDigits: 1
+        }).format(safeValue);
+        return formatted.replace(/([A-Z])$/, (m) => m.toLowerCase());
+    }
+
+    async shareCurrentUrl() {
+        const url = window.location.href;
+        try {
+            if (navigator.share) {
+                await navigator.share({ url });
+                return;
+            }
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(url);
+                this.toast.show('Link copied to clipboard');
+                return;
+            }
+            this.toast.show(url);
+        } catch (err: any) {
+            const message = (err && err.name === 'AbortError') ? null : 'Unable to share right now';
+            if (message) this.toast.show(message);
+        }
+    }
+
 }
