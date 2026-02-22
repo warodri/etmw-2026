@@ -18,11 +18,16 @@ import { ScreenContactSupport } from './SCREEN/SYSTEM/screen-contact-support/scr
 import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
 import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
+import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen-create-message';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
     { path: 'app', component: ScreenMobileMain },
+    
+    //  Inbox / Messages
     { path: 'app/inbox', component: ScreenInbox },
+    { path: 'app/inbox/new-message', component: ScreenCreateMessage },
+    { path: 'app/inbox/new-message/:userId', component: ScreenCreateMessage },
     
     //  User profile
     { path: 'app/user-profile/:id', component: ScreenUserProfile },

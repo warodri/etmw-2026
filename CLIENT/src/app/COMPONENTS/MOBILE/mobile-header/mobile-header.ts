@@ -1,8 +1,16 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { UserModel } from '../../../models/user';
 import { ToastService } from '../../../SERVICES/toast';
+import { InternetCommentsServices } from '../../../SERVICES/internet-comments.services';
+
+interface MessageComment {
+    _id: string;
+    userId: string | UserModel;
+    targetId: string;
+    isRead?: boolean;
+}
 
 @Component({
     selector: 'app-mobile-header',
@@ -10,7 +18,7 @@ import { ToastService } from '../../../SERVICES/toast';
     templateUrl: './mobile-header.html',
     styleUrl: './mobile-header.css',
 })
-export class MobileHeader implements OnInit {
+export class MobileHeader implements OnInit, OnDestroy {
 
     @Input() showBack = false;
     
@@ -26,15 +34,26 @@ export class MobileHeader implements OnInit {
     askForCode = signal<boolean>(false);
     showSearch = signal<boolean>(false);
     working = signal<boolean>(false);
+    unreadConversations = signal<number>(0);
+
+    private unreadTimer: any = null;
 
     constructor(
         private router: Router,
         private iUser: InternetUserService,
+        private iComments: InternetCommentsServices,
         private toast: ToastService
     ) {}
 
     ngOnInit(): void {
         this.init();
+    }
+
+    ngOnDestroy(): void {
+        if (this.unreadTimer) {
+            clearInterval(this.unreadTimer);
+            this.unreadTimer = null;
+        }
     }
 
     init() {
@@ -43,6 +62,8 @@ export class MobileHeader implements OnInit {
             if (user) {
                 this.isLoggedIn.set(true);
                 this.showLogin.set(false);
+                this.refreshUnreadConversations();
+                this.startUnreadRefreshTimer();
             }
         })
     }
@@ -90,6 +111,8 @@ export class MobileHeader implements OnInit {
                 localStorage.setItem('auth_token_etmw', token);
                 this.isLoggedIn.set(true);
                 this.showLogin.set(false);
+                this.refreshUnreadConversations();
+                this.startUnreadRefreshTimer();
                 setTimeout(() => {
                     this.gotoUserProfile()
                 }, 100)
@@ -119,6 +142,51 @@ export class MobileHeader implements OnInit {
         if (query) {
             this.router.navigate(['app/search/query', query])
         }
+    }
+
+    private startUnreadRefreshTimer() {
+        if (this.unreadTimer) {
+            clearInterval(this.unreadTimer);
+            this.unreadTimer = null;
+        }
+        this.unreadTimer = setInterval(() => {
+            this.refreshUnreadConversations();
+        }, 15000);
+    }
+
+    private refreshUnreadConversations() {
+        const me = this.myUser();
+        const myUserId = String(me?._id || '');
+        if (!myUserId) {
+            this.unreadConversations.set(0);
+            return;
+        }
+
+        this.iComments.commentFind('message', null, 0, 400, 'desc', (response: any) => {
+            if (!response?.success || !Array.isArray(response.comments)) {
+                this.unreadConversations.set(0);
+                return;
+            }
+            const comments = response.comments as MessageComment[];
+            const unreadByConversation = new Set<string>();
+            for (const item of comments) {
+                const senderId = this.getUserId(item.userId);
+                const receiverId = String(item.targetId || '');
+                const isIncoming = receiverId === myUserId;
+                const isUnread = isIncoming && !item.isRead;
+                if (!isUnread) continue;
+                if (senderId) {
+                    unreadByConversation.add(senderId);
+                }
+            }
+            this.unreadConversations.set(unreadByConversation.size);
+        });
+    }
+
+    private getUserId(value: string | UserModel): string {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        return String(value._id || '');
     }
 
 }

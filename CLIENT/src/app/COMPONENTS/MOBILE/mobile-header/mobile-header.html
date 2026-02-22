@@ -156,14 +156,16 @@
                         <h3 class="m-0"><i class="bi bi-search text-gray-400"></i></h3>
                     </div>
                     <!--
-                        CHAT AND UNREAD COUNT
+                        MESSAGES AND UNREAD COUNT
                     -->
                     @if(isLoggedIn()) {
                         <div class="rounded-circle d-flex justify-content-center align-items-center bg-dark position-relative pointer" style="width:50px; height:50px; object-fit: cover;" (click)="gotoInbox()">
                             <h3 class="m-0"><i class="bi bi-chat-dots"></i></h3>
-                            <div class="rounded-pill px-2 bg-danger text-light small position-absolute" style="right:0; top:5px;">
-                                2
-                            </div>
+                            @if (unreadConversations() > 0) {
+                                <div class="rounded-pill px-2 bg-danger text-light small position-absolute" style="right:0; top:5px;">
+                                    {{ unreadConversations() }}
+                                </div>
+                            }
                         </div>
                     }    
                 </div>
@@ -171,4 +173,3 @@
         }
     </div>
 }
-

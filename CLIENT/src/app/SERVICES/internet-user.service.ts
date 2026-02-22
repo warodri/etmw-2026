@@ -80,7 +80,7 @@ export class InternetUserService extends InternetService {
             }
         }, callback);
     }
-
+ 
     uploadUserProfileImage(file: File, callback: any) {
         const lang: string = LangUtils.detectLanguage();
         const form = new FormData();
@@ -111,6 +111,18 @@ export class InternetUserService extends InternetService {
                 query,
                 cityId,
                 channelId,
+            }
+        }, callback);
+    }
+
+    userFind(query: string, limit: number, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'UserFind',
+            lang,
+            data: {
+                query,
+                limit
             }
         }, callback);
     }

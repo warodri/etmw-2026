@@ -57,6 +57,7 @@ import { DebatePodcast } from './COMPONENTS/DEBATE/debate-podcast/debate-podcast
 import { DebateComments } from './COMPONENTS/DEBATE/debate-comments/debate-comments';
 import { FollowUsRow } from './COMPONENTS/MAIN/follow-us-row/follow-us-row';
 import { DebateAddComment } from './COMPONENTS/DEBATE/debate-add-comment/debate-add-comment';
+import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen-create-message';
 
 @NgModule({
     declarations: [
@@ -108,6 +109,7 @@ import { DebateAddComment } from './COMPONENTS/DEBATE/debate-add-comment/debate-
         DebateComments,
         FollowUsRow,
         DebateAddComment,
+        ScreenCreateMessage,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

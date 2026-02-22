@@ -22,11 +22,21 @@
     
             <!-- Filter Tabs -->
             <div class="d-flex gap-2 overflow-x-auto pb-2" style="white-space: nowrap;">
-                <button class="btn btn-sm btn-primary rounded-pill px-3">
-                    <i class="bi bi-inbox-fill"></i> All (12)
+                <button
+                    class="btn btn-sm rounded-pill px-3"
+                    [class.btn-primary]="activeFilter() === 'all'"
+                    [class.btn-secondary]="activeFilter() !== 'all'"
+                    (click)="setFilter('all')"
+                >
+                    <i class="bi bi-inbox-fill"></i> All ({{ channels().length }})
                 </button>
-                <button class="btn btn-sm btn-secondary rounded-pill px-3">
-                    <i class="bi bi-circle-fill text-danger" style="font-size: 0.5rem;"></i> Unread (3)
+                <button
+                    class="btn btn-sm rounded-pill px-3"
+                    [class.btn-primary]="activeFilter() === 'unread'"
+                    [class.btn-secondary]="activeFilter() !== 'unread'"
+                    (click)="setFilter('unread')"
+                >
+                    <i class="bi bi-circle-fill text-danger" style="font-size: 0.5rem;"></i> Unread ({{ getUnreadConversationsCount() }})
                 </button>
                 <button class="btn btn-sm btn-secondary rounded-pill px-3">
                     <i class="bi bi-star-fill"></i> Important
@@ -50,7 +60,7 @@
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <div class="fw-bold">AI Summary</div>
-                                <div class="small">3 unread conversations</div>
+                                <div class="small">{{ getUnreadConversationsCount() }} unread conversations</div>
                             </div>
                         </div>
                         <div class="text-light lh-175 small">
@@ -68,10 +78,10 @@
         -->
         <div class="mx-4 mt-3">
             <div class="d-flex justify-content-center align-items-center gap-2 pb-2">
-                <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
+                <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0" (click)="gotoNewMessage()">
                     <i class="bi bi-pencil-square"></i> New Message
                 </button>
-                <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
+                <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0" (click)="markAllRead()">
                     <i class="bi bi-check-all"></i> Mark All Read
                 </button>
                 <!-- <button class="btn btn-secondary rounded-pill px-3 flex-shrink-0">
@@ -84,12 +94,16 @@
             LIST OF MESSAGES
         -->
         <div class="mt-4 mx-4 pb-5">
+            @if (loading()) {
+                <div class="text-center py-4 text-gray-400">Loading messages...</div>
+            }
     
-            @for (item of channels; track item._id) {
+            @for (item of getVisibleChannels(); track item._id) {
                 <div class="bg-secondary rounded-4 mb-3 pointer position-relative overflow-hidden" 
                      [class.border]="item.unreadCount > 0"
                      [class.border-primary]="item.unreadCount > 0"
-                     style="transition: all 0.2s ease;">
+                     style="transition: all 0.2s ease;"
+                     (click)="openChannel(item)">
                     
                     <!-- Unread indicator bar -->
                     @if (item.unreadCount > 0) {
@@ -149,10 +163,12 @@
                     </div>
                     <div class="p-3">
                         <div class="d-flex justify-content-end align-items-center gap-2" >
-                            <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i> Delete</button>
-                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-star"></i></button>
-                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-archive"></i></button>
-                            <button class="btn btn-sm btn-secondary rounded-pill"><i class="bi bi-check-all"></i> Mark as Read</button>
+                            <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="deleteThread(item, $event)"><i class="bi bi-trash"></i> Delete</button>
+                            <button class="btn btn-sm btn-secondary rounded-pill" (click)="toggleStar(item, $event)"><i class="bi bi-star"></i></button>
+                            <button class="btn btn-sm btn-secondary rounded-pill" (click)="archiveThread(item, $event)"><i class="bi bi-archive"></i></button>
+                            <button class="btn btn-sm btn-secondary rounded-pill" (click)="markThreadAsRead(item, $event)">
+                                <i class="bi bi-check-all"></i> Mark as Read
+                            </button>
                         </div>
 
                     </div>
@@ -161,21 +177,26 @@
             }
     
             <!-- Empty state -->
-            @if (channels.length === 0) {
+            @if (!loading() && getVisibleChannels().length === 0) {
                 <div class="text-center py-5">
                     <div class="mb-3" style="font-size: 4rem; opacity: 0.3;">
                         📭
                     </div>
-                    <h5 class="text-gray-400">No messages yet</h5>
-                    <p class="text-gray-400 small">Start a conversation with someone!</p>
-                    <button class="btn btn-primary rounded-pill px-4 mt-3">
-                        <i class="bi bi-pencil-square"></i> New Message
-                    </button>
+                    @if (activeFilter() === 'unread') {
+                        <h5 class="text-gray-400">No unread messages</h5>
+                        <p class="text-gray-400 small">You are all caught up.</p>
+                    } @else {
+                        <h5 class="text-gray-400">No messages yet</h5>
+                        <p class="text-gray-400 small">Start a conversation with someone!</p>
+                        <button class="btn btn-primary rounded-pill px-4 mt-3" (click)="gotoNewMessage()">
+                            <i class="bi bi-pencil-square"></i> New Message
+                        </button>
+                    }
                 </div>
             }
     
             <!-- Load more -->
-            @if (channels.length > 0 && hasMore) {
+            @if (channels().length > 0 && hasMore) {
                 <div class="text-center mt-4">
                     <button class="btn px-5 py-3 btn-secondary rounded-pill" (click)="loadMore()">
                         <i class="bi bi-arrow-down-circle"></i> Load More
@@ -190,6 +211,7 @@
 
 <!-- Floating new message button (mobile) -->
 <button class="btn btn-primary rounded-circle position-fixed d-md-none shadow-lg" 
+        (click)="gotoNewMessage()"
         style="bottom: 80px; right: 20px; width: 56px; height: 56px; z-index: 1000;">
     <i class="bi bi-pencil-fill" style="font-size: 1.25rem;"></i>
 </button>

@@ -87,6 +87,7 @@ const ValidateCode = require('./tasks/user_validate_code');
 const GetMyUser = require('./tasks/user_get_mine');
 const GetUserById = require('./tasks/user_get_by_id');
 const UpdateMyProfile = require('./tasks/user_update');
+const UserFind = require('./tasks/user_find');
 
 //
 //  USER
@@ -102,6 +103,12 @@ const GetAppConfig = require('./tasks/app_get_config');
 const UploadFileAndReturn = require('./tasks/upload-file-and-return');
 const GetPromoCodes = require('./tasks/promo_code_get');
 const ValidatePromoCode = require('./tasks/promo_code_validate');
+const CommentAdd = require('./tasks/comment_add');
+const CommentDelete = require('./tasks/comment_delete');
+const CommentFind = require('./tasks/comment_find');
+const CommentGetById = require('./tasks/comment_get_by_id');
+const CommentUpdate = require('./tasks/comment_update');
+const CommentMarkRead = require('./tasks/comment_mark_read');
 
 //
 //  ADMIN
@@ -156,6 +163,7 @@ const TasksRegistry = {
     UserGetWork,
     UserSetListeningHistory,
     UserGetListeningHistory,
+    UserFind,
     
     //  SUBSCRIPTIONS
     SubscriptionGetConfig,
@@ -192,6 +200,12 @@ const TasksRegistry = {
     UploadFileAndReturn,
     GetPromoCodes,
     ValidatePromoCode,
+    CommentAdd,
+    CommentDelete,
+    CommentFind,
+    CommentGetById,
+    CommentUpdate,
+    CommentMarkRead,
     
     //  LOGIN
     SendCode,

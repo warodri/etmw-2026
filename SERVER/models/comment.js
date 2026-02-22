@@ -18,7 +18,7 @@ const model = new Schema({
 
     targetType: {
         type: String,
-        enum: ['audiobook', 'debate', 'author', 'comment'],
+        enum: ['audiobook', 'debate', 'author', 'comment', 'message'],
         index: true
     },
 
@@ -45,6 +45,18 @@ const model = new Schema({
         url: String
     }],
 
+    isRead: {
+        type: Boolean,
+        default: true,
+        index: true
+    },
+
+    readAt: {
+        type: Number,
+        default: null,
+        index: true
+    },
+
     createdAt: {
         type: Number,
         default: Date.now,
@@ -60,5 +72,6 @@ const model = new Schema({
 });
 
 model.index({ targetId: 1, targetType: 1, createdAt: 1 });
+model.index({ targetType: 1, targetId: 1, isRead: 1, createdAt: -1 });
 
 module.exports = mongoose.model("etmw2026_comments", model);

@@ -112,7 +112,7 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    audiobookGetContineListening(callback: any) {
+    audiobookGetContineListening(callback: any) { 
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'AudiobookGetContineListening',

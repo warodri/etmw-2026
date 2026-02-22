@@ -15,30 +15,41 @@ function parsePayload(req, data) {
 async function run(data, req, res) {
     try {
         const payload = parsePayload(req, data);
-        const id = payload.id;
         const userId = req.userId || null;
+        const conversationWithUserId = payload.conversationWithUserId || null;
+        const messageId = payload.messageId || null;
 
-        if (!userId || !id) {
+        if (!userId) {
             return res.status(200).json({
                 success: false,
                 message: 'Invalid data'
             });
         }
 
-        const comment = await Comment.findById(id)
-            .populate('userId', '_id firstName lastName profilePicture email')
-            .populate('parentCommentId');
+        const now = Date.now();
+        const query = {
+            targetType: 'message',
+            targetId: userId,
+            isRead: false
+        };
 
-        if (!comment) {
-            return res.status(200).json({
-                success: false,
-                message: 'Comment not found'
-            });
+        if (messageId) {
+            query._id = messageId;
+        } else if (conversationWithUserId) {
+            query.userId = conversationWithUserId;
         }
+
+        const result = await Comment.updateMany(query, {
+            $set: {
+                isRead: true,
+                readAt: now,
+                updatedAt: now
+            }
+        });
 
         return res.status(200).json({
             success: true,
-            comment
+            updated: Number(result?.modifiedCount || 0)
         });
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename);

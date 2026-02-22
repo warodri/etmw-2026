@@ -1,46 +1,47 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MobileHeader } from './mobile-header';
-import { Router } from '@angular/router';
+import { ScreenCreateMessage } from './screen-create-message';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetCommentsServices } from '../../../SERVICES/internet-comments.services';
 import { ToastService } from '../../../SERVICES/toast';
 import { FormsModule } from '@angular/forms';
 
-describe('MobileHeader', () => {
-  let component: MobileHeader;
-  let fixture: ComponentFixture<MobileHeader>;
+describe('ScreenCreateMessage', () => {
+  let component: ScreenCreateMessage;
+  let fixture: ComponentFixture<ScreenCreateMessage>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MobileHeader],
+      declarations: [ScreenCreateMessage],
       imports: [FormsModule],
       providers: [
         {
           provide: Router,
+          useValue: { navigate: (_commands: any[]) => Promise.resolve(true) }
+        },
+        {
+          provide: ActivatedRoute,
           useValue: {
-            navigate: (_commands: any[]) => Promise.resolve(true)
+            paramMap: {
+              subscribe: (fn: any) => {
+                fn(convertToParamMap({}));
+                return { unsubscribe() {} };
+              }
+            }
           }
         },
         {
           provide: InternetUserService,
           useValue: {
-            getMyUser: (cb: any) => cb({ success: true, user: null }),
-            sendCode: (_email: string, cb: any) => cb({ success: true }),
-            validateCode: (_email: string, _code: string, cb: any) => cb({ success: true, user: { _id: '1' }, token: 'x' })
+            getUserById: (_id: string, cb: any) => cb({ success: true, user: null }),
+            userFind: (_query: string, _limit: number, cb: any) => cb({ success: true, users: [] })
           }
         },
         {
           provide: InternetCommentsServices,
           useValue: {
-            commentFind: (
-              _targetType: string,
-              _conversationWithUserId: string | null,
-              _skip: number,
-              _limit: number,
-              _sortDir: string,
-              cb: any
-            ) => cb({ success: true, comments: [] })
+            commentAdd: (_targetId: string, _targetType: string, _text: string, _parent: any, cb: any) => cb({ success: true })
           }
         },
         {
@@ -54,7 +55,7 @@ describe('MobileHeader', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MobileHeader);
+    fixture = TestBed.createComponent(ScreenCreateMessage);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

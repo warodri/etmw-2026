@@ -15,8 +15,8 @@
                          (click)="openAudiobook(item)"
                          style="width: 60px; height: 90px; object-fit: cover;" />
                     <div class="flex-grow-1 min-w-0">
-                        <div class="fw-bold text-truncate">{{ item.book?.title || 'Untitled' }}</div>
-                        <div class="small text-gray-400">{{ item.book?.authorName || 'Unknown author' }}</div>
+                        <div class="fw-bold text-truncate">{{ item.book.title || 'Untitled' }}</div>
+                        <div class="small text-gray-400">{{ item.book.authorName || 'Unknown author' }}</div>
                         <div class="small text-gray-400 mt-1">Chapter {{ item.chapterNumber || 1 }}</div>
                         <!-- Progress bar -->
                         <div class="mt-2">
