@@ -71,4 +71,8 @@ export class ScreenHome implements OnInit {
         this.router.navigate(['app/page', route])
     }
 
+    gotoDebate() {
+        this.router.navigate(['app/debate'])
+    }
+
 }

@@ -76,11 +76,11 @@
 
                     <div class="cta-buttons justify-content-between pt-3 mt-4">
                         <button class="btn btn-primary btn-lg rounded-3 w-100 pt-3 pb-3" (click)="scrollToId('authors')">
-                            <i class="bi bi-book text-2xl"></i>&nbsp;&nbsp;
+                            <span style="font-size: 150%;">🖨️</span> &nbsp;&nbsp;
                             I'm an Author
                         </button>
                         <button class="btn btn-secondary btn-lg w-100  mt-3 mt-md-0 pt-3 pb-3" (click)="scrollToId('listener')">
-                            <i class="bi bi-play-circle text-2xl"></i>&nbsp;&nbsp;
+                            <span style="font-size: 150%;">🎧</span>&nbsp;&nbsp;
                             I'm a Listener
                         </button>
                     </div>
@@ -89,7 +89,7 @@
                 
                 <!-- Right Image -->
                 <div class="col-12 col-lg-6 order-first order-lg-last">
-                    <img class="hero-image" src="https://cdn.ailandingpage.ai/ai-landingpage/user-generate/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/825f8f21-9b79-4de0-9b77-f8f4fc6150c0/hero/hero-main-6fa8603c66e6476883feaed7178ac9cb.png" alt="Independent authors platform" />
+                    <img class="hero-image" src="hero.png" alt="Independent authors platform" />
                 </div>
 
             </div>
@@ -444,7 +444,7 @@
                         </div>
 
                         <div class="mt-5 text-center">
-                            <button class="btn btn-primary btn-lg rounded-pill">
+                            <button class="btn btn-primary btn-lg rounded-pill" (click)="gotoDebate()">
                                 <i class="bi bi-chat-dots-fill"></i>&nbsp;&nbsp;
                                 Start a Debate
                             </button>
