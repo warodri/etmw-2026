@@ -865,6 +865,12 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         this.toast.show('Payment cancelled. You can try again.');
     }
 
+    cancelPaymentWaitingAndTryAgain() {
+        this.stopPaymentPolling();
+        this.showPaymentWaiting.set(false);
+        this.router.navigate(['app/audiobooks/payment/pending']);
+    }
+
 
     // Success actions
     goToMyBooks() {

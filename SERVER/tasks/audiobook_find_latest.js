@@ -36,6 +36,8 @@ async function run(data, req, res) {
             });
         }
 
+        mongoQuery.published = true;
+
         const limit = data?.limit ?? 10;
         const skip = data?.skip ?? 0;
         const result = await runFindWithQuery(mongoQuery, {

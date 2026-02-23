@@ -19,6 +19,7 @@ import { ScreenStories } from './SCREEN/STORIES/screen-stories/screen-stories';
 import { ScreenItemDetail } from './SCREEN/AUDIOBOOK/screen-item-detail/screen-item-detail';
 import { ScreenAdminComponent } from './SCREEN/ADMIN/screen-admin/screen-admin';
 import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen-create-message';
+import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/screen-resume-payment';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -44,6 +45,7 @@ const routes: Routes = [
     { path: 'app/authors', component: ScreenAuthors },
     { path: 'app/partners', component: ScreenPartners },
     { path: 'app/audiobooks/upload', component: ScreenUploadAudiobook },
+    { path: 'app/audiobooks/payment/pending', component: ScreenResumePayment },
     
     //  Debate
     { path: 'app/debate', component: ScreenDebates },

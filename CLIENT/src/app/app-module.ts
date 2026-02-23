@@ -58,6 +58,8 @@ import { DebateComments } from './COMPONENTS/DEBATE/debate-comments/debate-comme
 import { FollowUsRow } from './COMPONENTS/MAIN/follow-us-row/follow-us-row';
 import { DebateAddComment } from './COMPONENTS/DEBATE/debate-add-comment/debate-add-comment';
 import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen-create-message';
+import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/screen-resume-payment';
+import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/resume-payment-warning';
 
 @NgModule({
     declarations: [
@@ -110,6 +112,8 @@ import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen
         FollowUsRow,
         DebateAddComment,
         ScreenCreateMessage,
+        ScreenResumePayment,
+        ResumePaymentWarning,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

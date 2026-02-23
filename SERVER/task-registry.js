@@ -69,6 +69,8 @@ const AudiobookFindByCategory = require("./tasks/audiobook_find_by_category");
 const AudiobookFindBySection = require("./tasks/audiobook_find_by_section");
 const AudiobookFindByAuthor = require("./tasks/audiobook_find_by_author");
 const AudiobookFindLatest = require("./tasks/audiobook_find_latest");
+const AudiobookGetPendingPayments = require("./tasks/audiobook_get_pending_payment");
+const AudiobookArchive = require("./tasks/audiobook_archive");
 
 const AudiobookGetChapterAudio = require("./tasks/audiobook_get_chapter_audio");
 const AudiobookGetChapterAudioIsAvailable = require("./tasks/audiobook_get_chapter_audio_is_available");
@@ -178,6 +180,8 @@ const TasksRegistry = {
     AudiobookFindByCategory,
     AudiobookFindBySection,
     AudiobookFindByAuthor,
+    AudiobookArchive,
+    AudiobookGetPendingPayments,
     AudiobookFindLatest,
     AudiobookUploadCover,
     AudiobookTranslate,

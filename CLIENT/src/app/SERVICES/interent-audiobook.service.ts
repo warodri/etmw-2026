@@ -196,7 +196,7 @@ export class InternetAudiobookService extends InternetService {
 
     audiobookFindLatest(categories: string[] | null, authorIds: string[] | null, callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'AudiobookFindLatest',
             lang,
             data: {
@@ -205,7 +205,26 @@ export class InternetAudiobookService extends InternetService {
             }
         }, callback);
     }
-
     
+    audiobookGetPendingPayments(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookGetPendingPayments',
+            lang,
+            data: {
+            }
+        }, callback);
+    }    
+
+    audiobookArchive(audiobookId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookArchive',
+            lang,
+            data: {
+                audiobookId
+            }
+        }, callback);
+    }    
 
 }

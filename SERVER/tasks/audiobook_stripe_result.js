@@ -6,7 +6,7 @@ async function handleStripeSuccess(req, res) {
 
     //  Get config
     const config = require('../config')
-    const dev = config.dev;        
+    const dev = config.STRIPE.test;        
     const stripe = require('stripe')( dev ? config.STRIPE.dev.secret_key : config.STRIPE.prod.secret_key );
 
     //  CLIENT

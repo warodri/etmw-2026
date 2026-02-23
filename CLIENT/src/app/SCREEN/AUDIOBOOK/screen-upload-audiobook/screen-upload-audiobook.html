@@ -835,7 +835,7 @@
                                                 <i class="bi bi-emoji-smile"></i> Expression Enabled
                                             </span>
                                         }
-                            @if (isTranslationEnabled()) {
+                                        @if (isTranslationEnabled()) {
                                             <span class="bg-slate-800 px-3 py-1 rounded-3">
                                                 <i class="bi bi-translate"></i> Translating to {{ getLanguageName(bookConfig.targetLanguage) }}
                                             </span>
@@ -1043,9 +1043,14 @@
                         Please complete your payment in the Stripe window.<br>
                         This page will automatically update when payment is confirmed.
                     </p>
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelPaymentWaiting()">
-                        Cancel
-                    </button>
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelPaymentWaiting()">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" (click)="cancelPaymentWaitingAndTryAgain()">
+                            Try again
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
