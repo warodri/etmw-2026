@@ -3,14 +3,14 @@
 @if (pricesObj) {
     <div class="text-center mb-5">
         <h2 class="section-title">
-            {{ mainTitle }}
+            {{ tr(mainTitle, 'Elige Tu Plan') }}
         </h2>
         <h5 class="mt-3 text-gray-400">
-            No credits. No hidden catalogue. If a book exists on the platform, you can listen to it.
+            {{ tr('No credits. No hidden catalogue. If a book exists on the platform, you can listen to it.', 'Sin créditos. Sin catálogo oculto. Si un libro existe en la plataforma, puedes escucharlo.') }}
         </h5>
         <div class="mt-3 pricing-region-badge">
             <i class="bi bi-geo-alt-fill"></i>
-            Prices adjusted to local purchasing power
+            {{ tr('Prices adjusted to local purchasing power', 'Precios ajustados al poder adquisitivo local') }}
         </div>
     </div>
     
@@ -23,44 +23,44 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="pricing-card">
                     <div class="pricing-header">
-                        <h3 class="pricing-plan-name">Explorer</h3>
-                        <div class="pricing-plan-subtitle">Perfect to start</div>
+                        <h3 class="pricing-plan-name">{{ tr('Explorer', 'Explorador') }}</h3>
+                        <div class="pricing-plan-subtitle">{{ tr('Perfect to start', 'Perfecto para empezar') }}</div>
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
                         <span class="pricing-amount">{{ pricesObj.explorer.price }}</span>
-                        <span class="pricing-period">/month</span>
+                        <span class="pricing-period">{{ tr('/month', '/mes') }}</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>{{ pricesObj.explorer.booksPerMonth }} books</strong> per month
+                        <strong>{{ pricesObj.explorer.booksPerMonth }} {{ tr('books', 'libros') }}</strong> {{ tr('per month', 'por mes') }}
                     </div>
                     <ul class="pricing-features">
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Full catalogue</span>
+                            <span>{{ tr('Full catalogue', 'Catálogo completo') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>New releases</span>
+                            <span>{{ tr('New releases', 'Nuevos lanzamientos') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Debate area</span>
+                            <span>{{ tr('Debate area', 'Área de debate') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Offline listening</span>
+                            <span>{{ tr('Offline listening', 'Escucha sin conexión') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Re-listen anytime</span>
+                            <span>{{ tr('Re-listen anytime', 'Vuelve a escuchar cuando quieras') }}</span>
                         </li>
                     </ul>
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
-                        We deliver 1 chapter of each book daily
+                        {{ tr('We deliver 1 chapter of each book daily', 'Entregamos 1 capítulo de cada libro diariamente') }}
                     </div>
                     <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Explorer')">
-                        Start listening
+                        {{ tr('Start listening', 'Comenzar a escuchar') }}
                     </button>
                 </div>
             </div>
@@ -71,47 +71,47 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="pricing-card pricing-card-popular">
                     <div class="pricing-badge">
-                        ⭐ Most Popular
+                        ⭐ {{ tr('Most Popular', 'Más Popular') }}
                     </div>
                     <div class="pricing-header">
-                        <h3 class="pricing-plan-name">Reader</h3>
-                        <div class="pricing-plan-subtitle">Best value</div>
+                        <h3 class="pricing-plan-name">{{ tr('Reader', 'Lector') }}</h3>
+                        <div class="pricing-plan-subtitle">{{ tr('Best value', 'Mejor valor') }}</div>
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
                         <span class="pricing-amount">{{ pricesObj.reader.price }}</span>
-                        <span class="pricing-period">/month</span>
+                        <span class="pricing-period">{{ tr('/month', '/mes') }}</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>{{ pricesObj.reader.booksPerMonth }} books</strong> per month
+                        <strong>{{ pricesObj.reader.booksPerMonth }} {{ tr('books', 'libros') }}</strong> {{ tr('per month', 'por mes') }}
                     </div>
                     <ul class="pricing-features">
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Full catalogue</span>
+                            <span>{{ tr('Full catalogue', 'Catálogo completo') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>New releases</span>
+                            <span>{{ tr('New releases', 'Nuevos lanzamientos') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Debate area</span>
+                            <span>{{ tr('Debate area', 'Área de debate') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Offline listening</span>
+                            <span>{{ tr('Offline listening', 'Escucha sin conexión') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Re-listen anytime</span>
+                            <span>{{ tr('Re-listen anytime', 'Vuelve a escuchar cuando quieras') }}</span>
                         </li>
                     </ul>
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
-                        We deliver 1 chapter of each book daily
+                        {{ tr('We deliver 1 chapter of each book daily', 'Entregamos 1 capítulo de cada libro diariamente') }}
                     </div>
                     <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Reader')">
-                        Start listening
+                        {{ tr('Start listening', 'Comenzar a escuchar') }}
                     </button>
                 </div>
             </div>
@@ -122,44 +122,44 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="pricing-card">
                     <div class="pricing-header">
-                        <h3 class="pricing-plan-name">Unlimited</h3>
-                        <div class="pricing-plan-subtitle">For passionate readers</div>
+                        <h3 class="pricing-plan-name">{{ tr('Unlimited', 'Ilimitado') }}</h3>
+                        <div class="pricing-plan-subtitle">{{ tr('For passionate readers', 'Para lectores apasionados') }}</div>
                     </div>
                     <div class="pricing-price">
                         <span class="pricing-currency">{{ currency() }}</span>
                         <span class="pricing-amount">{{ pricesObj.unlimited.price }}</span>
-                        <span class="pricing-period">/month</span>
+                        <span class="pricing-period">{{ tr('/month', '/mes') }}</span>
                     </div>
                     <div class="pricing-feature-main">
-                        <strong>Unlimited books</strong>
+                        <strong>{{ tr('Unlimited books', 'Libros ilimitados') }}</strong>
                     </div>
                     <ul class="pricing-features">
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Full catalogue</span>
+                            <span>{{ tr('Full catalogue', 'Catálogo completo') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>New releases</span>
+                            <span>{{ tr('New releases', 'Nuevos lanzamientos') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Debate area</span>
+                            <span>{{ tr('Debate area', 'Área de debate') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Offline listening</span>
+                            <span>{{ tr('Offline listening', 'Escucha sin conexión') }}</span>
                         </li>
                         <li>
                             <i class="bi bi-check-circle-fill"></i>
-                            <span>Re-listen anytime</span>
+                            <span>{{ tr('Re-listen anytime', 'Vuelve a escuchar cuando quieras') }}</span>
                         </li>
                     </ul>
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
-                        You have access to all the chapters
+                        {{ tr('You have access to all the chapters', 'Tienes acceso a todos los capítulos') }}
                     </div>
                     <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Unlimited')">
-                        Go unlimited
+                        {{ tr('Go unlimited', 'Ir a ilimitado') }}
                     </button>
                 </div>
             </div>
@@ -177,7 +177,7 @@
     
     <div class="text-center mt-5">
         <p class="text-gray-400">
-            All plans billed monthly. Cancel anytime with no penalties.
+            {{ tr('All plans billed monthly. Cancel anytime with no penalties.', 'Todos los planes se cobran mensualmente. Cancela cuando quieras sin penalizaciones.') }}
         </p>
     </div>
 }

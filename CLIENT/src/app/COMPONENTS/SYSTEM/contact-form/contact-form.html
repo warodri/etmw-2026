@@ -3,15 +3,14 @@
     <!-- Left Side - Info -->
     <div class="col-12 col-lg-5">
         @if (sector === 'support') {
-            <h2 class="mt-4 section-title mb-4">Contact Support</h2>
+            <h2 class="mt-4 section-title mb-4">{{ tr('Contact Support', 'Contactar Soporte') }}</h2>
             <p class="text-gray-300 text-lg lh-175 mb-4">
-                Report a bug, payment issue, or a chapter that isn’t available yet. The more details you share, the faster we can help.
+                {{ tr('Report a bug, payment issue, or a chapter that isn’t available yet. The more details you share, the faster we can help.', 'Reporta un error, un problema de pago o un capítulo que aún no está disponible. Cuantos más detalles compartas, más rápido podremos ayudarte.') }}
             </p>
         } @else {
-            <h2 class="mt-4 section-title mb-4">Get in Touch</h2>
+            <h2 class="mt-4 section-title mb-4">{{ tr('Get in Touch', 'Ponte en Contacto') }}</h2>
             <p class="text-gray-300 text-lg lh-175 mb-4">
-                Have questions about how Enter To My World works? Want to discuss author partnerships 
-                or integration opportunities? We'd love to hear from you.
+                {{ tr("Have questions about how Enter To My World works? Want to discuss author partnerships or integration opportunities? We'd love to hear from you.", '¿Tienes preguntas sobre cómo funciona Enter To My World? ¿Quieres hablar de alianzas para autores u oportunidades de integración? Nos encantará escucharte.') }}
             </p>
         }
         
@@ -21,7 +20,7 @@
                     <i class="bi bi-envelope-fill"></i>
                 </div>
                 <div>
-                    <div class="contact-info-label">Email us</div>
+                    <div class="contact-info-label">{{ tr('Email us', 'Escríbenos') }}</div>
                     <div class="contact-info-value">
                         @if (sector === 'support') { support@entertomyworld.com } @else { hello@entertomyworld.com }
                     </div>
@@ -33,8 +32,8 @@
                     <i class="bi bi-clock-fill"></i>
                 </div>
                 <div>
-                    <div class="contact-info-label">Response time</div>
-                    <div class="contact-info-value">Within 24 hours</div>
+                    <div class="contact-info-label">{{ tr('Response time', 'Tiempo de respuesta') }}</div>
+                    <div class="contact-info-value">{{ tr('Within 24 hours', 'Dentro de 24 horas') }}</div>
                 </div>
             </div>
             
@@ -43,14 +42,14 @@
                     <i class="bi bi-globe"></i>
                 </div>
                 <div>
-                    <div class="contact-info-label">We speak</div>
-                    <div class="contact-info-value">English, Spanish, Italian</div>
+                    <div class="contact-info-label">{{ tr('We speak', 'Hablamos') }}</div>
+                    <div class="contact-info-value">{{ tr('English, Spanish, Italian', 'Inglés, Español, Italiano') }}</div>
                 </div>
             </div>
         </div>
 
         <div class="contact-social mt-5">
-            <div class="mb-3 text-gray-400">Follow us</div>
+            <div class="mb-3 text-gray-400">{{ tr('Follow us', 'Síguenos') }}</div>
             <div class="d-flex gap-3">
                 <a href="#" class="contact-social-link">
                     <i class="bi bi-twitter"></i>
@@ -75,125 +74,125 @@
                 <div class="row g-4">
                     
                     <div class="col-12 col-md-6">
-                        <label class="contact-label">Your Name</label>
+                        <label class="contact-label">{{ tr('Your Name', 'Tu Nombre') }}</label>
                         <input 
                             type="text" 
                             class="contact-input" 
-                            placeholder="John Doe"
+                            [placeholder]="tr('John Doe', 'Juan Pérez')"
                             [(ngModel)]="contactForm().name"
                             name="name">
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="contact-label">Email Address</label>
+                        <label class="contact-label">{{ tr('Email Address', 'Correo Electrónico') }}</label>
                         <input 
                             type="email" 
                             class="contact-input" 
-                            placeholder="john@example.com"
+                            [placeholder]="tr('john@example.com', 'juan@ejemplo.com')"
                             [(ngModel)]="contactForm().email"
                             name="email">
                     </div>
 
                     @if (sector !== 'support') {
                         <div class="col-12">
-                            <label class="contact-label">I am a...</label>
+                            <label class="contact-label">{{ tr('I am a...', 'Soy...') }}</label>
                             <select 
                                 class="contact-input"
                                 [(ngModel)]="contactForm().userType"
                                 name="userType">
-                                <option value="">Select an option</option>
-                                <option value="author">Independent Author</option>
-                                <option value="listener">Listener</option>
-                                <option value="publisher">Publisher</option>
-                                <option value="press">Press / Media</option>
-                                <option value="other">Other</option>
+                                <option value="">{{ tr('Select an option', 'Selecciona una opción') }}</option>
+                                <option value="author">{{ tr('Independent Author', 'Autor Independiente') }}</option>
+                                <option value="listener">{{ tr('Listener', 'Oyente') }}</option>
+                                <option value="publisher">{{ tr('Publisher', 'Editorial') }}</option>
+                                <option value="press">{{ tr('Press / Media', 'Prensa / Medios') }}</option>
+                                <option value="other">{{ tr('Other', 'Otro') }}</option>
                             </select>
                         </div>
                     }
 
                     @if (sector === 'support') {
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">Issue Type</label>
+                            <label class="contact-label">{{ tr('Issue Type', 'Tipo de Problema') }}</label>
                             <select class="contact-input"
                                     [(ngModel)]="contactForm().issueType"
                                     name="issueType">
-                                <option value="">Select an issue</option>
-                                <option value="bug">Bug / App not working</option>
-                                <option value="payment">Payment issue</option>
-                                <option value="chapter">Chapter not available</option>
-                                <option value="account">Account / Login</option>
-                                <option value="other">Other</option>
+                                <option value="">{{ tr('Select an issue', 'Selecciona un problema') }}</option>
+                                <option value="bug">{{ tr('Bug / App not working', 'Error / App no funciona') }}</option>
+                                <option value="payment">{{ tr('Payment issue', 'Problema de pago') }}</option>
+                                <option value="chapter">{{ tr('Chapter not available', 'Capítulo no disponible') }}</option>
+                                <option value="account">{{ tr('Account / Login', 'Cuenta / Acceso') }}</option>
+                                <option value="other">{{ tr('Other', 'Otro') }}</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">Platform</label>
+                            <label class="contact-label">{{ tr('Platform', 'Plataforma') }}</label>
                             <select class="contact-input"
                                     [(ngModel)]="contactForm().platform"
                                     name="platform">
-                                <option value="">Select platform</option>
+                                <option value="">{{ tr('Select platform', 'Selecciona plataforma') }}</option>
                                 <option value="ios">iOS</option>
                                 <option value="android">Android</option>
                                 <option value="web">Web</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">Device</label>
+                            <label class="contact-label">{{ tr('Device', 'Dispositivo') }}</label>
                             <input type="text"
                                    class="contact-input"
-                                   placeholder="iPhone 14, Pixel 8, MacBook..."
+                                   [placeholder]="tr('iPhone 14, Pixel 8, MacBook...', 'iPhone 14, Pixel 8, MacBook...')"
                                    [(ngModel)]="contactForm().device"
                                    name="device">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">App Version</label>
+                            <label class="contact-label">{{ tr('App Version', 'Versión de la App') }}</label>
                             <input type="text"
                                    class="contact-input"
-                                   placeholder="e.g. 1.2.4"
+                                   [placeholder]="tr('e.g. 1.2.4', 'ej. 1.2.4')"
                                    [(ngModel)]="contactForm().appVersion"
                                    name="appVersion">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">Audiobook Name or ID (optional)</label>
+                            <label class="contact-label">{{ tr('Audiobook Name or ID (optional)', 'Nombre o ID del Audiolibro (opcional)') }}</label>
                             <input type="text"
                                    class="contact-input"
-                                   placeholder="If related to a specific book"
+                                   [placeholder]="tr('If related to a specific book', 'Si está relacionado con un libro específico')"
                                    [(ngModel)]="contactForm().audiobookId"
                                    name="audiobookId">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="contact-label">Chapter Number (optional)</label>
+                            <label class="contact-label">{{ tr('Chapter Number (optional)', 'Número de Capítulo (opcional)') }}</label>
                             <input type="text"
                                    class="contact-input"
-                                   placeholder="e.g. 1"
+                                   [placeholder]="tr('e.g. 1', 'ej. 1')"
                                    [(ngModel)]="contactForm().chapterNumber"
                                    name="chapterNumber">
                         </div>
                         <div class="col-12">
-                            <label class="contact-label">Payment ID (optional)</label>
+                            <label class="contact-label">{{ tr('Payment ID (optional)', 'ID de Pago (opcional)') }}</label>
                             <input type="text"
                                    class="contact-input"
-                                   placeholder="Payment / session id"
+                                   [placeholder]="tr('Payment / session id', 'ID de pago / sesión')"
                                    [(ngModel)]="contactForm().paymentId"
                                    name="paymentId">
                         </div>
                     }
 
                     <div class="col-12">
-                        <label class="contact-label">Subject</label>
+                        <label class="contact-label">{{ tr('Subject', 'Asunto') }}</label>
                         <input 
                             type="text" 
                             class="contact-input" 
-                            placeholder="How can we help you?"
+                            [placeholder]="tr('How can we help you?', '¿Cómo podemos ayudarte?')"
                             [(ngModel)]="contactForm().subject"
                             name="subject">
                     </div>
 
                     <div class="col-12">
-                        <label class="contact-label">Message</label>
+                        <label class="contact-label">{{ tr('Message', 'Mensaje') }}</label>
                         <textarea 
                             class="contact-input contact-textarea" 
                             rows="6" 
-                            placeholder="Please include steps to reproduce, what you expected, and what happened."
+                            [placeholder]="tr('Please include steps to reproduce, what you expected, and what happened.', 'Incluye pasos para reproducir, lo que esperabas y lo que ocurrió.')"
                             [(ngModel)]="contactForm().message"
                             name="message"></textarea>
                     </div>
@@ -201,10 +200,10 @@
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">
                             <i class="bi bi-send-fill"></i>&nbsp;&nbsp;
-                            Send Message
+                            {{ tr('Send Message', 'Enviar Mensaje') }}
                         </button>
                         <div class="contact-form-note">
-                            We'll get back to you within 24 hours
+                            {{ tr("We'll get back to you within 24 hours", 'Te responderemos dentro de 24 horas') }}
                         </div>
                     </div>
 

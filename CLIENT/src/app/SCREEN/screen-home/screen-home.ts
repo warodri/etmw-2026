@@ -6,6 +6,7 @@ import { InternetAudiobookService } from '../../SERVICES/interent-audiobook.serv
 import { AudiobookModel } from '../../models/audiobook';
 import { InternetAuthorService } from '../../SERVICES/internet-author.service';
 import { AuthorModel } from '../../models/author';
+import { LangUtils } from '../../utils/lang';
 
 @Component({
     selector: 'app-screen-home',
@@ -16,6 +17,8 @@ import { AuthorModel } from '../../models/author';
 export class ScreenHome implements OnInit {
         
     latestAudiobooks = signal<AudiobookModel[]>([])
+    mobileMenuOpen = false;
+    language: 'en' | 'es' = 'en';
 
     constructor(
         private router: Router,
@@ -26,6 +29,7 @@ export class ScreenHome implements OnInit {
     ngOnInit() {
         this.getLatest();
         this.detectRegion();
+        this.language = LangUtils.detectLanguage();
     }
 
     getLatest() {
@@ -55,7 +59,21 @@ export class ScreenHome implements OnInit {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    toggleMobileMenu() {
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+    }
+
+    onMobileMenuSelect(id: string) {
+        this.scrollToId(id);
+        this.mobileMenuOpen = false;
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
+    }
+
     gotoApp() {
+        this.mobileMenuOpen = false;
         this.router.navigate(['app'])
     }
     
@@ -72,6 +90,7 @@ export class ScreenHome implements OnInit {
     }
 
     gotoDebate() {
+        this.mobileMenuOpen = false;
         this.router.navigate(['app/debate'])
     }
 

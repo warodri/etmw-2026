@@ -1,6 +1,7 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, OnInit, signal } from '@angular/core';
 import { InternetService } from '../../../SERVICES/internet.service';
 import { ToastService } from '../../../SERVICES/toast';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-contact-form',
@@ -8,9 +9,10 @@ import { ToastService } from '../../../SERVICES/toast';
     templateUrl: './contact-form.html',
     styleUrl: './contact-form.css',
 })
-export class ContactForm {
+export class ContactForm implements OnInit {
 
     @Input() sector: 'website' | 'support' = 'website';
+    language: 'en' | 'es' = 'en';
 
     contactForm = signal({
         name: '',
@@ -32,6 +34,10 @@ export class ContactForm {
         private toast: ToastService
     ) {}
 
+    ngOnInit() {
+        this.language = LangUtils.detectLanguage();
+    }
+
     sendForm() {
         const form = this.contactForm();
         const name = form.name.trim();
@@ -41,11 +47,11 @@ export class ContactForm {
         const isSupport = this.sector === 'support';
 
         if (!name || !email || !subject || !message) {
-            this.toast.show('Please complete all required fields.');
+            this.toast.show(this.tr('Please complete all required fields.', 'Por favor completa todos los campos obligatorios.'));
             return;
         }
         if (isSupport && !form.issueType) {
-            this.toast.show('Please select an issue type.');
+            this.toast.show(this.tr('Please select an issue type.', 'Por favor selecciona un tipo de problema.'));
             return;
         }
 
@@ -64,7 +70,7 @@ export class ContactForm {
             paymentId: form.paymentId || ''
         }, (response: any) => {
             if (response && response.success) {
-                this.toast.show('Thanks for your contact!')
+                this.toast.show(this.tr('Thanks for your contact!', 'Gracias por contactarnos!'))
                 this.contactForm.set({
                     name: '',
                     email: '',
@@ -83,6 +89,10 @@ export class ContactForm {
                 this.toast.show(this.toast.getMessageErrorUnexpected());
             }
         })
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 }

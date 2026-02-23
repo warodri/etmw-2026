@@ -5,6 +5,7 @@ import { UserModel } from '../../../models/user';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { InternetSubscriptionService } from '../../../SERVICES/internet-subscription.services';
 import { ToastService } from '../../../SERVICES/toast';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-pricing',
@@ -15,6 +16,7 @@ import { ToastService } from '../../../SERVICES/toast';
 export class Pricing implements OnInit {
 
     @Input() mainTitle = 'Choose Your Plan';
+    language: 'en' | 'es' = 'en';
     
     myUser = signal<UserModel | null>(null);
 
@@ -49,6 +51,7 @@ export class Pricing implements OnInit {
     ) {}
 
     ngOnInit() {
+        this.language = LangUtils.detectLanguage();
         this.getSubscriptionConfig(() => {
             this.loadMyUser(() => {
                 this.detectRegion();        
@@ -133,6 +136,10 @@ export class Pricing implements OnInit {
                 }
             })
         }
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
     
 }
