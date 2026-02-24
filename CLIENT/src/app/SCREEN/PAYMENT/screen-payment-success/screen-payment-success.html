@@ -15,23 +15,23 @@
                     
                     <!-- Success Message -->
                     <h1 class="text-5xl fw-bold mb-3 text-light">
-                        Payment Successful!
+                        {{ tr('Payment Successful!', '¡Pago Exitoso!') }}
                     </h1>
                     
                     <p class="text-gray-400 text-lg mb-4 mx-auto" style="max-width: 500px;">
-                        Your audiobook is being processed. You'll receive an email notification once it's ready to listen.
+                        {{ tr("Your audiobook is being processed. You'll receive an email notification once it's ready to listen.", 'Tu audiolibro se está procesando. Recibirás una notificación por correo cuando esté listo para escuchar.') }}
                     </p>
                     
                     <!-- Details Card -->
                     <div class="bg-slate-900 rounded-4 p-4 mb-4 text-start">
-                        <h3 class="fw-bold mb-3 text-light">What's Next?</h3>
+                        <h3 class="fw-bold mb-3 text-light">{{ tr("What's Next?", '¿Qué Sigue?') }}</h3>
                         
                         <div class="d-flex align-items-start mb-3">
                             <i class="bi bi-1-circle-fill text-primary me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Processing</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Processing', 'Procesamiento') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    Our AI is converting your book into high-quality audio
+                                    {{ tr('Our AI is converting your book into high-quality audio', 'Nuestra IA está convirtiendo tu libro en audio de alta calidad') }}
                                 </p>
                             </div>
                         </div>
@@ -39,9 +39,9 @@
                         <div class="d-flex align-items-start mb-3">
                             <i class="bi bi-2-circle-fill text-primary me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Email Notification</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Email Notification', 'Notificación por Correo') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    You'll receive an email when your audiobook is ready
+                                    {{ tr("You'll receive an email when your audiobook is ready", 'Recibirás un correo cuando tu audiolibro esté listo') }}
                                 </p>
                             </div>
                         </div>
@@ -49,9 +49,9 @@
                         <div class="d-flex align-items-start">
                             <i class="bi bi-3-circle-fill text-primary me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Start Listening</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Start Listening', 'Comenzar a Escuchar') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    Access your audiobook in "My Audiobooks" section
+                                    {{ tr('Access your audiobook in "My Audiobooks" section', 'Accede a tu audiolibro en la sección "Mis Audiolibros"') }}
                                 </p>
                             </div>
                         </div>
@@ -82,12 +82,12 @@
                     <!-- Footer Note -->
                     <p class="text-gray-400 small mt-4 mb-0">
                         <i class="bi bi-shield-check me-1"></i>
-                        Your payment has been securely processed
+                        {{ tr('Your payment has been securely processed', 'Tu pago se procesó de forma segura') }}
                     </p>
 
                     <div class="mt-4 text-center">
                         <button class="btn btn-primary btn-lg rounded-pill" (click)="goApp()">
-                            Home
+                            {{ tr('Home', 'Inicio') }}
                         </button>
                     </div>
                     

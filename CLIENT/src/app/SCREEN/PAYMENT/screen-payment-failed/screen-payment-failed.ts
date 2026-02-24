@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-screen-payment-failed',
@@ -8,12 +9,18 @@ import { Router } from '@angular/router';
     styleUrl: './screen-payment-failed.css',
 })
 export class ScreenPaymentFailed implements OnInit {
+    language: 'en' | 'es' = 'en';
 
     constructor(
         private router: Router
     ) { }
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
     tryAgain() {

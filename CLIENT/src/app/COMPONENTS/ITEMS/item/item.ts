@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AudiobookModel } from '../../../models/audiobook';
 import { UtilsService } from '../../../utils/utils-service';
 import { Router } from '@angular/router';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-item',
@@ -13,6 +14,7 @@ export class Item {
 
     @Input() audiobook: AudiobookModel | null = null;
     @Input() template: 'default' | 'md' | 'large' | 'detail' = 'default';
+    language: 'en' | 'es' = LangUtils.detectLanguage();
 
     constructor(
         private utils: UtilsService,
@@ -29,7 +31,7 @@ export class Item {
 
     getPrimaryCategory(): string {
         if (!this.audiobook || !Array.isArray(this.audiobook.categories) || this.audiobook.categories.length === 0) {
-            return 'General';
+            return this.tr('General', 'General');
         }
         return this.audiobook.categories[0];
     }
@@ -40,7 +42,7 @@ export class Item {
     }
 
     getDurationLabel(): string {
-        if (!this.audiobook || !this.audiobook.totalAudioDurationSec) return 'N/A';
+        if (!this.audiobook || !this.audiobook.totalAudioDurationSec) return this.tr('N/A', 'N/D');
         const totalSeconds = Math.max(0, Math.floor(this.audiobook.totalAudioDurationSec));
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -59,6 +61,16 @@ export class Item {
         return 'Pending';
     }
 
+    getStatusLabelTr(): string {
+        const label = this.getStatusLabel();
+        if (label === 'Published') return this.tr('Published', 'Publicado');
+        if (label === 'Ready') return this.tr('Ready', 'Listo');
+        if (label === 'Failed') return this.tr('Failed', 'Fallido');
+        if (label === 'Processing') return this.tr('Processing', 'Procesando');
+        if (label === 'Pending') return this.tr('Pending', 'Pendiente');
+        return label;
+    }
+
     private getFallbackCover(): string {
         const title = this.audiobook?.title || 'Audiobook';
         const safeTitle = encodeURIComponent(title);
@@ -75,6 +87,10 @@ export class Item {
         if (this.audiobook) {
             this.router.navigate(['app/debate', this.audiobook._id])
         }
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 }

@@ -5,7 +5,6 @@ import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { ScreenHome } from './SCREEN/screen-home/screen-home';
-import { Main } from './COMPONENTS/MAIN/main/main';
 import { Search } from './COMPONENTS/SEARCH/search/search';
 import { ItemDetail } from './COMPONENTS/ITEMS/item-detail/item-detail';
 import { Item } from './COMPONENTS/ITEMS/item/item';
@@ -66,7 +65,6 @@ import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/
         App,
         ScreenHome,
         ScreenItemDetail,
-        Main,
         Search,
         ItemDetail,
         Item,

@@ -9,6 +9,7 @@ import { UtilClass } from '../../../utils/utils';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { Language, ProcessedVoice } from '../../../models/voices';
 import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-screen-upload-audiobook',
@@ -17,6 +18,7 @@ import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
     styleUrl: './screen-upload-audiobook.css',
 })
 export class ScreenUploadAudiobook implements OnInit, OnDestroy {
+    language: 'en' | 'es' = 'en';
     
     //  My logged user (mandatory)
     myUser = signal<UserModel | null>(null);
@@ -308,6 +310,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         this.getAppConfig(() => {
             this.calculatePremiumVoiceCost();
             this.calculateVoiceExpressionCost();
@@ -322,6 +325,19 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 });
             })
         })
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
+    }
+
+    trStep(stepLabel: string) {
+        if (stepLabel === 'Pricing') return this.tr('Pricing', 'Precios');
+        if (stepLabel === 'Upload') return this.tr('Upload', 'Subir');
+        if (stepLabel === 'Cover') return this.tr('Cover', 'Portada');
+        if (stepLabel === 'Configure') return this.tr('Configure', 'Configurar');
+        if (stepLabel === 'Review') return this.tr('Review', 'Revisar');
+        return stepLabel;
     }
 
     ngOnDestroy(): void {
@@ -480,11 +496,15 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
             const referralValid = this.referralValid();
             const selectedPricing = this.selectedPricing();
             if ((!referralCode || !referralValid) && !selectedPricing) {
-                this.toast.show('Please enter a promo code or pick a pricing');
+                this.toast.show(this.tr('Please enter a promo code or pick a pricing', 'Por favor ingresa un código promocional o elige un precio'));
                 return;
             }
             //  Donwlod voices for next step
             this.loadVoicesByLanguage();
+        }
+        if (this.currentStep() == 3 && !this.coverFile) {
+            this.toast.show(this.tr('Please upload a cover image to continue.', 'Por favor sube una imagen de portada para continuar.'));
+            return;
         }
         if (this.currentStep() < 6) {
             this.currentStep.set(this.currentStep() + 1);
@@ -510,7 +530,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 this.referralValid.set(true);
                 this.nextStep();
             } else {
-                this.toast.show('This code seems to be incorrect.')
+                this.toast.show(this.tr('This code seems to be incorrect.', 'Este código parece incorrecto.'))
             }
         })
     }
@@ -752,6 +772,10 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         //  Validate
         if (!this.acceptedTerms) return;
         if (this.working()) return;
+        if (!this.coverFile) {
+            this.toast.show(this.tr('Cover image is required.', 'La imagen de portada es obligatoria.'));
+            return;
+        }
 
         //  Working
         this.working.set(true);
@@ -790,7 +814,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 })
                 
             } else {
-                this.toast.show('Error creating audiobook upload');
+                this.toast.show(this.tr('Error creating audiobook upload', 'Error al crear la carga del audiolibro'));
             }
         });
     }
@@ -827,7 +851,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 // Start polling for payment confirmation
                 this.startPaymentPolling(audiobookId);
             } else {
-                this.toast.show('Error creating payment session');
+                this.toast.show(this.tr('Error creating payment session', 'Error al crear la sesión de pago'));
             }
         });
     }
@@ -862,7 +886,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     cancelPaymentWaiting() {
         this.stopPaymentPolling();
         this.showPaymentWaiting.set(false);
-        this.toast.show('Payment cancelled. You can try again.');
+        this.toast.show(this.tr('Payment cancelled. You can try again.', 'Pago cancelado. Puedes intentarlo de nuevo.'));
     }
 
     cancelPaymentWaitingAndTryAgain() {

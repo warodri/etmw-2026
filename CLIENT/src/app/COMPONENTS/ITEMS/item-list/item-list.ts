@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CategoryModel } from '../../../models/categories';
 import { AudiobookFindPayload, InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { AudiobookModel } from '../../../models/audiobook';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-item-list',
@@ -21,7 +22,8 @@ export class ItemList implements OnInit, OnChanges {
     searchQuery = '';
     searchResultCount = 0;
     searchResultLabel = '';
-    searchResultPrefix = 'Results';
+    searchResultPrefix = '';
+    language: 'en' | 'es' = 'en';
     forceShowSearchResults = false;
     activeFilters: string[] = [];
     searchResults = signal<Array<any>>([]);
@@ -65,9 +67,15 @@ export class ItemList implements OnInit, OnChanges {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
+        this.searchResultPrefix = this.tr('Results', 'Resultados');
         this.getCategories();
         this.getTrendingNow();
         this.applyInitialSearchFromRoute();
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -172,8 +180,8 @@ export class ItemList implements OnInit, OnChanges {
             limit: this.searchLimit,
             skip: 0
         };
-        this.searchResultPrefix = 'Results for';
-        this.searchResultLabel = q.length >= 2 ? `"${q}"` : 'all audiobooks';
+        this.searchResultPrefix = this.tr('Results for', 'Resultados para');
+        this.searchResultLabel = q.length >= 2 ? `"${q}"` : this.tr('all audiobooks', 'todos los audiolibros');
         this.forceShowSearchResults = true;
 
         this.fetchSearchResults(payload);
@@ -182,10 +190,10 @@ export class ItemList implements OnInit, OnChanges {
     private buildActiveFilters(): string[] {
         const filters: string[] = [];
         if (this.filterCategory) filters.push(this.filterCategory);
-        if (this.filterPipelineStatus) filters.push(`Status: ${this.filterPipelineStatus}`);
-        if (this.filterMyAudiobooks) filters.push('My Audiobooks');
-        if (this.filterPublished === true) filters.push('Published');
-        if (this.filterPublished === false) filters.push('Unpublished');
+        if (this.filterPipelineStatus) filters.push(`${this.tr('Status', 'Estado')}: ${this.filterPipelineStatus}`);
+        if (this.filterMyAudiobooks) filters.push(this.tr('My Audiobooks', 'Mis Audiolibros'));
+        if (this.filterPublished === true) filters.push(this.tr('Published', 'Publicado'));
+        if (this.filterPublished === false) filters.push(this.tr('Unpublished', 'Sin publicar'));
         return filters;
     }
 
@@ -215,7 +223,7 @@ export class ItemList implements OnInit, OnChanges {
 
         if (section) {
             this.searchQuery = '';
-            this.searchResultPrefix = 'Section';
+            this.searchResultPrefix = this.tr('Section', 'Sección');
             this.searchResultLabel = section;
             this.forceShowSearchResults = true;
             this.fetchSearchResults({
@@ -229,8 +237,8 @@ export class ItemList implements OnInit, OnChanges {
 
         if (authorId) {
             this.searchQuery = '';
-            this.searchResultPrefix = 'Author';
-            this.searchResultLabel = 'selected author';
+            this.searchResultPrefix = this.tr('Author', 'Autor');
+            this.searchResultLabel = this.tr('selected author', 'autor seleccionado');
             this.forceShowSearchResults = true;
             this.fetchSearchResults({
                 authorIds: [authorId],
@@ -245,7 +253,7 @@ export class ItemList implements OnInit, OnChanges {
             this.searchQuery = '';
             this.filterCategory = category;
             this.activeFilters = this.buildActiveFilters();
-            this.searchResultPrefix = 'Category';
+            this.searchResultPrefix = this.tr('Category', 'Categoría');
             this.searchResultLabel = category;
             this.forceShowSearchResults = true;
             this.fetchSearchResults({

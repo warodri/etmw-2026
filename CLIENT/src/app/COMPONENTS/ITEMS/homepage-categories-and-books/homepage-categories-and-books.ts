@@ -3,6 +3,7 @@ import { AudiobookModel } from '../../../models/audiobook';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { UtilsService } from '../../../utils/utils-service';
 import { Router } from '@angular/router';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-homepage-categories-and-books',
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
 export class HomepageCategoriesAndBooks implements OnInit {
 
     @Input() section: 'for-you' | 'trending' | null = null;
+    language: 'en' | 'es' = 'en';
 
     audiobooks = signal<AudiobookModel[]>([]);
 
@@ -23,7 +25,12 @@ export class HomepageCategoriesAndBooks implements OnInit {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         this.loadAudiobooks();
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
     loadAudiobooks() {

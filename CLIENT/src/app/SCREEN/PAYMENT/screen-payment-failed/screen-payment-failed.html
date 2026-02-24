@@ -15,23 +15,23 @@
                     
                     <!-- Error Message -->
                     <h1 class="text-5xl fw-bold mb-3 text-light">
-                        Payment Failed
+                        {{ tr('Payment Failed', 'Pago Fallido') }}
                     </h1>
                     
                     <p class="text-gray-400 text-lg mb-4 mx-auto" style="max-width: 500px;">
-                        We couldn't process your payment. Don't worry, your card hasn't been charged.
+                        {{ tr("We couldn't process your payment. Don't worry, your card hasn't been charged.", 'No pudimos procesar tu pago. No te preocupes, tu tarjeta no fue cobrada.') }}
                     </p>
                     
                     <!-- Common Reasons -->
                     <div class="bg-slate-900 rounded-4 p-4 mb-4 text-start">
-                        <h3 class="fw-bold mb-3 text-light">Common Reasons</h3>
+                        <h3 class="fw-bold mb-3 text-light">{{ tr('Common Reasons', 'Razones Comunes') }}</h3>
                         
                         <div class="d-flex align-items-start mb-3">
                             <i class="bi bi-credit-card text-danger me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Insufficient Funds</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Insufficient Funds', 'Fondos Insuficientes') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    Your card may not have enough balance
+                                    {{ tr('Your card may not have enough balance', 'Tu tarjeta puede no tener saldo suficiente') }}
                                 </p>
                             </div>
                         </div>
@@ -39,9 +39,9 @@
                         <div class="d-flex align-items-start mb-3">
                             <i class="bi bi-shield-x text-danger me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Security Block</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Security Block', 'Bloqueo de Seguridad') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    Your bank may have blocked the transaction for security
+                                    {{ tr('Your bank may have blocked the transaction for security', 'Tu banco pudo haber bloqueado la transacción por seguridad') }}
                                 </p>
                             </div>
                         </div>
@@ -49,9 +49,9 @@
                         <div class="d-flex align-items-start">
                             <i class="bi bi-exclamation-triangle text-danger me-3" style="font-size: 1.5rem;"></i>
                             <div>
-                                <h5 class="fw-semibold text-light mb-1">Incorrect Details</h5>
+                                <h5 class="fw-semibold text-light mb-1">{{ tr('Incorrect Details', 'Datos Incorrectos') }}</h5>
                                 <p class="text-gray-400 mb-0 small">
-                                    Check your card number, expiry date, or CVV
+                                    {{ tr('Check your card number, expiry date, or CVV', 'Verifica el número de tarjeta, fecha de vencimiento o CVV') }}
                                 </p>
                             </div>
                         </div>
@@ -61,7 +61,7 @@
                     <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-light mb-4">
                         <i class="bi bi-lightbulb me-2"></i>
                         <small>
-                            Try using a different payment method or contact your bank
+                            {{ tr('Try using a different payment method or contact your bank', 'Prueba con otro método de pago o contacta a tu banco') }}
                         </small>
                     </div>
                     
@@ -76,7 +76,7 @@
                         -->
                         <a href="https://entertomyworld.com" class="btn btn-secondary btn-lg rounded-pill px-5">
                             <i class="bi bi-headset me-2"></i>
-                            Contact Support
+                            {{ tr('Contact Support', 'Contactar Soporte') }}
                         </a>
                     </div>
                     <!-- 
@@ -91,12 +91,12 @@
                     <!-- Footer Note -->
                     <p class="text-gray-400 small mt-4 mb-0">
                         <i class="bi bi-info-circle me-1"></i>
-                        No charges were made to your account
+                        {{ tr('No charges were made to your account', 'No se realizaron cargos en tu cuenta') }}
                     </p>
 
                     <div class="mt-4 text-center">
                         <button class="btn btn-primary btn-lg rounded-pill" (click)="goApp()">
-                            Home
+                            {{ tr('Home', 'Inicio') }}
                         </button>
                     </div>
                     

@@ -94,4 +94,8 @@ export class ScreenHome implements OnInit {
         this.router.navigate(['app/debate'])
     }
 
+    gotoUploadWork() {
+        this.router.navigate(['app/audiobooks/upload'])
+    }
+
 }

@@ -163,6 +163,12 @@
 
             </div>
 
+            <div class="pt-5 text-center">
+                <button class="btn btn-lg btn-primary rounded-pill" (click)="gotoUploadWork()">
+                    {{ tr('Upload your Work!', 'Sube tu Obra!') }}
+                </button>
+            </div>
+
             <div class="mt-5 text-center mb-5">
                 <h2 class="section-title">
                     {{ tr('How You Get Paid', 'Cómo Recibes Pagos') }}
@@ -177,18 +183,16 @@
 
             <!-- Latest Authors -->
             <div class="mt-5">
-
                 <div class="mt-4 rounded-4 p-4">
                     <div class="d-flex justify-content-center align-items-center gap-4">
                         <h2 class="m-0">
                             <b>{{ tr('Latest Authors', 'Autores Recientes') }}</b>
                         </h2>
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3 d-flex justify-content-center">
                         <app-authors></app-authors>
                     </div>
                 </div>
-
             </div>
 
         </div>

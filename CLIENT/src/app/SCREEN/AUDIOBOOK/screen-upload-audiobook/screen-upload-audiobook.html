@@ -8,9 +8,9 @@
         <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0">
             <app-mobile-header></app-mobile-header>
             <div class="p-3">
-                <h3>Nice to see you here, author</h3>
+                <h3>{{ tr('Nice to see you here', 'Qué bueno verte por aquí') }}</h3>
                 <div class="mt-3">
-                    You need to be logged in to continuw
+                    {{ tr('You need to be logged in to continue', 'Necesitas iniciar sesión para continuar') }}
                 </div>
             </div>
             <app-mobile-footer></app-mobile-footer>
@@ -26,7 +26,7 @@
                         <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
                     </button>
                     <h3 class="fw-bold m-0 flex-grow-1 text-center">
-                        Upload Your Book
+                        {{ tr('Upload Your Book', 'Sube Tu Libro') }}
                     </h3>
                     <div style="width: 32px;"></div>
                 </div>
@@ -53,7 +53,7 @@
                                 }
                             </div>
                             <div class="small" [class.text-primary]="currentStep() === step.number" [class.text-gray-400]="currentStep() !== step.number">
-                                {{ step.label }}
+                                {{ trStep(step.label) }}
                             </div>
                         </div>
                     }
@@ -66,9 +66,9 @@
                         <div class="position-absolute bg-secondary text-light rounded-circle pointer" style="right:-15px; top:-9px; width:30px; height:30px;" (click)="closeInstructionsStep1()">
                             <i class="bi bi-x-lg"></i>
                         </div>
-                        Upload your book, essay, or paper.
-                        We turn it into an audiobook and publish it on Enter To My World.
-                        Subscribers listen to your work, and you get paid every month.
+                        {{ tr('Upload your book, essay, or paper.', 'Sube tu libro, ensayo o artículo.') }}
+                        {{ tr('We turn it into an audiobook and publish it on Enter To My World.', 'Lo convertimos en audiolibro y lo publicamos en Enter To My World.') }}
+                        {{ tr('Subscribers listen to your work, and you get paid every month.', 'Los suscriptores escuchan tu obra y tú cobras cada mes.') }}
                     </div>
                 </div>
             }
@@ -87,10 +87,10 @@
                                 style="border-color: var(--color-primary) !important; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);">
                                 <div class="text-center mb-3">
                                     <div style="font-size: 3rem;">🎉</div>
-                                    <h5 class="fw-bold mb-2">Upload for FREE</h5>
+                                    <h5 class="fw-bold mb-2">{{ tr('Upload for FREE', 'Sube GRATIS') }}</h5>
                                     <p class="text-gray-400 mb-3">
-                                        Have a referral code from our partners? <br>
-                                        Upload your book at no cost!
+                                        {{ tr('Have a referral code from our partners?', '¿Tienes un código de referido de nuestros socios?') }} <br>
+                                        {{ tr('Upload your book at no cost!', '¡Sube tu libro sin costo!') }}
                                     </p>
                                 </div>
                                 <!-- 
@@ -98,19 +98,19 @@
                                 -->
                                 <div class="mb-3">
                                     <div class="d-flex gap-2">
-                                        <input type="text"  class="contact-input flex-grow-1" placeholder="Enter your code..." [(ngModel)]="referralCode" />
+                                        <input type="text"  class="contact-input flex-grow-1" [placeholder]="tr('Enter your code...', 'Ingresa tu código...')" [(ngModel)]="referralCode" />
                                         <button class="btn btn-primary rounded-pill px-4" [disabled]="!referralCode()" (click)="applyReferralCode()">
-                                            Apply
+                                            {{ tr('Apply', 'Aplicar') }}
                                         </button>
                                     </div>
                                     @if (referralChecked() && referralCodeObj) {
                                         @if (referralValid() === true) {
                                             <div class="small text-success p-2">
-                                                <i class="bi bi-check-circle-fill"></i> &nbsp;Code validated! Your upload is FREE.
+                                                <i class="bi bi-check-circle-fill"></i> &nbsp;{{ tr('Code validated! Your upload is FREE.', '¡Código validado! Tu carga es GRATIS.') }}
                                             </div>
                                         } @else if (referralValid() === false) {
                                             <div class="small text-danger p-2">
-                                                <i class="bi bi-x-circle-fill"></i> &nbsp;Invalid code. Please try again.
+                                                <i class="bi bi-x-circle-fill"></i> &nbsp;{{ tr('Invalid code. Please try again.', 'Código inválido. Inténtalo de nuevo.') }}
                                             </div>
                                         }
                                     }
@@ -120,11 +120,11 @@
                                 -->
                                 <div class="pt-2 text-center">
                                     <button class="btn btn-secondary rounded-pill px-4" (click)="showPartners()">
-                                        <i class="bi bi-building"></i> View Our Partners
+                                        <i class="bi bi-building"></i> {{ tr('View Our Partners', 'Ver Nuestros Socios') }}
                                     </button>
                                 </div>
                                 <div class="pt-2 small text-gray-400 text-center">
-                                    Max amount of pages: 250
+                                    {{ tr('Max amount of pages: 250', 'Cantidad máxima de páginas: 250') }}
                                 </div>
                             </div>
                             <!--
@@ -132,7 +132,7 @@
                             -->
                             <div class="pt-3 mb-5 text-center">
                                 <button class="btn btn-lg btn-secondary rounded-4 px-4 pt-3 pb-3" (click)="dontHaveReferralCodeSelected()">
-                                    ❌ &nbsp;I don't have a referral code
+                                    ❌ &nbsp;{{ tr("I don't have a referral code", 'No tengo código de referido') }}
                                 </button>
                             </div>
                         }
@@ -143,7 +143,7 @@
                         @if (showPricingOptions()) {
                             <div class="bg-secondary rounded-4 p-4">
                                 <h5 class="fw-bold mb-3">
-                                    Standard Pricing
+                                    {{ tr('Standard Pricing', 'Precios Estándar') }}
                                 </h5>                        
                                 <!-- 
                                     Pricing tiers 
@@ -171,14 +171,13 @@
                                     }
                                 </div>
                                 <div class="small text-gray-400 text-center">
-                                    <i class="bi bi-info-circle"></i> &nbsp;Pricing includes 
-                                    professional voice, curated expressions and quality control
+                                    <i class="bi bi-info-circle"></i> &nbsp;{{ tr('Pricing includes professional voice, curated expressions and quality control', 'El precio incluye voz profesional, expresiones curadas y control de calidad') }}
                                 </div>
                             </div>
                         }
                         <div class="text-center mt-4">
                             <button class="btn btn-primary btn-lg rounded-pill px-5" (click)="nextStep()">
-                                Continue <i class="bi bi-arrow-right"></i>
+                                {{ tr('Continue', 'Continuar') }} <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -188,7 +187,7 @@
                 @if (currentStep() === 2) {
                     <div class="mt-4 fade-in-up">
                         <h5 class="fw-bold mb-4">
-                            How would you like to submit your book?
+                            {{ tr('How would you like to submit your book?', '¿Cómo te gustaría enviar tu libro?') }}
                         </h5>
                         <!-- 
                             Digital Upload Option 
@@ -203,9 +202,9 @@
                                     <i class="bi bi-cloud-upload-fill" style="font-size: 2rem;"></i>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="fw-bold mb-1">Digital Upload</h6>
+                                    <h6 class="fw-bold mb-1">{{ tr('Digital Upload', 'Carga Digital') }}</h6>
                                     <p class="small text-gray-400 mb-0">
-                                        Upload PDF or TXT file directly (Fastest option)
+                                        {{ tr('Upload PDF or TXT file directly (Fastest option)', 'Sube un archivo PDF o TXT directamente (Opción más rápida)') }}
                                     </p>
                                 </div>
                                 @if (uploadMethod === 'digital') {
@@ -227,9 +226,9 @@
                                     <i class="bi bi-mailbox" style="font-size: 2rem;"></i>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="fw-bold mb-1">Mail Physical Copy</h6>
+                                    <h6 class="fw-bold mb-1">{{ tr('Mail Physical Copy', 'Enviar Copia Física') }}</h6>
                                     <p class="small text-gray-400 mb-0">
-                                        Send your book via mail (Argentina & UK only)
+                                        {{ tr('Send your book via mail (Argentina & UK only)', 'Envía tu libro por correo (solo Argentina y Reino Unido)') }}
                                     </p>
                                 </div>
                                 @if (uploadMethod === 'mail') {
@@ -245,12 +244,12 @@
                             <div class="bg-slate-800 rounded-4 p-4 mb-3">
                                 @if(!showMailingAddress()) {
                                     <div class="text-center">
-                                        Sorry. Mailing physical copies is not enabled right now.
+                                        {{ tr('Sorry. Mailing physical copies is not enabled right now.', 'Lo sentimos. El envío de copias físicas no está habilitado por ahora.') }}
                                     </div>
                                 } @else {
     
                                     <h3 class="fw-bold mb-3">
-                                        Mailing Addresses
+                                        {{ tr('Mailing Addresses', 'Direcciones de Envío') }}
                                     </h3>
                                     
                                     <div class="mb-3">
@@ -292,7 +291,7 @@
         
                                 <div class="alert bg-slate-900 border border-warning text-warning mt-3 mb-0" role="alert">
                                     <i class="bi bi-exclamation-triangle-fill"></i>
-                                    &nbsp;<strong>Note:</strong> &nbsp;Processing time for mailed books is 5-7 business days after receipt.
+                                    &nbsp;<strong>{{ tr('Note:', 'Nota:') }}</strong> &nbsp;{{ tr('Processing time for mailed books is 5-7 business days after receipt.', 'El tiempo de procesamiento para libros enviados por correo es de 5 a 7 días hábiles después de recibirlos.') }}
                                 </div>
                             </div>
                         }
@@ -305,9 +304,9 @@
                                 @if (!uploadedFile) {
                                     <div class="py-4">
                                         <div class="mb-3" style="font-size: 3rem;">📄</div>
-                                        <h6 class="fw-bold mb-2">Upload Your Book</h6>
+                                        <h6 class="fw-bold mb-2">{{ tr('Upload Your Book', 'Sube Tu Libro') }}</h6>
                                         <p class="small text-gray-400 mb-3">
-                                            Supported formats: PDF, TXT (Max 100MB)
+                                            {{ tr('Supported formats: PDF, TXT (Max 100MB)', 'Formatos compatibles: PDF, TXT (Máx. 100MB)') }}
                                         </p>
                                         <input type="file" 
                                                #fileInput 
@@ -315,7 +314,7 @@
                                                (change)="onFileSelected($event)"
                                                style="display: none;">
                                         <button class="btn btn-primary rounded-pill px-5" (click)="fileInput.click()">
-                                            <i class="bi bi-upload"></i> Choose File
+                                            <i class="bi bi-upload"></i> {{ tr('Choose File', 'Elegir Archivo') }}
                                         </button>
                                     </div>
                                 } @else {
@@ -337,12 +336,12 @@
         
                         <div class="d-flex gap-3">
                             <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
-                                <i class="bi bi-arrow-left"></i> Back
+                                <i class="bi bi-arrow-left"></i> {{ tr('Back', 'Atrás') }}
                             </button>
                             <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" 
                                     [disabled]="!canProceedFromStep2()"
                                     (click)="nextStep()">
-                                Continue <i class="bi bi-arrow-right"></i>
+                                {{ tr('Continue', 'Continuar') }} <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -352,15 +351,15 @@
                 @if (currentStep() === 3) {
                     <div class="mt-4 fade-in-up">
                         <h5 class="fw-bold mb-4">
-                            Upload Your Book Cover
+                            {{ tr('Upload Your Book Cover', 'Sube la Portada de Tu Libro') }}
                         </h5>
                         <div class="bg-slate-800 rounded-4 p-4 text-center mb-3">
                             @if (!coverFile) {
                                 <div class="py-4">
                                     <div class="mb-3" style="font-size: 3rem;">🖼️</div>
-                                    <h6 class="fw-bold mb-2">Add a Cover Image</h6>
+                                    <h6 class="fw-bold mb-2">{{ tr('Add a Cover Image', 'Agrega una Imagen de Portada') }}</h6>
                                     <p class="small text-gray-400 mb-3">
-                                        Supported formats: JPG, PNG (Recommended 1400x1400)
+                                        {{ tr('Supported formats: JPG, PNG (Recommended 1400x1400)', 'Formatos compatibles: JPG, PNG (Recomendado 1400x1400)') }}
                                     </p>
                                     <input type="file"
                                            #coverInput
@@ -368,7 +367,7 @@
                                            (change)="onCoverSelected($event)"
                                            style="display: none;">
                                     <button class="btn btn-primary rounded-pill px-5" (click)="coverInput.click()">
-                                        <i class="bi bi-upload"></i> Choose Cover
+                                        <i class="bi bi-upload"></i> {{ tr('Choose Cover', 'Elegir Portada') }}
                                     </button>
                                 </div>
                             } @else {
@@ -389,12 +388,12 @@
     
                         <div class="d-flex gap-3">
                             <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
-                                <i class="bi bi-arrow-left"></i> Back
+                                <i class="bi bi-arrow-left"></i> {{ tr('Back', 'Atrás') }}
                             </button>
                             <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1"
                                     [disabled]="!canProceedFromStep3()"
                                     (click)="nextStep()">
-                                Continue <i class="bi bi-arrow-right"></i>
+                                {{ tr('Continue', 'Continuar') }} <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -404,20 +403,20 @@
                 @if (currentStep() === 4) {
                     <div class="mt-4 fade-in-up">                
                         <h3 class="fw-bold mb-4">
-                            Configure Your Audiobook
+                            {{ tr('Configure Your Audiobook', 'Configura Tu Audiolibro') }}
                         </h3>
                         <!-- 
                             Source Language 
                         -->
                         <div class="mb-4">
                             <label class="contact-label">
-                                Source Language
+                                {{ tr('Source Language', 'Idioma de Origen') }}
                             </label>
                             <div class="small text-gray-400 mt-1 mb-1">
-                                The language your book is written in
+                                {{ tr('The language your book is written in', 'El idioma en el que está escrito tu libro') }}
                             </div>
                             <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage" (change)="calculateTranslationCost()">
-                                <option value="">Select language...</option>
+                                <option value="">{{ tr('Select language...', 'Selecciona un idioma...') }}</option>
                                 @for (lang of availableLanguages; track lang.code) {
                                     <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
                                 }
@@ -428,13 +427,13 @@
                         -->
                         <div class="mb-4">
                             <label class="contact-label">
-                                Target Language (Optional)
+                                {{ tr('Target Language (Optional)', 'Idioma de Destino (Opcional)') }}
                             </label>
                             <div class="small text-gray-400 mt-1 mb-1">
-                                Translate and narrate in a different language
+                                {{ tr('Translate and narrate in a different language', 'Traduce y narra en otro idioma') }}
                             </div>
                             <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage" (change)="calculateTranslationCost()">
-                                <option value="">Same as source</option>
+                                <option value="">{{ tr('Same as source', 'Igual que origen') }}</option>
                                 @for (lang of availableLocales; track lang.code) {
                                     <option [value]="lang.code">{{ getLocaleLabel(lang.code) }}</option>
                                 }
@@ -443,7 +442,7 @@
                                 @if (!translation.useFixedPrice) {
                                     <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">
                                         <i class="bi bi-info-circle-fill"></i> 
-                                        Translation adds +{{ selectedCurrency() }}{{ TRANSLATION_PRICE_PER_WORD }} per word
+                                        {{ tr('Translation adds', 'La traducción agrega') }} +{{ selectedCurrency() }}{{ TRANSLATION_PRICE_PER_WORD }} {{ tr('per word', 'por palabra') }}
                                     </div>
                                 }
                             }
@@ -453,10 +452,10 @@
                         -->
                         <div class="mb-4">
                             <h3>
-                                Voices
+                                {{ tr('Voices', 'Voces') }}
                             </h3>
                             <p class="text-gray-400 mb-3">
-                                Pick a voice for your audiobook
+                                {{ tr('Pick a voice for your audiobook', 'Elige una voz para tu audiolibro') }}
                             </p>
                             <div class="row g-3" [class.included-voices-limit]="!includedVoicesShowMore()">
                                 @for (voice of availableVoices(); track voice.id) {
@@ -477,7 +476,7 @@
                                             </div>
                                             @if (voice.previewUrl) {
                                                 <button class="btn btn-sm btn-secondary rounded-pill w-100" (click)="playVoiceSample($event, voice.previewUrl)">
-                                                    <i class="bi bi-play-fill"></i> Preview
+                                                    <i class="bi bi-play-fill"></i> {{ tr('Preview', 'Escuchar') }}
                                                 </button>
                                             }
                                         </div>
@@ -487,7 +486,7 @@
                             @if (!includedVoicesShowMore()) {
                                 <div class="mt-4 p-3 text-center">
                                     <button class="btn btn-secondary rounded-pill" (click)="toggleShowMoreIncludedVouces()">
-                                        Show more voices
+                                        {{ tr('Show more voices', 'Mostrar más voces') }}
                                     </button>
                                 </div>
                             }
@@ -497,7 +496,7 @@
                             @if (!premiumVoicesShowMore()) {
                                 <div class="text-center mt-3">
                                     <button class="btn btn-primary rounded-pill" (click)="toggleShowPremiumVoices()">
-                                        <i class="bi bi-stars"></i> View Premium Voices 
+                                        <i class="bi bi-stars"></i> {{ tr('View Premium Voices', 'Ver Voces Premium') }} 
                                         (+{{ selectedCurrency() }}{{ SELECTED_PREMIUM_VOICE_COST() }})
                                     </button>
                                 </div>
@@ -507,9 +506,9 @@
                             -->
                             @if (showPremiumVoices()) {
                                 <div class="mt-4 mb-5 p-4 bg-slate-800 rounded-4 border-primary-2x">                        
-                                    <h3>Premium Voices</h3>
+                                    <h3>{{ tr('Premium Voices', 'Voces Premium') }}</h3>
                                     <p class="text-gray-400 mb-3">
-                                        You can pick any of these voices at extra cost
+                                        {{ tr('You can pick any of these voices at extra cost', 'Puedes elegir cualquiera de estas voces con costo adicional') }}
                                     </p>
                                     <div class="row g-3" [class.included-voices-limit]="!premiumVoicesShowMore()">
                                         @for (voice of premiumVoices(); track voice.id) {
@@ -530,7 +529,7 @@
                                                     </div>
                                                     @if (voice.previewUrl) {
                                                         <button class="btn btn-sm btn-secondary rounded-pill w-100" (click)="playVoiceSample($event, voice.previewUrl)">
-                                                            <i class="bi bi-play-fill"></i> Preview
+                                                            <i class="bi bi-play-fill"></i> {{ tr('Preview', 'Escuchar') }}
                                                         </button>
                                                     }
                                                 </div>
@@ -540,7 +539,7 @@
                                     @if (!premiumVoicesShowMore()) {
                                         <div class="mt-4 text-center">
                                             <button class="btn btn-secondary rounded-pill" (click)="toggleShowMorePremiumVouces()">
-                                                Show more voices
+                                                {{ tr('Show more voices', 'Mostrar más voces') }}
                                             </button>
                                         </div>
                                     }
@@ -555,7 +554,7 @@
                             <div class="mt-4 bg-secondary rounded-4 p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h3>
-                                        Voice Expression
+                                        {{ tr('Voice Expression', 'Expresión de Voz') }}
                                     </h3>
                                     <span class="rounded-3 bg-slate-800 text-warning px-3 py-1">
                                         +{{ selectedCurrency() }}{{ SELECTED_VOICE_EXPRESSION_COST() }}
@@ -564,10 +563,10 @@
                                 <div class="mt-3 form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="expressionToggle" [(ngModel)]="bookConfig.useExpression">
                                     <label class="form-check-label" for="expressionToggle">
-                                        Enable emotional expression and natural intonation
+                                        {{ tr('Enable emotional expression and natural intonation', 'Habilitar expresión emocional y entonación natural') }}
                                     </label>
                                     <div class="text-gray-400 mt-2">
-                                        Creates more dynamic and engaging narration with varied emotions
+                                        {{ tr('Creates more dynamic and engaging narration with varied emotions', 'Crea una narración más dinámica y atractiva con emociones variadas') }}
                                     </div>
                                 </div>
                             </div>
@@ -579,7 +578,7 @@
                         <div class="mb-4">
                             <button class="btn btn-link text-primary p-0" (click)="showAdvanced = !showAdvanced">
                                 <i class="bi" [class.bi-chevron-down]="!showAdvanced" [class.bi-chevron-up]="showAdvanced"></i>
-                                Advanced Options
+                                {{ tr('Advanced Options', 'Opciones Avanzadas') }}
                             </button>
                             
                             @if (showAdvanced) {
@@ -587,38 +586,38 @@
                                     <!-- Speech Rate -->
                                     <div class="mb-4">
                                         <label class="contact-label">
-                                            Speech Rate
+                                            {{ tr('Speech Rate', 'Velocidad de Habla') }}
                                         </label>
                                         <select class="contact-input" [(ngModel)]="bookConfig.speechRate">
-                                            <option value="0.75">Slow (0.75x)</option>
-                                            <option value="1.0" selected>Normal (1.0x)</option>
-                                            <option value="1.25">Fast (1.25x)</option>
+                                            <option value="0.75">{{ tr('Slow (0.75x)', 'Lento (0.75x)') }}</option>
+                                            <option value="1.0" selected>{{ tr('Normal (1.0x)', 'Normal (1.0x)') }}</option>
+                                            <option value="1.25">{{ tr('Fast (1.25x)', 'Rápido (1.25x)') }}</option>
                                         </select>
                                     </div>
         
                                     <!-- Stability -->
                                     <div class="mb-4">
                                         <label class="contact-label">
-                                            Voice Stability
+                                            {{ tr('Voice Stability', 'Estabilidad de Voz') }}
                                         </label>
                                         <input type="range" class="form-range" min="0" max="100" [(ngModel)]="bookConfig.stability">
                                         <div class="d-flex justify-content-between small text-gray-400">
-                                            <span>More Variable</span>
+                                            <span>{{ tr('More Variable', 'Más Variable') }}</span>
                                             <span>{{ bookConfig.stability }}%</span>
-                                            <span>More Stable</span>
+                                            <span>{{ tr('More Stable', 'Más Estable') }}</span>
                                         </div>
                                     </div>
         
                                     <!-- Clarity -->
                                     <div class="mb-4">
                                         <label class="contact-label">
-                                            Clarity + Similarity
+                                            {{ tr('Clarity + Similarity', 'Claridad + Similitud') }}
                                         </label>
                                         <input type="range" class="form-range" min="0" max="100" [(ngModel)]="bookConfig.clarity">
                                         <div class="d-flex justify-content-between small text-gray-400">
-                                            <span>More Similar</span>
+                                            <span>{{ tr('More Similar', 'Más Similar') }}</span>
                                             <span>{{ bookConfig.clarity }}%</span>
-                                            <span>More Clear</span>
+                                            <span>{{ tr('More Clear', 'Más Clara') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -630,37 +629,37 @@
                         -->
                         <div class="bg-slate-800 rounded-4 p-4 mb-4">                    
                             <h3 class="fw-bold mb-3">
-                                Book Information
+                                {{ tr('Book Information', 'Información del Libro') }}
                             </h3>                    
                             <div class="mb-3">
-                                <label class="text-gray-400">Title</label>
+                                <label class="text-gray-400">{{ tr('Title', 'Título') }}</label>
                                 <input type="text" 
                                        class="contact-input"
-                                       placeholder="Enter book title..."
+                                       [placeholder]="tr('Enter book title...', 'Ingresa el título del libro...')"
                                        [(ngModel)]="bookConfig.title">
                             </div>
                             <div class="mb-3">
-                                <label class="text-gray-400">Author Name</label>
+                                <label class="text-gray-400">{{ tr('Author Name', 'Nombre del Autor') }}</label>
                                 <input type="text" 
                                        class="contact-input"
-                                       placeholder="Enter author name..."
+                                       [placeholder]="tr('Enter author name...', 'Ingresa el nombre del autor...')"
                                        [(ngModel)]="bookConfig.authorName">
                             </div>
                             <div class="mb-3">
-                                <label class="text-gray-400">Description</label>
+                                <label class="text-gray-400">{{ tr('Description', 'Descripción') }}</label>
                                 <textarea class="contact-input"
                                           rows="3"
-                                          placeholder="Brief description of your book..."
+                                          [placeholder]="tr('Brief description of your book...', 'Breve descripción de tu libro...')"
                                           [(ngModel)]="bookConfig.description"></textarea>
                             </div>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center gap-3">
                                     <label class="contact-label">
-                                        Categories <span class="text-gray-400">(Select up to 3)</span>
+                                        {{ tr('Categories', 'Categorías') }} <span class="text-gray-400">({{ tr('Select up to 3', 'Selecciona hasta 3') }})</span>
                                     </label>
                                     @if (!showAllCategories()) {
                                         <button class="btn btn-sm btn-dark rounded-pill px-3" (click)="toggleShowAllCategories()">
-                                            Show all
+                                            {{ tr('Show all', 'Mostrar todo') }}
                                         </button>
                                     }    
                                 </div>
@@ -682,39 +681,39 @@
                         -->
                         <div class="bg-secondary rounded-4 p-4 mb-4">
                             <h3 class="fw-bold mb-3">
-                                Cost Summary
+                                {{ tr('Cost Summary', 'Resumen de Costos') }}
                             </h3>
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-gray-400">Base Price</span>
+                                <span class="text-gray-400">{{ tr('Base Price', 'Precio Base') }}</span>
                                 <span class="fw-semibold">${{ calculateBasePrice() }}</span>
                             </div>
                             @if (bookConfig.useExpression) {
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-gray-400">Voice Expression</span>
+                                    <span class="text-gray-400">{{ tr('Voice Expression', 'Expresión de Voz') }}</span>
                                     <span class="fw-semibold">+${{ selectedCurrency() }}{{ SELECTED_VOICE_EXPRESSION_COST() }}</span>
                                 </div>
                             }
                             @if (isVoiceProfessional()) {
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-gray-400">Premium Voice</span>
+                                    <span class="text-gray-400">{{ tr('Premium Voice', 'Voz Premium') }}</span>
                                     <span class="fw-semibold">+$20</span>
                                 </div>
                             }
                             @if (isTranslationEnabled()) {
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-gray-400">Translation</span>
+                                    <span class="text-gray-400">{{ tr('Translation', 'Traducción') }}</span>
                                     <span class="fw-semibold">+{{ selectedCurrency() }}{{ totalTranslation()}}</span>
                                 </div>
                             }
                             <hr style="border-color: rgba(255,255,255,0.1);">
                             <div class="d-flex justify-content-between">
-                                <span class="fw-bold">Total</span>
+                                <span class="fw-bold">{{ tr('Total', 'Total') }}</span>
                                 <span class="fw-bold text-primary text-2xl">${{ calculateTotalPrice() }}</span>
                             </div>
                             @if (referralValid()) {
                                 <div class="text-center mt-3">
                                     <span class="badge bg-success px-4 py-2">
-                                        <i class="bi bi-check-circle-fill"></i> FREE with referral code!
+                                        <i class="bi bi-check-circle-fill"></i> {{ tr('FREE with referral code!', '¡GRATIS con código de referido!') }}
                                     </span>
                                 </div>
                             }
@@ -722,10 +721,10 @@
         
                         <div class="d-flex gap-3">
                             <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
-                                <i class="bi bi-arrow-left"></i> Back
+                                <i class="bi bi-arrow-left"></i> {{ tr('Back', 'Atrás') }}
                             </button>
                             <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" [disabled]="!canProceedFromStep4()" (click)="nextStep()">
-                                Review <i class="bi bi-arrow-right"></i>
+                                {{ tr('Review', 'Revisar') }} <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </div>
@@ -735,14 +734,14 @@
                 @if (currentStep() === 5) {
                     <div class="mt-4 fade-in-up">
                         <h3 class="fw-bold mb-4">
-                            Review Your Submission
+                            {{ tr('Review Your Submission', 'Revisa Tu Envío') }}
                         </h3>
                         <!-- 
                             Upload Summary 
                         -->
                         <div class="bg-secondary rounded-4 p-4 mb-3">
                             <h3 class="fw-semibold mb-3">
-                                Upload Method
+                                {{ tr('Upload Method', 'Método de Envío') }}
                             </h3>
                             @if (uploadMethod === 'digital') {
                                 <div class="d-flex align-items-center gap-3">
@@ -756,8 +755,8 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <i class="bi bi-mailbox text-primary" style="font-size: 2rem;"></i>
                                     <div>
-                                        <div class="fw-semibold">Physical Mail</div>
-                                        <div class="small text-gray-400">Please send to the provided address</div>
+                                        <div class="fw-semibold">{{ tr('Physical Mail', 'Correo Físico') }}</div>
+                                        <div class="small text-gray-400">{{ tr('Please send to the provided address', 'Por favor envía al domicilio indicado') }}</div>
                                     </div>
                                 </div>
                             }
@@ -768,7 +767,7 @@
                         -->
                         <div class="bg-secondary rounded-4 p-4 mb-3">
                             <h3 class="fw-semibold mb-3">
-                                Cover Image
+                                {{ tr('Cover Image', 'Imagen de Portada') }}
                             </h3>
                             @if (coverFile) {
                                 <div class="d-flex align-items-center gap-3">
@@ -780,7 +779,7 @@
                                 </div>
                             } @else {
                                 <div class="small text-gray-400">
-                                    No cover selected
+                                    {{ tr('No cover selected', 'No se seleccionó portada') }}
                                 </div>
                             }
                         </div>
@@ -790,19 +789,19 @@
                         -->
                         <div class="bg-secondary rounded-4 p-4 mb-3">
                             <h3 class="fw-semibold mb-3">
-                                Book Details
+                                {{ tr('Book Details', 'Detalles del Libro') }}
                             </h3>
                             <div class="row g-3">
                                 <div class="col-6">
-                                    <div class="small text-gray-400">Title</div>
+                                    <div class="small text-gray-400">{{ tr('Title', 'Título') }}</div>
                                     <div class="fw-semibold">{{ bookConfig.title }}</div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="small text-gray-400">Author</div>
+                                    <div class="small text-gray-400">{{ tr('Author', 'Autor') }}</div>
                                     <div class="fw-semibold">{{ bookConfig.authorName }}</div>
                                 </div>
                                 <div class="col-12">
-                                    <div class="small text-gray-400">Categories</div>
+                                    <div class="small text-gray-400">{{ tr('Categories', 'Categorías') }}</div>
                                     <div class="d-flex gap-2 mt-1">
                                         @for (cat of bookConfig.categories; track cat) {
                                             <span class="bg-primary px-3 py-1 rounded-3">{{ cat }}</span>
@@ -817,27 +816,27 @@
                         -->
                         <div class="bg-secondary rounded-4 p-4 mb-3">
                             <h3 class="fw-semibold mb-3">
-                                Voice Configuration
+                                {{ tr('Voice Configuration', 'Configuración de Voz') }}
                             </h3>
                             <div class="row g-3">
                                 <div class="col-6">
-                                    <div class="small text-gray-400">Language</div>
+                                    <div class="small text-gray-400">{{ tr('Language', 'Idioma') }}</div>
                                     <div class="fw-semibold">{{ getLanguageName(bookConfig.sourceLanguage) }}</div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="small text-gray-400">Voice</div>
+                                    <div class="small text-gray-400">{{ tr('Voice', 'Voz') }}</div>
                                     <div class="fw-semibold">{{ bookConfig.voiceName }}</div>
                                 </div>
                                 <div class="col-12">
                                     <div class="d-flex gap-2">
                                         @if (bookConfig.useExpression) {
                                             <span class="bg-slate-800 px-3 py-1 rounded-3">
-                                                <i class="bi bi-emoji-smile"></i> Expression Enabled
+                                                <i class="bi bi-emoji-smile"></i> {{ tr('Expression Enabled', 'Expresión Activada') }}
                                             </span>
                                         }
                                         @if (isTranslationEnabled()) {
                                             <span class="bg-slate-800 px-3 py-1 rounded-3">
-                                                <i class="bi bi-translate"></i> Translating to {{ getLanguageName(bookConfig.targetLanguage) }}
+                                                <i class="bi bi-translate"></i> {{ tr('Translating to', 'Traduciendo a') }} {{ getLanguageName(bookConfig.targetLanguage) }}
                                             </span>
                                         }
                                     </div>
@@ -852,20 +851,20 @@
                              [class.border-success]="referralValid()"
                              [class.border-primary]="!referralValid()">
                             <h3 class="fw-bold mb-2">
-                                Total Cost
+                                {{ tr('Total Cost', 'Costo Total') }}
                             </h3>
                             @if (referralValid() && calculateTotalPrice() === 0) {
-                                <div class="text-success" style="font-size: 3rem; font-weight: 700;">FREE</div>
-                                <div class="small text-gray-400">Referral code applied</div>
+                                <div class="text-success" style="font-size: 3rem; font-weight: 700;">{{ tr('FREE', 'GRATIS') }}</div>
+                                <div class="small text-gray-400">{{ tr('Referral code applied', 'Código de referido aplicado') }}</div>
                             } @else if (referralValid() && calculateTotalPrice() > 0) {
                                 <div class="text-warning" style="font-size: 3rem; font-weight: 700;">${{ calculateTotalPrice() }}</div>
                                 <div class="small text-gray-400">
-                                    <div class="text-success mb-1">Base price: FREE (Referral applied)</div>
-                                    <div>Premium features: ${{ calculateTotalPrice() }}</div>
+                                    <div class="text-success mb-1">{{ tr('Base price: FREE (Referral applied)', 'Precio base: GRATIS (Referido aplicado)') }}</div>
+                                    <div>{{ tr('Premium features:', 'Funciones premium:') }} ${{ calculateTotalPrice() }}</div>
                                 </div>
                             } @else {
                                 <div class="text-primary" style="font-size: 3rem; font-weight: 700;">${{ calculateTotalPrice() }}</div>
-                                <div class="small text-gray-400">One-time payment</div>
+                                <div class="small text-gray-400">{{ tr('One-time payment', 'Pago único') }}</div>
                             }
                         </div>
         
@@ -879,20 +878,20 @@
                                        id="termsCheck"
                                        [(ngModel)]="acceptedTerms">
                                 <label class="form-check-label" for="termsCheck">
-                                    I have read and agree to the 
-                                    <a href="#" class="text-primary" (click)="showTerms($event)">Terms & Conditions</a>
+                                    {{ tr('I have read and agree to the', 'He leído y acepto los') }} 
+                                    <a href="#" class="text-primary" (click)="showTerms($event)">{{ tr('Terms & Conditions', 'Términos y Condiciones') }}</a>
                                 </label>
                             </div>
                         </div>
         
                         <div class="d-flex gap-3">
                             <button class="btn btn-secondary btn-lg rounded-pill px-5" (click)="prevStep()">
-                                <i class="bi bi-arrow-left"></i> Back
+                                <i class="bi bi-arrow-left"></i> {{ tr('Back', 'Atrás') }}
                             </button>
                             <button class="btn btn-primary btn-lg rounded-pill px-5 flex-grow-1" 
                                     [disabled]="!acceptedTerms"
                                     (click)="submitUpload()">
-                                <i class="bi bi-check-circle-fill"></i> Submit
+                                <i class="bi bi-check-circle-fill"></i> {{ tr('Submit', 'Enviar') }}
                             </button>
                         </div>
                     </div>
@@ -902,21 +901,21 @@
                 @if (currentStep() === 6) {
                     <div class="mt-5 text-center fade-in-up">
                         <div class="mb-4" style="font-size: 5rem;">✅</div>
-                        <h3 class="fw-bold mb-3">Thank You!</h3>
+                        <h3 class="fw-bold mb-3">{{ tr('Thank You!', '¡Gracias!') }}</h3>
                         <p class="text-gray-400 mb-4" style="max-width: 500px; margin: 0 auto;">
-                            Your book has been submitted successfully. Our team of expert humans will personally review and process your audiobook to ensure the highest quality output.
+                            {{ tr('Your book has been submitted successfully. Our team of expert humans will personally review and process your audiobook to ensure the highest quality output.', 'Tu libro se envió con éxito. Nuestro equipo de expertos revisará y procesará tu audiolibro para asegurar la mejor calidad posible.') }}
                         </p>
                         
                         <div class="bg-slate-800 rounded-4 p-4 mb-4" style="max-width: 500px; margin: 0 auto;">
-                            <h6 class="fw-bold mb-3">What Happens Next?</h6>
+                            <h6 class="fw-bold mb-3">{{ tr('What Happens Next?', '¿Qué Sigue?') }}</h6>
                             <div class="d-flex align-items-start gap-3 mb-3 text-start">
                                 <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
                                      style="width: 32px; height: 32px; font-size: 0.875rem;">
                                     1
                                 </div>
                                 <div>
-                                    <div class="fw-semibold small">Quality Check</div>
-                                    <div class="small text-gray-400">Our team reviews your submission</div>
+                                    <div class="fw-semibold small">{{ tr('Quality Check', 'Control de Calidad') }}</div>
+                                    <div class="small text-gray-400">{{ tr('Our team reviews your submission', 'Nuestro equipo revisa tu envío') }}</div>
                                 </div>
                             </div>
                             <div class="d-flex align-items-start gap-3 mb-3 text-start">
@@ -925,8 +924,8 @@
                                     2
                                 </div>
                                 <div>
-                                    <div class="fw-semibold small">AI Processing</div>
-                                    <div class="small text-gray-400">Your book is converted to audio</div>
+                                    <div class="fw-semibold small">{{ tr('AI Processing', 'Procesamiento con IA') }}</div>
+                                    <div class="small text-gray-400">{{ tr('Your book is converted to audio', 'Tu libro se convierte en audio') }}</div>
                                 </div>
                             </div>
                             <div class="d-flex align-items-start gap-3 text-start">
@@ -935,8 +934,8 @@
                                     3
                                 </div>
                                 <div>
-                                    <div class="fw-semibold small">Publication</div>
-                                    <div class="small text-gray-400">We'll notify you via app & email</div>
+                                    <div class="fw-semibold small">{{ tr('Publication', 'Publicación') }}</div>
+                                    <div class="small text-gray-400">{{ tr("We'll notify you via app & email", 'Te notificaremos por la app y por email') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -944,10 +943,10 @@
                         @if (showNextStepsAfterUploadingBook()) {
                             <div class="d-flex gap-3 justify-content-center">
                                 <button class="btn btn-secondary rounded-pill px-5" (click)="goToMyBooks()">
-                                    View My Books
+                                    {{ tr('View My Books', 'Ver Mis Libros') }}
                                 </button>
                                 <button class="btn btn-primary rounded-pill px-5" (click)="uploadAnother()">
-                                    Upload Another
+                                    {{ tr('Upload Another', 'Subir Otro') }}
                                 </button>
                             </div>
                         }
@@ -970,12 +969,12 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" (click)="$event.stopPropagation()">
             <div class="modal-content bg-secondary">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title text-light fw-bold">Our Partners</h5>
+                    <h5 class="modal-title text-light fw-bold">{{ tr('Our Partners', 'Nuestros Socios') }}</h5>
                     <button type="button" class="btn-close btn-close-white" (click)="closePartners()"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-gray-400 mb-4">
-                        Get a referral code from any of our trusted partners to upload your book for free!
+                        {{ tr('Get a referral code from any of our trusted partners to upload your book for free!', 'Obtén un código de referido de cualquiera de nuestros socios de confianza para subir tu libro gratis.') }}
                     </p>
                     
                     @for (partner of partners(); track partner.name) {
@@ -1011,7 +1010,7 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" (click)="$event.stopPropagation()">
             <div class="modal-content bg-secondary">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold text-light">Terms & Conditions</h5>
+                    <h5 class="modal-title fw-bold text-light">{{ tr('Terms & Conditions', 'Términos y Condiciones') }}</h5>
                     <button type="button" class="btn-close btn-close-white" (click)="closeTerms()"></button>
                 </div>
                 <div class="modal-body">
@@ -1019,7 +1018,7 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-primary rounded-pill px-4" (click)="acceptTermsFromModal()">
-                        I Agree
+                        {{ tr('I Agree', 'Estoy de Acuerdo') }}
                     </button>
                 </div>
             </div>
@@ -1036,19 +1035,19 @@
             <div class="modal-content bg-secondary">
                 <div class="modal-body text-center py-5">
                     <div class="spinner-border text-primary mb-4" role="status" style="width: 4rem; height: 4rem;">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{{ tr('Loading...', 'Cargando...') }}</span>
                     </div>
-                    <h4 class="fw-bold mb-3 text-light">Waiting for Payment</h4>
+                    <h4 class="fw-bold mb-3 text-light">{{ tr('Waiting for Payment', 'Esperando el Pago') }}</h4>
                     <p class="text-gray-400 mb-4">
-                        Please complete your payment in the Stripe window.<br>
-                        This page will automatically update when payment is confirmed.
+                        {{ tr('Please complete your payment in the Stripe window.', 'Completa tu pago en la ventana de Stripe.') }}<br>
+                        {{ tr('This page will automatically update when payment is confirmed.', 'Esta página se actualizará automáticamente cuando el pago se confirme.') }}
                     </p>
                     <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelPaymentWaiting()">
-                            Cancel
+                            {{ tr('Cancel', 'Cancelar') }}
                         </button>
                         <button type="button" class="btn btn-outline-primary rounded-pill px-4" (click)="cancelPaymentWaitingAndTryAgain()">
-                            Try again
+                            {{ tr('Try again', 'Intentar de nuevo') }}
                         </button>
                     </div>
                 </div>

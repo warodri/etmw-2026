@@ -28,6 +28,7 @@ async function run(data, req, res) {
         const Audiobook = require('../models/audiobook');
         const audiobooks = await Audiobook.find({
             authorId: author._id,
+            totalPrice: { $gt: 0 },
             published: false,
             enabled: true
         })

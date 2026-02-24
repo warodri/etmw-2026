@@ -12,9 +12,9 @@
             </button>
             <h5 class="m-0 fw-bold">
                 @if (audioLoaded()) {
-                    Now Playing
+                    {{ tr('Now Playing', 'Reproduciendo Ahora') }}
                 } @else {
-                    Subscribe to Listen
+                    {{ tr('Subscribe to Listen', 'Suscríbete para Escuchar') }}
                 }
             </h5>
             <button class="btn btn-link text-white p-0" (click)="toggleBookmark()">
@@ -110,7 +110,7 @@
             <!-- Additional Controls -->
             <div class="d-flex justify-content-center gap-3 mb-4">
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="toggleChapterList()">
-                    <i class="bi bi-list-ul"></i> Chapters
+                    <i class="bi bi-list-ul"></i> {{ tr('Chapters', 'Capítulos') }}
                 </button>
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openSpeed()">
                     <i class="bi bi-speedometer2"></i> {{ playbackSpeed }}x
@@ -123,9 +123,9 @@
             <!-- If this book is not purchased, it will appear here -->
             @if (!audiobookNotAvailableForThisUser()) {
                 <div class="mt-4 mb-4 pt-3 pb-3 rounded-4 bg-danger text-light text-center">
-                    You can't play this chapter now &nbsp; 
+                    {{ tr("You can't play this chapter now", 'No puedes reproducir este capítulo ahora') }} &nbsp; 
                     <button class="btn btn-sm btn-outline-light rounded-pill" (click)="seeMore()">
-                        See more
+                        {{ tr('See more', 'Ver más') }}
                     </button>
                 </div>
             }
@@ -141,7 +141,7 @@
                                         {{ ch.chapter }}
                                     </div>
                                     <div class="chapter-body">
-                                        <div class="chapter-title">Chapter {{ ch.chapter }}</div>
+                                        <div class="chapter-title">{{ tr('Chapter', 'Capítulo') }} {{ ch.chapter }}</div>
                                         <div class="chapter-meta">{{ formatDuration(ch.durationSec) }}</div>
                                     </div>
                                     <button class="btn btn-sm btn-dark rounded-pill"
@@ -153,12 +153,12 @@
                         </div>
                     } @else {
                         <div class="bg-secondary rounded-4 p-4 text-center text-gray-400">
-                            No chapters available yet.
+                            {{ tr('No chapters available yet.', 'Aún no hay capítulos disponibles.') }}
                         </div>
                     }
                     @if (loadingAudio() === true) {
                         <div class="p-3 text-center small text-gray-400">
-                            Loading please wait...
+                            {{ tr('Loading please wait...', 'Cargando, por favor espera...') }}
                         </div>
                     }
                     @if (errorMessageObj) {

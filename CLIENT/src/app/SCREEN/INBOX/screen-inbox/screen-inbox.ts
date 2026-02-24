@@ -5,6 +5,7 @@ import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { ToastService } from '../../../SERVICES/toast';
 import { Config } from '../../../utils/config';
 import { UserModel } from '../../../models/user';
+import { LangUtils } from '../../../utils/lang';
 
 interface MessageComment {
     _id: string;
@@ -38,6 +39,7 @@ interface InboxChannel {
     styleUrl: './screen-inbox.css',
 })
 export class ScreenInbox implements OnInit {
+    language: 'en' | 'es' = 'en';
 
     readonly SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
     readonly channels = signal<InboxChannel[]>([]);
@@ -60,6 +62,13 @@ export class ScreenInbox implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
+        this.aiSummary.set(
+            this.tr(
+                'Maria sent you a first message about collaboration opportunities. Tony is asking about your book "Away" and wants a signed copy. Romain responded to your question about pricing.',
+                'Maria te envió un primer mensaje sobre oportunidades de colaboración. Tony está preguntando por tu libro "Away" y quiere una copia firmada. Romain respondió a tu pregunta sobre precios.'
+            )
+        );
         this.iUser.getMyUser((response: any) => {
             if (response?.success && response.user?._id) {
                 this.myUserId = String(response.user._id);
@@ -95,7 +104,7 @@ export class ScreenInbox implements OnInit {
             if (response?.success) {
                 this.loadThreads();
                 this.refreshAiSummary(false);
-                this.toast.show('All messages marked as read');
+                this.toast.show(this.tr('All messages marked as read', 'Todos los mensajes marcados como leídos'));
                 return;
             }
             this.toast.show(response?.message || this.toast.getMessageErrorUnexpected());
@@ -142,7 +151,7 @@ export class ScreenInbox implements OnInit {
                     this.aiSummary.set(summaryText);
                 }
                 const remaining = Number(response.remainingToday ?? 0);
-                this.aiSummaryMeta.set(`AI summaries left today: ${remaining}`);
+                this.aiSummaryMeta.set(`${this.tr('AI summaries left today', 'Resúmenes IA restantes hoy')}: ${remaining}`);
                 return;
             }
 
@@ -151,7 +160,7 @@ export class ScreenInbox implements OnInit {
                 if (fallback) {
                     this.aiSummary.set(fallback);
                 }
-                this.aiSummaryMeta.set('Daily AI summary limit reached (5/5).');
+                this.aiSummaryMeta.set(this.tr('Daily AI summary limit reached (5/5).', 'Límite diario de resumen IA alcanzado (5/5).'));
                 return;
             }
 
@@ -163,17 +172,17 @@ export class ScreenInbox implements OnInit {
         event.stopPropagation();
         const next = this.channels().filter((i) => i._id !== item._id);
         this.channels.set(next);
-        this.toast.show('Thread hidden from list');
+        this.toast.show(this.tr('Thread hidden from list', 'Hilo oculto de la lista'));
     }
 
     toggleStar(_item: InboxChannel, event: Event) {
         event.stopPropagation();
-        this.toast.show('Starred list coming soon');
+        this.toast.show(this.tr('Starred list coming soon', 'La lista de destacados estará disponible pronto'));
     }
 
     archiveThread(_item: InboxChannel, event: Event) {
         event.stopPropagation();
-        this.toast.show('Archive coming soon');
+        this.toast.show(this.tr('Archive coming soon', 'Archivo disponible pronto'));
     }
 
     private loadThreads() {
@@ -197,7 +206,7 @@ export class ScreenInbox implements OnInit {
                     const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
                     items.push({
                         _id: counterpartId,
-                        userName: fullName || user?.email || 'Unknown user',
+                        userName: fullName || user?.email || this.tr('Unknown user', 'Usuario desconocido'),
                         userProfile: this.resolveProfile(user),
                         lastMessage: this.getLastMessageText(latest),
                         lastMessageTime: this.formatRelativeTime(latest.createdAt),
@@ -290,10 +299,10 @@ export class ScreenInbox implements OnInit {
     }
 
     private getLastMessageText(item: MessageComment): string {
-        if (item?.audioUrl) return 'Sent a voice message';
+        if (item?.audioUrl) return this.tr('Sent a voice message', 'Envió un mensaje de voz');
         const firstAttachmentType = String(item?.attachments?.[0]?.type || '').toLowerCase();
-        if (firstAttachmentType === 'image') return 'Sent an image';
-        return String(item?.text || 'New message');
+        if (firstAttachmentType === 'image') return this.tr('Sent an image', 'Envió una imagen');
+        return String(item?.text || this.tr('New message', 'Nuevo mensaje'));
     }
 
     private formatRelativeTime(timestamp: number): string {
@@ -303,10 +312,14 @@ export class ScreenInbox implements OnInit {
         const minute = 60 * 1000;
         const hour = 60 * minute;
         const day = 24 * hour;
-        if (diff < minute) return 'now';
-        if (diff < hour) return `${Math.floor(diff / minute)}m ago`;
-        if (diff < day) return `${Math.floor(diff / hour)}h ago`;
-        if (diff < day * 2) return 'Yesterday';
-        return `${Math.floor(diff / day)} days ago`;
+        if (diff < minute) return this.tr('now', 'ahora');
+        if (diff < hour) return `${Math.floor(diff / minute)}${this.tr('m ago', 'm atrás')}`;
+        if (diff < day) return `${Math.floor(diff / hour)}${this.tr('h ago', 'h atrás')}`;
+        if (diff < day * 2) return this.tr('Yesterday', 'Ayer');
+        return `${Math.floor(diff / day)} ${this.tr('days ago', 'días atrás')}`;
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 }

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { UserModel } from '../../../models/user';
 import { CategoryModel } from '../../../models/categories';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-screen-mobile-main',
@@ -11,13 +12,18 @@ import { CategoryModel } from '../../../models/categories';
     styleUrl: './screen-mobile-main.css',
 })
 export class ScreenMobileMain implements OnInit {
+    language: 'en' | 'es' = 'en';
 
     constructor(
         private router: Router,
     ) {}
 
     ngOnInit(): void {
-        
+        this.language = LangUtils.detectLanguage();
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
     gotoSearchResult() {

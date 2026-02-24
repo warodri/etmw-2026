@@ -19,18 +19,18 @@
                 <div class="flex-grow-1 min-w-0">
                     <div class="fw-bold text-truncate">{{ getDisplayName() }}</div>
                     <div class="small text-gray-400 d-flex align-items-center gap-2">
-                        <span>{{ getTotalAudiobooks() }} {{ getTotalAudiobooks() === 1 ? 'work' : 'works' }}</span>
+                        <span>{{ getTotalAudiobooks() }} {{ getTotalAudiobooks() === 1 ? tr('work', 'obra') : tr('works', 'obras') }}</span>
                         <span>•</span>
-                        <span>{{ totalFollowers() }} followers</span>
+                        <span>{{ totalFollowers() }} {{ tr('followers', 'seguidores') }}</span>
                     </div>
                 </div>
     
                 <!-- Action button -->
                 <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="toggleFollow($event)">
                     @if (isFollowing()) {
-                        <i class="bi bi-check-lg"></i> Following
+                        <i class="bi bi-check-lg"></i> {{ tr('Following', 'Siguiendo') }}
                     } @else {
-                        <i class="bi bi-plus-lg"></i> Follow
+                        <i class="bi bi-plus-lg"></i> {{ tr('Follow', 'Seguir') }}
                     }
                 </button>
             </div>
@@ -86,11 +86,11 @@
                 <div class="d-flex justify-content-center gap-4 mb-3">
                     <div class="text-center">
                         <div class="fw-bold text-primary">{{ getTotalAudiobooks() }}</div>
-                        <div class="small text-gray-400">Works</div>
+                        <div class="small text-gray-400">{{ tr('Works', 'Obras') }}</div>
                     </div>
                     <div class="text-center">
                         <div class="fw-bold text-primary">{{ formatNumber(totalFollowers()) }}</div>
-                        <div class="small text-gray-400">Followers</div>
+                        <div class="small text-gray-400">{{ tr('Followers', 'Seguidores') }}</div>
                     </div>
                 </div>
     
@@ -98,9 +98,9 @@
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary rounded-pill flex-grow-1" (click)="toggleFollow($event)">
                         @if (isFollowing()) {
-                            <i class="bi bi-check-lg"></i> Following
+                            <i class="bi bi-check-lg"></i> {{ tr('Following', 'Siguiendo') }}
                         } @else {
-                            <i class="bi bi-plus-lg"></i> Follow
+                            <i class="bi bi-plus-lg"></i> {{ tr('Follow', 'Seguir') }}
                         }
                     </button>
                     <button class="btn btn-secondary rounded-pill px-3" (click)="viewProfile($event)">
@@ -141,9 +141,9 @@
                 <div class="position-absolute" style="top: 16px; right: 16px;">
                     <button class="btn btn-primary rounded-pill px-4" (click)="toggleFollow($event)">
                         @if (isFollowing()) {
-                            <i class="bi bi-check-lg"></i> Following
+                            <i class="bi bi-check-lg"></i> {{ tr('Following', 'Siguiendo') }}
                         } @else {
-                            <i class="bi bi-plus-lg"></i> Follow
+                            <i class="bi bi-plus-lg"></i> {{ tr('Follow', 'Seguir') }}
                         }
                     </button>
                 </div>
@@ -163,25 +163,25 @@
                 <div class="d-flex gap-3 mb-3">
                     <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
                         <div class="fw-bold text-primary">{{ getTotalAudiobooks() }}</div>
-                        <div class="small text-gray-400">Works</div>
+                        <div class="small text-gray-400">{{ tr('Works', 'Obras') }}</div>
                     </div>
                     <div class="bg-slate-800 rounded-3 px-3 py-2 text-center flex-grow-1">
                         <div class="fw-bold text-primary">{{ formatNumber(totalFollowers()) }}</div>
-                        <div class="small text-gray-400">Followers</div>
+                        <div class="small text-gray-400">{{ tr('Followers', 'Seguidores') }}</div>
                     </div>
                 </div>
     
                 <!-- Bio -->
                 @if (getBio()) {
                     <div class="mb-3">
-                        <h6 class="fw-semibold small mb-2">About</h6>
+                        <h6 class="fw-semibold small mb-2">{{ tr('About', 'Acerca de') }}</h6>
                         <p class="text-gray-400 small lh-175 mb-0">{{ getBio() }}</p>
                     </div>
                 }
     
                 <!-- Languages and categories -->
                 <div class="mb-3">
-                    <h6 class="fw-semibold small mb-2">Writes in</h6>
+                    <h6 class="fw-semibold small mb-2">{{ tr('Writes in', 'Escribe en') }}</h6>
                     <div class="d-flex flex-wrap gap-2">
                         @if (getLanguages().length > 0) {
                             @for (lang of getLanguages(); track lang) {
@@ -203,7 +203,7 @@
                 <!-- Latest works preview -->
                 @if (latestWork().length > 0) {
                     <div class="mb-3">
-                        <h6 class="fw-semibold small mb-2">Latest Works</h6>
+                        <h6 class="fw-semibold small mb-2">{{ tr('Latest Works', 'Últimas Obras') }}</h6>
                         <div class="d-flex gap-2 overflow-x-auto pb-2">
                             @for (work of latestWork(); track work) {
                                 <div class="flex-shrink-0" style="width: 80px;">
@@ -221,7 +221,7 @@
                 <!-- Action buttons -->
                 <div class="d-flex gap-2">
                     <button class="btn btn-secondary rounded-pill flex-grow-1" (click)="viewProfile($event)">
-                        <i class="bi bi-person"></i> View Profile
+                        <i class="bi bi-person"></i> {{ tr('View Profile', 'Ver Perfil') }}
                     </button>
                     <button class="btn btn-secondary rounded-pill px-3" (click)="sendMessage($event)">
                         <i class="bi bi-chat-dots"></i>

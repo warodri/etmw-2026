@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular
 import { AuthorModel } from '../../../models/author';
 import { UserModel } from '../../../models/user';
 import { AudiobookModel } from '../../../models/audiobook';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-author-item',
@@ -10,6 +11,7 @@ import { AudiobookModel } from '../../../models/audiobook';
     styleUrl: './author-item.css',
 })
 export class AuthorItem implements OnInit {
+    language: 'en' | 'es' = 'en';
 
     @Input() template: 'simple' | 'extended' | 'detailed' = 'simple';
 
@@ -27,10 +29,15 @@ export class AuthorItem implements OnInit {
     constructor() {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         const followers = this.getTotalFollowers();
         if (followers !== null) {
             this.totalFollowers.set(followers);
         }
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
     formatNumber(num: number): string {

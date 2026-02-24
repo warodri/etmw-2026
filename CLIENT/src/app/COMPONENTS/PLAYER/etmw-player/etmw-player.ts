@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { ScreenPlayer } from '../../../SCREEN/PLAYER/screen-player/screen-player';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-etmw-player',
@@ -8,6 +9,7 @@ import { ScreenPlayer } from '../../../SCREEN/PLAYER/screen-player/screen-player
     styleUrl: './etmw-player.css',
 })
 export class EtmwPlayer extends ScreenPlayer implements OnInit {
+    language: 'en' | 'es' = 'en';
 
     coverFile = signal<string | null>(null);
     errorMessage = signal<string | null>(null);
@@ -16,6 +18,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
     showChapterList = signal<boolean>(false);
 
     override ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         super.ngOnInit();
     }
 
@@ -41,7 +44,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
             } else {
                 this.loadingAudio.set(false);
                 this.audiobookNotAvailableForThisUser.set(success);
-                this.errorMessage.set('Unable to load this chapter');
+                this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
             }
         })
     }
@@ -66,7 +69,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
         const audiobookId = this.audiobookId();
         if (!audiobookId) {
             this.audiobookNotAvailableForThisUser.set(false);
-            this.errorMessage.set('Unable to load this chapter');
+            this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
             if (callback) callback();
             return;
         }
@@ -74,7 +77,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
             console.log('audiobookGetChapterAudio')
             if (!buffer) {
                 this.audiobookNotAvailableForThisUser.set(false);
-                this.errorMessage.set('Unable to load this chapter');
+                this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
                 if (callback) callback();
                 return;
             }
@@ -95,6 +98,10 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
 
     toggleChapterList() {
         this.showChapterList.set(!this.showChapterList())
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
     
 }

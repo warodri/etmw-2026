@@ -15,7 +15,7 @@
                             {{ audiobook.title }}
                         </div>
                         <div class="work-author m-1">
-                            by {{ audiobook.authorName }}
+                            {{ tr('by', 'por') }} {{ audiobook.authorName }}
                         </div>
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <div class="work-meta-item">
@@ -24,15 +24,15 @@
                             </div>
                             <div class="work-meta-item">
                                 <i class="bi bi-book"></i>
-                                <span>{{ getChapterCount() }} chapters</span>
+                                <span>{{ getChapterCount() }} {{ tr('chapters', 'capítulos') }}</span>
                             </div>
                             <div class="work-meta-item" [class.text-warning]="getStatusLabel() === 'Published'">
                                 <i class="bi bi-check-circle"></i>
-                                <span>{{ getStatusLabel() }}</span>
+                                <span>{{ getStatusLabelTr() }}</span>
                             </div>
                         </div>
                         <button class="mt-3 btn btn-sm btn-primary rounded-pill" (click)="viewItem()">
-                            View Details
+                            {{ tr('View Details', 'Ver Detalles') }}
                         </button>
                     </div>
                 </div>
@@ -48,10 +48,10 @@
                 </div>
                 <div class="d-flex justify-content-end align-items-center gap-2">
                     <button class="btn btn-dark rounded-pill" (click)="gotoDebate()">
-                        💬 &nbsp;Debate
+                        💬 &nbsp;{{ tr('Debate', 'Debate') }}
                     </button>
                     <button class="btn btn-dark rounded-pill" (click)="viewItem()">
-                        <i class="bi bi-play-fill"></i> Play
+                        <i class="bi bi-play-fill"></i> {{ tr('Play', 'Reproducir') }}
                     </button>
                 </div>
             </div>
@@ -65,21 +65,21 @@
                             {{ getDurationLabel() }}
                         </div>
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
-                            {{ getStatusLabel() }}
+                            {{ getStatusLabelTr() }}
                         </div>
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small text-truncate" style="max-width: 50%;">
                             {{ audiobook.authorName }}
                         </div>
                     </div>
                     <div class="mt-2 text-gray-400 small" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        {{ audiobook.description || 'No description available.' }}
+                        {{ audiobook.description || tr('No description available.', 'No hay descripción disponible.') }}
                     </div>        
                     <div class="mt-2 d-flex justify-content-start align-items-center gap-2">
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
                             {{ getPrimaryCategory() }}
                         </div>
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
-                            {{ getChapterCount() }} chapters
+                            {{ getChapterCount() }} {{ tr('chapters', 'capítulos') }}
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                 <img [src]="getCoverUrl()" [alt]="audiobook.title" class="work-cover">
                 <div class="work-overlay">
                     <button class="btn btn-primary rounded-pill px-4" (click)="viewItem()">
-                        <i class="bi bi-play-fill"></i> Listen Now
+                        <i class="bi bi-play-fill"></i> {{ tr('Listen Now', 'Escuchar Ahora') }}
                     </button>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                     }
                 </div>
                 <h4 class="work-title">{{ audiobook.title }}</h4>
-                <div class="work-author">by {{ audiobook.authorName }}</div>
+                <div class="work-author">{{ tr('by', 'por') }} {{ audiobook.authorName }}</div>
                 <div class="work-meta">
                     <div class="work-meta-item">
                         <i class="bi bi-clock"></i>
@@ -110,7 +110,7 @@
                     </div>
                     <div class="work-meta-item">
                         <i class="bi bi-book"></i>
-                        <span>{{ audiobook.audioFiles.length }} chapters</span>
+                        <span>{{ audiobook.audioFiles.length }} {{ tr('chapters', 'capítulos') }}</span>
                     </div>
                     <!-- <div class="work-meta-item">
                         <i class="bi bi-star-fill text-warning"></i>
@@ -118,7 +118,7 @@
                     </div> -->
                 </div>
                 <button class="btn btn-secondary w-100 mt-3 rounded-pill" (click)="viewItem()">
-                    View Details
+                    {{ tr('View Details', 'Ver Detalles') }}
                 </button>
             </div>
         </div>
