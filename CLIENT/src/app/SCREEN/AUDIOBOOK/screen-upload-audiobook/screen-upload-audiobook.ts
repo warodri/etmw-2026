@@ -47,11 +47,12 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     partners = signal<Array<{
         name: string,
         description: string,
-        website: string
+        website: string,
+        language: string
     }>>([]);
 
     // Step 2: Upload Method
-    uploadMethod: 'digital' | 'mail' | null = null;
+    uploadMethod: 'digital' | 'mail' | null = 'digital';
     uploadedFile: File | null = null;
     coverFile: File | null = null;
     estimatedWordCount = signal<number>(0);
@@ -95,6 +96,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         targetLanguage: '',
         voiceId: '',
         voiceName: '',
+        voiceGender: '',
+        voiceUrl: '',
         useExpression: false,
         speechRate: '1.0',
         stability: 50,
@@ -299,6 +302,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     sendingBook = signal<boolean>(false);
     showMailingAddress = signal<boolean>(false);
     showNextStepsAfterUploadingBook = signal<boolean>(false);
+    showAdvancedConfig = signal<boolean>(false);
 
     constructor(
         private iUser: InternetUserService,
@@ -441,13 +445,15 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         const a: Array<{
             name: string,
             description: string,
-            website: string
+            website: string,
+            language: string
         }> = [];
         for (let item of this.promoCodes()) {
             a.push({
                 name: item.partnerName,
                 description: item.partnerDescription,
-                website: item.linkToCode
+                website: item.linkToCode,
+                language: item.language,
             })
         }
         this.partners.set(a);
@@ -606,9 +612,17 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     }
 
     // Step 4: Configuration
-    selectVoice(voiceId: string, voiceName: string, isPro: boolean = false) {
+    selectVoice(voice: any) {
+        const voiceId: string = voice.id
+        const voiceName = voice.name;
+        const voiceGender = voice && voice.labels && voice.labels.gender ? voice.labels.gender : 'male';
+        const voiceUrl = voice.previewUrl;
+        const isPro = false
+
         this.bookConfig.voiceId = voiceId;
         this.bookConfig.voiceName = voiceName;
+        this.bookConfig.voiceGender = voiceGender;
+        this.bookConfig.voiceUrl = voiceUrl;
         this.isVoiceProfessional.set(isPro);
     }
 
@@ -916,6 +930,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
             targetLanguage: '',
             voiceId: '',
             voiceName: '',
+            voiceGender: '',
+            voiceUrl: '',
             useExpression: false,
             speechRate: '1.0',
             stability: 50,

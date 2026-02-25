@@ -51,6 +51,12 @@ const model = new Schema({
         type: String,
         required: true
     },
+    voiceGender: {
+        type: String,
+    },
+    voiceUrl: {
+        type: String,
+    },
     useExpression: {
         type: Boolean,
         default: false

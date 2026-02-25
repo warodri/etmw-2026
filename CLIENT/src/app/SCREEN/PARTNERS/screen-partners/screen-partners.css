@@ -38,3 +38,122 @@ li {
     font-style: italic;
     color: #b5b5b5;
 }
+
+.partner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid #27313d;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #131a23 0%, #0f141b 100%);
+}
+
+.partner-title {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.6vw, 1.95rem);
+    line-height: 1.2;
+    letter-spacing: 0.015em;
+    color: #f4f8ff;
+}
+
+.partner-title-script {
+    font-family: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+    font-size: 1.22em;
+    color: #8bc3ff;
+    margin-left: 0.22rem;
+}
+
+.partner-site-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 0.62rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #3a526d;
+    background: linear-gradient(180deg, #1f2c3a 0%, #16202b 100%);
+    color: #eef6ff;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.partner-site-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(31, 88, 150, 0.25);
+    border-color: #5382b2;
+}
+
+.iframe-shell {
+    min-height: 80vh;
+    position: relative;
+}
+
+.partner-iframe {
+    width: 100%;
+    height: 80vh;
+    display: block;
+}
+
+.loading-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid #2a2f36;
+    border-radius: 16px;
+    background: radial-gradient(circle at top, #18202a 0%, #10151b 55%, #0f1215 100%);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    z-index: 2;
+}
+
+.loading-spinner {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(255, 255, 255, 0.16);
+    border-top-color: #4ea4ff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.loading-title {
+    margin: 0;
+    color: #f4f8ff;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.loading-subtitle {
+    margin: 0.3rem 0 0;
+    color: #9eb0c2;
+    font-size: 0.95rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .partner-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .iframe-shell,
+    .partner-iframe,
+    .loading-state {
+        min-height: 72vh;
+        height: 72vh;
+    }
+}

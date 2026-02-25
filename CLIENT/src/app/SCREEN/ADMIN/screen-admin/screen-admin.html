@@ -1,7 +1,7 @@
 <div class="admin-screen text-light">
     <div class="container py-4">
         <div class="main-card">
-            <div class="header-gradient text-center">
+            <div class="header-gradient text-center d-flex justify-content-center align-items-center gap-3 ">
                 <h1 class="mb-2">Enter To My World</h1>
                 <p class="mb-0 opacity-75">Internal Use</p>
             </div>
@@ -172,7 +172,7 @@
                                             <div class="col-md-4 col-lg-3 mb-3">
                                                 <div class="card audiobook-card" [class.priority]="book.paymentCompleted && book.uploadMethod === 'digital'" (click)="viewAudiobook(book)">
                                                     <div class="card-body">
-                                                        @if (book.paymentCompleted && book.uploadMethod === 'digital') {
+                                                        @if ((book.paymentCompleted && book.uploadMethod === 'digital') || book.totalPrice == 0) {
                                                             <span class="badge bg-success mb-2">Listo para convertir</span>
                                                         }
                                                         <h6 class="card-title">{{ book.title || 'Sin título' }}</h6>
@@ -213,6 +213,9 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-3">
+                                                <img [src]="current.coverFileFull" class="w-100" />
+                                            </div>
+                                            <div class="mb-3">
                                                 <label class="fw-bold">Título:</label>
                                                 <div>{{ current.title || 'N/D' }}</div>
                                             </div>
@@ -222,41 +225,49 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="fw-bold">Fecha de pago:</label>
-                                                <div>{{ current.paymentDate ? (current.paymentDate | date:'short') : 'N/D' }}</div>
+                                                <div>{{ current.paymentDate ? (current.paymentDate | date:'short') : 'Gratis' }}</div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="fw-bold">Pago base:</label>
-                                                <div>{{ current.basePrice ? ('$' + current.basePrice) : 'N/D' }}</div>
+                                                <div>{{ current.basePrice ? ('$' + current.basePrice) : 'Gratis' }}</div>
+                                                @if (!current.basePrice) {
+                                                    <div class="mt-1 p-2 bg-danger rounded-3 text-light small">
+                                                        IMPORTANTE: El autor ingresó un código de promoción. 
+                                                        Tiene autorizado hasta 250 páginas solamente.
+                                                    </div>
+                                                }
                                             </div>
                                             <div class="mb-3">
                                                 <label class="fw-bold">Precio total:</label>
-                                                <div>{{ current.totalPrice ? ('$' + current.totalPrice) : 'N/D' }}</div>
+                                                <div>{{ current.totalPrice ? ('$' + current.totalPrice) : 'Gratis' }}</div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="fw-bold">Total de páginas</label>
-                                                <div class="mt-1 input-group">
-                                                    <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($any($event))" placeholder="Introduce el total de páginas">
-                                                    <button class="btn btn-success" (click)="updateTotalPages()">
-                                                        <i class="bi bi-check-lg"></i> Actualizar
-                                                    </button>
+                                            <!--
+                                                <div class="mb-3">
+                                                    <label class="fw-bold">Total de páginas</label>
+                                                    <div class="mt-1 input-group">
+                                                        <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($any($event))" placeholder="Introduce el total de páginas">
+                                                        <button class="btn btn-success" (click)="updateTotalPages()">
+                                                            <i class="bi bi-check-lg"></i> Actualizar
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="fw-bold">Total de capítulos (incluyendo epílogo)</label>
-                                                <div class="mt-1 input-group">
-                                                    <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($any($event))" placeholder="Introduce el total de capítulos">
-                                                    <button class="btn btn-success" (click)="updateTotalChapters()">
-                                                        <i class="bi bi-check-lg"></i> Actualizar
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                <div class="mb-3">
+                                                    <label class="fw-bold">Total de capítulos (incluyendo epílogo)</label>
+                                                    <div class="mt-1 input-group">
+                                                        <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($any($event))" placeholder="Introduce el total de capítulos">
+                                                        <button class="btn btn-success" (click)="updateTotalChapters()">
+                                                            <i class="bi bi-check-lg"></i> Actualizar
+                                                        </button>
+                                                    </div>
+                                                </div>                                            
+                                            -->
                                             <div class="mb-3">
                                                 <label class="fw-bold">Descripción</label>
                                                 <div class="text-muted word-break">{{ current.description || 'Sin descripción' }}</div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="fw-bold">Categorías:</label>
-                                                @if (current.categories?.length) {
+                                                @if (current.categories.length) {
                                                     <div>
                                                         @for (cat of current.categories; track cat) {
                                                             <span class="badge bg-secondary me-1">{{ cat }}</span>
@@ -269,25 +280,28 @@
                                         </div>
                                     </div>
 
-                                    <div class="card mt-3 shadow">
-                                        <div class="card-header">
-                                            <button class="btn btn-link text-decoration-none text-dark" (click)="detailsOpen.set(!detailsOpen())">
-                                                <i class="bi bi-list-ul"></i> Detalles adicionales
-                                                <i class="bi" [class.bi-chevron-down]="!detailsOpen()" [class.bi-chevron-up]="detailsOpen()"></i>
-                                            </button>
-                                        </div>
-                                        @if (detailsOpen()) {
-                                            <div class="card-body">
-                                                <pre class="bg-light p-3 rounded" style="font-size: 12px; max-height: 400px; overflow-y: auto;">{{ current | json }}</pre>
+                                    <!-- 
+                                        <div class="card mt-3 shadow">
+                                            <div class="card-header">
+                                                <button class="btn btn-link text-decoration-none text-dark" (click)="detailsOpen.set(!detailsOpen())">
+                                                    <i class="bi bi-list-ul"></i> Detalles adicionales
+                                                    <i class="bi" [class.bi-chevron-down]="!detailsOpen()" [class.bi-chevron-up]="detailsOpen()"></i>
+                                                </button>
                                             </div>
-                                        }
-                                    </div>
+                                            @if (detailsOpen()) {
+                                                <div class="card-body">
+                                                    <pre class="bg-light p-3 rounded" style="font-size: 12px; max-height: 400px; overflow-y: auto;">{{ current | json }}</pre>
+                                                </div>
+                                            }
+                                        </div>
+                                    -->
+
                                 </div>
 
                                 <div class="col-md-8">
                                     @if (getOpenFileUrl(); as openUrl) {
                                         <div class="p-3">
-                                            <a [href]="openUrl" class="btn btn-primary rounded-pill" target="_blank">Abrir archivo</a>
+                                            <a [href]="openUrl" class="btn btn-primary rounded-3" target="_blank">Abrir PDF subido por el usuario</a>
                                         </div>
                                     }
 
@@ -339,32 +353,46 @@
                                                         </tr>
                                                         <tr>
                                                             <th scope="row" class="text-primary">Idioma de destino</th>
-                                                            <td>{{ getLanguageName(current.targetLanguage) }}</td>
+                                                            <td>{{ current.targetLanguage ? getLanguageName(current.targetLanguage) : getLanguageName(current.sourceLanguage) }}</td>
                                                         </tr>
-                                                        <tr>
-                                                            <th scope="row">ID de voz</th>
-                                                            <td class="font-monospace">{{ current.voiceId || 'N/D' }}</td>
-                                                        </tr>
+                                                        <!-- 
+                                                            <tr>
+                                                                <th scope="row">ID de voz</th>
+                                                                <td class="font-monospace">{{ current.voiceId || 'N/D' }}</td>
+                                                            </tr>
+                                                        -->
                                                         <tr>
                                                             <th scope="row">Nombre de la voz</th>
                                                             <td>{{ current.voiceName || 'N/D' }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <th scope="row">Usar expresión</th>
-                                                            <td>{{ current.useExpression ? 'Sí' : 'No' }}</td>
+                                                            <th scope="row">Género de la voz</th>
+                                                            <td>{{ current.voiceGender || 'N/D' }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <th scope="row">Velocidad de habla</th>
-                                                            <td>{{ current.speechRate || '1.0' }}</td>
+                                                            <th scope="row">Escucha de la voz</th>
+                                                            <td>
+                                                                <audio controls [src]="current.voiceUrl"></audio>
+                                                            </td>
                                                         </tr>
-                                                        <tr>
-                                                            <th scope="row">Estabilidad</th>
-                                                            <td>{{ current.stability || '0.5' }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th scope="row">Claridad</th>
-                                                            <td>{{ current.clarity || '0.75' }}</td>
-                                                        </tr>
+                                                        <!-- 
+                                                            <tr>
+                                                                <th scope="row">Usar expresión</th>
+                                                                <td>{{ current.useExpression ? 'Sí' : 'No' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th scope="row">Velocidad de habla</th>
+                                                                <td>{{ current.speechRate || '1.0' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th scope="row">Estabilidad</th>
+                                                                <td>{{ current.stability || '0.5' }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th scope="row">Claridad</th>
+                                                                <td>{{ current.clarity || '0.75' }}</td>
+                                                            </tr>
+                                                        -->
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -376,31 +404,41 @@
                                             <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Convierte a Audio</h5>
                                         </div>
                                         <div class="card-body">
-                                            <div class="mb-4">
-                                                <label class="fw-bold">Subir PDF para convertir</label>
-                                                <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
-                                                    <input type="file" class="form-control" accept="application/pdf" style="max-width: 360px;" (change)="setSelectedPdfFile($any($event))">
-                                                    <button class="btn btn-outline-primary" (click)="loadPdfForConversion()">
-                                                        <i class="bi bi-file-earmark-pdf"></i> Cargar PDF
-                                                    </button>
-                                                    <button class="btn btn-primary" (click)="convertPdfToMp3()">
-                                                        <i class="bi bi-file-earmark-music"></i> Convertir PDF a MP3
-                                                    </button>
-                                                </div>
-                                                <div class="d-flex align-items-center gap-2 mt-3">
-                                                    <div class="fw-bold" style="width: 180px;">Número de capítulo:</div>
-                                                    <input type="number" class="form-control" [ngModel]="chapterNumberInput()" (ngModelChange)="chapterNumberInput.set($any($event))" placeholder="ej: 1, 2, 3..." min="1" style="max-width: 220px;">
-                                                </div>
-                                                <div class="d-flex align-items-center gap-2 mt-3">
-                                                    <div class="fw-bold" style="width: 180px;">Total de capítulos (incluyendo Epilogo):</div>
-                                                    <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($any($event))" placeholder="ej: 10, 12, 40..." min="1" style="max-width: 220px;">
-                                                </div>
+                                            <!-- PDF -->
+                                            <label class="fw-bold">Subir PDF para convertir</label>
+                                            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                                                <input type="file" class="form-control" accept="application/pdf" style="max-width: 360px;" (change)="setSelectedPdfFile($any($event))">
+                                                <button class="btn btn-outline-primary" (click)="loadPdfForConversion()">
+                                                    <i class="bi bi-file-earmark-pdf"></i> Cargar PDF
+                                                </button>
+                                            </div>
+                                            <!-- Sample de la voz a usar -->
+                                            <label class="mt-3 fw-bold"><i class="bi bi-music-note-beamed"></i> Subir voz de Referencia</label>
+                                            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                                                <input type="file" class="form-control" style="max-width: 360px;" (change)="setSelectedSampleVoiceFile($any($event))">
+                                            </div>
+                                            <!-- Numero de Capitulo -->
+                                            <div class="d-flex align-items-center gap-2 mt-3">
+                                                <div class="fw-bold" style="width: 180px;">Número de capítulo:</div>
+                                                <input type="number" class="form-control" [ngModel]="chapterNumberInput()" (ngModelChange)="chapterNumberInput.set($any($event))" placeholder="ej: 1, 2, 3..." min="1" style="max-width: 220px;">
+                                            </div>
+                                            <!-- Total de Capitulos -->
+                                            <div class="d-flex align-items-center gap-2 mt-3">
+                                                <div class="fw-bold" style="width: 180px;">Total de capítulos (incluyendo Epilogo):</div>
+                                                <input type="number" class="form-control" [ngModel]="totalChaptersInput()" (ngModelChange)="totalChaptersInput.set($any($event))" placeholder="ej: 10, 12, 40..." min="1" style="max-width: 220px;">
+                                            </div>
+                                            <!-- Total de paginas -->
                                             <div class="d-flex align-items-center gap-2 mt-3">
                                                 <div class="fw-bold" style="width: 180px;">Total de páginas:</div>
                                                 <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($any($event))" placeholder="ej: 100, 240, etc..." min="1" style="max-width: 220px;">
                                             </div>
+                                            <!-- Botton para convertir -->
+                                            <div class="d-flex align-items-center gap-2 mt-3">
+                                                <button class="btn btn-primary" (click)="convertPdfToMp3()">
+                                                    <i class="bi bi-file-earmark-music"></i> Convertir PDF a MP3
+                                                </button>
+                                            </div>
                                             <div class="small text-muted mt-2">{{ pdfStatus() }}</div>
-                                        </div>
 
                                             @if (conversionStatusVisible()) {
                                                 <div class="alert mt-3" [class.alert-info]="conversionStatusType() === 'info'" [class.alert-success]="conversionStatusType() === 'success'" [class.alert-danger]="conversionStatusType() === 'danger'">

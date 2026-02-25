@@ -27,6 +27,8 @@ async function run(data, req, res) {
             targetLanguage,
             voiceId,
             voiceName,
+            voiceGender,
+            voiceUrl,
             useExpression,
             speechRate,
             stability,
@@ -89,14 +91,15 @@ async function run(data, req, res) {
         ab.basePrice = basePrice;
         ab.hasReferral = hasReferral;
         
-        console.log('voiceId', voiceId)
-        console.log('voiceName', voiceName)
-
         ab.authorId = a._id;
         ab.sourceLanguage = sourceLanguage;
         ab.targetLanguage = targetLanguage;
+        
         ab.voiceId = voiceId;
         ab.voiceName = voiceName;
+        ab.voiceGender = voiceGender;
+        ab.voiceUrl = voiceUrl;
+
         ab.useExpression = useExpression;
         ab.speechRate = speechRate;
         ab.stability = stability;

@@ -68,6 +68,9 @@ const routes: Routes = [
     //  Stories
     { path: 'app/stories', component: ScreenStories },
 
+    //  Partners
+    { path: 'partners/:id', component: ScreenPartners },
+
     //  Admin
     { path: 'app/admin', component: ScreenAdminComponent },
 

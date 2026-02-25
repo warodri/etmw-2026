@@ -23,6 +23,10 @@ const model = new Schema({
         index: false,
         required: true,
     },
+    language: { 
+        type: String,
+        default: 'English'
+    },
     linkToCode: { 
         type: String,
         index: false,

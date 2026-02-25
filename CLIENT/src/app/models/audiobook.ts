@@ -17,6 +17,8 @@ export interface AudiobookModel {
     targetLanguage: string,
     voiceId: string,
     voiceName: string,
+    voiceGender: string,
+    voiceUrl: string,    
     useExpression: boolean,
     speechRate: string,
     stability: number,
@@ -46,5 +48,8 @@ export interface AudiobookModel {
     enabled: boolean,
     createdAt: number,
     updatedAt: number,
+
+    totalChapters?: number,
+    
 
 }

@@ -42,10 +42,10 @@ async function run(data, req, res) {
                 global: 0.002,
             }, 
             FIXED_PRICE: {
-                latam: 5,
-                us: 15,
-                uk: 15,
-                global: 15,
+                latam: 0, // 5,
+                us: 0, // 15,
+                uk: 0, // 15,
+                global: 0, // 15,
             }
         }
 

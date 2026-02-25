@@ -1,6 +1,9 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { InternetAdminService } from '../../../SERVICES/internet-admin.service';
 import { Config } from '../../../utils/config';
+import { AudiobookModel } from '../../../models/audiobook';
+import { UtilClass } from '../../../utils/utils';
+import { UtilsService } from '../../../utils/utils-service';
 
 type PromoCode = {
     _id: string;
@@ -49,7 +52,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
 
     audiobooks = signal<any[]>([]);
     audiobooksLoading = signal(false);
-    currentAudiobook = signal<any | null>(null);
+    currentAudiobook = signal<AudiobookModel | null>(null);
     detailsOpen = signal(false);
 
     conversionStatusVisible = signal(false);
@@ -60,6 +63,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     pdfTextForConversion = signal('');
     pdfNameForConversion = signal('');
     selectedPdfFile = signal<File | null>(null);
+    selectedSampleVoiceFile = signal<File | null>(null);
 
     audioUrls = signal<Record<number, string>>({});
     audioLoading = signal<Record<number, boolean>>({});
@@ -110,7 +114,8 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     private pdfJsLoading = false;
 
     constructor(
-        private internetAdmin: InternetAdminService
+        private internetAdmin: InternetAdminService,
+        private utils: UtilsService
     ) {}
 
     ngOnInit() {
@@ -243,6 +248,9 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.internetAdmin.audiobooksGetAdmin((result: any) => {
             this.audiobooksLoading.set(false);
             if (result && result.success) {
+                for (let item of result.audiobooks) {
+                    item.coverFileFull = this.utils.getClientUrlForFiles(item.coverFile, item.coverFileMimetype);
+                }
                 const sorted = this.sortAudiobooks(result.audiobooks || []);
                 this.audiobooks.set(sorted);
                 if (currentId) {
@@ -342,6 +350,11 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.selectedPdfFile.set(file);
     }
 
+    setSelectedSampleVoiceFile(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0] || null;
+        this.selectedSampleVoiceFile.set(file);
+    }
+
     async loadPdfForConversion() {
         const selectedFile = this.selectedPdfFile();
         if (!selectedFile) {
@@ -425,8 +438,8 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.conversionStatusType.set('info');
         this.conversionStatusText.set('Convirtiendo a MP3...');
 
-        const stability = parseFloat(current.stability) || 50;
-        const clarity = parseFloat(current.clarity) || 75;
+        const stability = current.stability || 50;
+        const clarity = current.clarity || 75;
 
         this.internetAdmin.convertToMP3(
             current._id,

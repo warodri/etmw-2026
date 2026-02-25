@@ -8,10 +8,12 @@ async function run(data, req, res) {
 
         const config = require('../config');       
         
+        const test = config.STRIPE.test;
+
         //  Return
         return res.status(200).json({
             success: true,
-            config: config.STRIPE.PRODUCTS
+            config: test ? config.STRIPE.PRODUCTS.test : config.STRIPE.PRODUCTS.prod
         })
         
     } catch (ex) {

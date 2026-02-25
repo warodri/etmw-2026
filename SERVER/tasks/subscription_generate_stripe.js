@@ -168,7 +168,7 @@ function getPlanInfo(plan) {
 
 function getProductByPlan(plan) {
     const name = String(plan || '').toLowerCase();
-    const products = (config.STRIPE && config.STRIPE.PRODUCTS) ? config.STRIPE.PRODUCTS : {};
+    const products = config.STRIPE.test ? config.STRIPE.PRODUCTS.test : config.STRIPE.PRODUCTS.prod;
     return products[name] || null;
 }
 

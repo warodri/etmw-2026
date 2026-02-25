@@ -34,7 +34,7 @@ body {
     display: none
 }
 
-.word-break {
+.word-break, .line-break {
     white-space: pre-line;
 }
 

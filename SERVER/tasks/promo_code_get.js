@@ -11,6 +11,7 @@ async function run(data, req, res) {
                 partnerName: item.partnerName,
                 partnerDescription: item.partnerDescription,
                 website: item.website,
+                language: item.language,
                 linkToCode: item.linkToCode
             })
         }

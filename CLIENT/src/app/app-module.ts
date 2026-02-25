@@ -59,6 +59,7 @@ import { DebateAddComment } from './COMPONENTS/DEBATE/debate-add-comment/debate-
 import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen-create-message';
 import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/screen-resume-payment';
 import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/resume-payment-warning';
+import { Partners } from './SCREEN/screen/partners/partners';
 
 @NgModule({
     declarations: [
@@ -112,6 +113,7 @@ import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/
         ScreenCreateMessage,
         ScreenResumePayment,
         ResumePaymentWarning,
+        Partners,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

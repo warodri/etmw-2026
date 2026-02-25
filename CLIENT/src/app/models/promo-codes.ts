@@ -5,6 +5,7 @@ export interface PromoCodeModel {
     partnerName: string,
     partnerDescription: string,
     website: string,
+    language: string,
     linkToCode: string,
 
     createdAt: number,
