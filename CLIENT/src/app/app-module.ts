@@ -60,6 +60,7 @@ import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen
 import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/screen-resume-payment';
 import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/resume-payment-warning';
 import { Partners } from './SCREEN/screen/partners/partners';
+import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-story/screen-create-your-story';
 
 @NgModule({
     declarations: [
@@ -114,6 +115,7 @@ import { Partners } from './SCREEN/screen/partners/partners';
         ScreenResumePayment,
         ResumePaymentWarning,
         Partners,
+        ScreenCreateYourStory,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

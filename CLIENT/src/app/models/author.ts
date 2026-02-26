@@ -4,6 +4,9 @@ export interface AuthorModel {
 
     _id: string,
     userId: UserModel,
+    isAlias?: boolean,
+    profilePicture?: any,
+    bookTaste?: string[],
     penName: string,
     bio: string | null,
     languages: Array<string>,

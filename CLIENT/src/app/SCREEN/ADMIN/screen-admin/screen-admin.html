@@ -307,10 +307,10 @@
 
                                     <div class="card shadow">
                                         <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0"><i class="bi bi-music-note-list"></i> Capítulos completados ({{ current.audioFiles?.length || 0 }})</h5>
+                                            <h5 class="mb-0"><i class="bi bi-music-note-list"></i> Capítulos completados ({{ current.audioFiles.length || 0 }})</h5>
                                         </div>
                                         <div class="card-body">
-                                            @if (!current.audioFiles?.length) {
+                                            @if (!current.audioFiles.length) {
                                                 <div class="text-muted">Aún no hay capítulos convertidos</div>
                                             } @else {
                                                 @for (file of current.audioFiles; track file.chapter) {

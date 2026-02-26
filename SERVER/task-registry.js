@@ -127,6 +127,16 @@ const SendContactForm = require('./tasks/contact_add');
 //  AUTHOR
 //
 const FindAuthor = require('./tasks/author_find');
+const AuthorUpsertAlias = require('./tasks/author_upsert_alias');
+const AuthorGetAlias = require('./tasks/author_get_alias');
+
+//
+//  YOUR STORY
+//
+YourStoryUpsert = require('./tasks/your_story_upsert');
+YourStoryGet = require('./tasks/your_story_get');
+YourStoryChapterUpsert = require('./tasks/your_story_chapter_upsert');
+YourStoryMemoryUpsert = require('./tasks/your_story_memory_upsert');
 
 const TasksRegistry = {
 
@@ -159,7 +169,15 @@ const TasksRegistry = {
     GetStoriesByAudiobook,
     GetStories,
     
+    //  YOUR STORY
+    YourStoryGet,
+    YourStoryUpsert,
+    YourStoryChapterUpsert,
+    YourStoryMemoryUpsert,
+
     //  AUTHOR
+    AuthorGetAlias,
+    AuthorUpsertAlias,
     FindAuthor,
     
     //  USER

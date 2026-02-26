@@ -9,35 +9,39 @@ const model = new Schema({
         index: true,
         required: true
     },
-
+    //  START ALIASES
+    isAlias: {
+        type: Boolean,
+        default: false
+    },
+    profilePicture: {
+        type: Object,
+        default: null
+    },
+    bookTaste: [{
+        type: String,
+        default: []
+    }],
+    //  END ALIASES
     penName: {
         type: String,
         index: true
     },
-
     bio: {
         type: String,
         default: null
     },
-
     languages: [{
         type: Object,
         default: []
     }],
-
     categories: [{
         type: Object,
         default: []
     }],
-
-    languages: [{
-        type: String
-    }],
-
     country: {
         type: String
     },
-
     isVerified: {
         type: Boolean,
         default: false,
