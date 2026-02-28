@@ -59,6 +59,8 @@ export class ScreenPlayer implements OnInit, OnDestroy {
     protected audioUrl: string | null = null;
     loadingAudio = signal<boolean>(false);
     sleepTimerRemainingSec = signal<number>(0);
+    chapterCompletedBannerVisible = signal<boolean>(false);
+    updatingChapterStatus = signal<boolean>(false);
     private pendingChapterProgressPercent: number | null = null;
     private initialProgressAppliedForCurrentSource = false;
     private lastHistorySyncAt = 0;
@@ -157,13 +159,14 @@ export class ScreenPlayer implements OnInit, OnDestroy {
             if (callback) callback();
             return;
         }
-        this.iUser.userGetListeningHistory(audiobookId, chapterNumber, (response: any) => {
+        this.iUser.userGetListeningHistory(audiobookId, (response: any) => {
             if (response && response.success) {
                 const history = this.normalizeListeningHistory(response.history);
                 this.listeningProgress.set(history);
                 this.pendingChapterProgressPercent = this.extractChapterProgressPercent(history, chapterNumber);
                 this.progressPercent.set(this.pendingChapterProgressPercent);
                 this.applyPendingChapterProgress();
+                this.chapterCompletedBannerVisible.set(this.isChapterCompleted(chapterNumber));
             } else {
                 this.pendingChapterProgressPercent = null;
             }
@@ -308,6 +311,9 @@ export class ScreenPlayer implements OnInit, OnDestroy {
             this.totalSeconds = Math.floor(this.audioElement.duration || 0);
             this.updateTime();
             this.updateWaveform();
+            if (this.progressPercent() < 99 && this.chapterCompletedBannerVisible()) {
+                this.chapterCompletedBannerVisible.set(false);
+            }
             this.syncListeningHistory(false);
         });
         this.audioElement.addEventListener('loadedmetadata', () => {
@@ -319,6 +325,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         });
         this.audioElement.addEventListener('ended', () => {
             this.isPlaying = false;
+            this.onChapterPlaybackEnded();
             this.syncListeningHistory(true);
         });
         this.audioElement.addEventListener('pause', () => {
@@ -332,6 +339,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
 
         this.loadingAudio.set(true);
         this.audioLoaded.set(false);
+        this.chapterCompletedBannerVisible.set(false);
         this.iAudiobook.audiobookGetChapterAudio(audiobookId, chapterNumber, (buffer: ArrayBuffer | null) => {
             this.loadingAudio.set(false);
             if (!buffer || !this.audioElement) {
@@ -359,6 +367,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         this.initAudioElement();
         if (!this.audioElement) return;
         this.audioLoaded.set(false);
+        this.chapterCompletedBannerVisible.set(false);
         if (this.audioUrl) {
             URL.revokeObjectURL(this.audioUrl);
         }
@@ -465,6 +474,152 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         return Math.max(0, Math.min(99.5, item.progressPercent));
     }
 
+    getChapterProgressPercent(chapterNumber: number): number {
+        const normalizedChapter = Number(chapterNumber);
+        if (normalizedChapter === Number(this.chapterNumber())) {
+            return Math.max(0, Math.min(100, Math.round(this.progressPercent())));
+        }
+        const item = this.listeningProgress().find((h) => Number(h.chapterNumber) === normalizedChapter);
+        if (!item || typeof item.progressPercent !== 'number') return 0;
+        return Math.max(0, Math.min(100, Math.round(item.progressPercent)));
+    }
+
+    isChapterCompleted(chapterNumber: number): boolean {
+        const item = this.listeningProgress().find((h) => Number(h.chapterNumber) === Number(chapterNumber));
+        if (!item) return false;
+        return item.completed === true || Number(item.progressPercent || 0) >= 99;
+    }
+
+    isCurrentChapterCompleted(): boolean {
+        return this.isChapterCompleted(this.chapterNumber());
+    }
+
+    toggleCurrentChapterReadStatus() {
+        const chapterNumber = this.chapterNumber();
+        if (!chapterNumber) return;
+        const completed = this.isChapterCompleted(chapterNumber);
+        this.setChapterReadStatus(chapterNumber, !completed);
+    }
+
+    toggleChapterReadStatus(chapterNumber: number) {
+        const completed = this.isChapterCompleted(chapterNumber);
+        this.setChapterReadStatus(chapterNumber, !completed);
+    }
+
+    private setChapterReadStatus(chapterNumber: number, markAsRead: boolean) {
+        const audiobookId = this.audiobookId();
+        if (!audiobookId || !chapterNumber || this.updatingChapterStatus()) return;
+
+        const normalizedChapter = Number(chapterNumber);
+        const progressPercent = markAsRead ? 100 : 0;
+        const completed = markAsRead;
+
+        this.updatingChapterStatus.set(true);
+        this.upsertListeningProgressLocal(normalizedChapter, progressPercent, completed);
+
+        if (normalizedChapter === Number(this.chapterNumber())) {
+            this.progressPercent.set(progressPercent);
+            if (!markAsRead) {
+                this.chapterCompletedBannerVisible.set(false);
+                if (this.audioElement) {
+                    this.audioElement.pause();
+                    this.isPlaying = false;
+                    try {
+                        this.audioElement.currentTime = 0;
+                    } catch (ex) {
+                        // ignore seek failures
+                    }
+                }
+                this.currentSeconds = 0;
+                this.updateTime();
+                this.updateWaveform();
+            } else {
+                this.chapterCompletedBannerVisible.set(true);
+            }
+        }
+
+        this.iUser.userSetListeningHistory(audiobookId, normalizedChapter, progressPercent, completed, () => {
+            this.updatingChapterStatus.set(false);
+        });
+    }
+
+    private upsertListeningProgressLocal(chapterNumber: number, progressPercent: number, completed: boolean) {
+        const current = this.listeningProgress();
+        const idx = current.findIndex((h) => Number(h.chapterNumber) === Number(chapterNumber));
+        const clampedProgress = Math.max(0, Math.min(100, Number(progressPercent || 0)));
+
+        if (idx >= 0) {
+            const item = current[idx];
+            const next = [...current];
+            next[idx] = {
+                ...item,
+                progressPercent: clampedProgress,
+                completed: completed || clampedProgress >= 99,
+                updatedAt: Date.now()
+            };
+            this.listeningProgress.set(next);
+            return;
+        }
+
+        const synthetic: ListeningProgressModel = {
+            _id: `local-${chapterNumber}`,
+            userId: '',
+            audiobookId: this.audiobookId() || '',
+            chapterNumber,
+            progressPercent: clampedProgress,
+            completed: completed || clampedProgress >= 99,
+            enabled: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+        this.listeningProgress.set([...current, synthetic]);
+    }
+
+    protected onChapterPlaybackEnded() {
+        const chapterNumber = this.chapterNumber();
+        if (!chapterNumber) return;
+        this.upsertListeningProgressLocal(chapterNumber, 100, true);
+        this.progressPercent.set(100);
+        this.chapterCompletedBannerVisible.set(true);
+        this.toast.show(`Chapter ${chapterNumber} completed`);
+        const nextChapter = this.getNextChapterNumber(chapterNumber);
+        if (nextChapter !== null) {
+            this.autoPlayChapter(nextChapter);
+        }
+    }
+
+    protected autoPlayChapter(chapterNumber: number) {
+        const normalized = Number(chapterNumber);
+        if (!normalized) return;
+        this.chapterNumber.set(normalized);
+        const idx = this.getChapters().findIndex((ch) => Number(ch.chapter) === normalized);
+        if (idx >= 0) {
+            this.selectedChapterIndex.set(idx);
+        }
+
+        this.getListeningProgress(() => {
+            this.loadChapterAudio(normalized, () => {
+                if (!this.audioElement) return;
+                this.audioElement.play().then(() => {
+                    this.isPlaying = true;
+                }).catch(() => {
+                    this.isPlaying = false;
+                });
+            });
+        });
+    }
+
+    private getNextChapterNumber(currentChapterNumber: number): number | null {
+        const ordered = this.getChapters()
+            .map((ch) => Number(ch.chapter))
+            .filter((ch) => Number.isFinite(ch) && ch > 0)
+            .sort((a, b) => a - b);
+        if (ordered.length === 0) return null;
+        const idx = ordered.findIndex((chapter) => chapter === Number(currentChapterNumber));
+        if (idx < 0 || idx + 1 >= ordered.length) return null;
+        return ordered[idx + 1];
+    }
+
     private applyPendingChapterProgress() {
         if (!this.audioElement) return;
         if (this.initialProgressAppliedForCurrentSource) return;
@@ -501,6 +656,7 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         this.lastHistorySyncAt = now;
         this.lastHistorySyncedProgress = clamped;
         const completed = clamped >= 99;
+        this.upsertListeningProgressLocal(chapterNumber, clamped, completed);
         this.iUser.userSetListeningHistory(audiobookId, chapterNumber, clamped, completed, () => {});
     }
     

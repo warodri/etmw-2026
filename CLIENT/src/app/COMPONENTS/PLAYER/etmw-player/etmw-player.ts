@@ -36,6 +36,10 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
                 this.audiobookNotAvailableForThisUser.set(true);
                 this.errorMessage.set(null)
                 this.chapterNumber.set(chapterNumber);
+                const idx = this.getChapters().findIndex((ch) => Number(ch.chapter) === Number(chapterNumber));
+                if (idx >= 0) {
+                    this.selectedChapterIndex.set(idx);
+                }
                 this.getListeningProgress(() => {
                     this.getChapterAudio(chapterNumber, () => {
                         this.loadingAudio.set(false);
@@ -47,6 +51,10 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
                 this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
             }
         })
+    }
+
+    override autoPlayChapter(chapterNumber: number) {
+        this.playChapter(chapterNumber);
     }
 
     isChapterAllowed(chapterNumber: number, callback: any) {

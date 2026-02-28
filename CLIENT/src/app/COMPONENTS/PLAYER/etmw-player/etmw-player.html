@@ -112,6 +112,15 @@
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="toggleChapterList()">
                     <i class="bi bi-list-ul"></i> {{ tr('Chapters', 'Capítulos') }}
                 </button>
+                <button class="btn btn-secondary rounded-pill px-4 py-2"
+                        [disabled]="updatingChapterStatus()"
+                        (click)="toggleCurrentChapterReadStatus()">
+                    @if (isCurrentChapterCompleted()) {
+                        <i class="bi bi-arrow-counterclockwise"></i> {{ tr('Mark Unread', 'Marcar no leído') }}
+                    } @else {
+                        <i class="bi bi-check2-circle"></i> {{ tr('Mark Read', 'Marcar leído') }}
+                    }
+                </button>
                 <button class="btn btn-secondary rounded-pill px-4 py-2" (click)="openSpeed()">
                     <i class="bi bi-speedometer2"></i> {{ playbackSpeed }}x
                 </button>
@@ -119,6 +128,13 @@
                     <i class="bi bi-clock"></i> {{ getSleepTimerLabel() }}
                 </button>
             </div>
+
+            @if (chapterCompletedBannerVisible()) {
+                <div class="chapter-finished-pill mb-4">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>{{ tr('Chapter finished. You can continue or mark it unread.', 'Capítulo terminado. Puedes continuar o marcarlo como no leído.') }}</span>
+                </div>
+            }
 
             <!-- If this book is not purchased, it will appear here -->
             @if (!audiobookNotAvailableForThisUser()) {
@@ -142,8 +158,25 @@
                                     </div>
                                     <div class="chapter-body">
                                         <div class="chapter-title">{{ tr('Chapter', 'Capítulo') }} {{ ch.chapter }}</div>
-                                        <div class="chapter-meta">{{ formatDuration(ch.durationSec) }}</div>
+                                        <div class="chapter-meta d-flex justify-content-start align-items-center flex-wrap gap-2">
+                                            <span>{{ formatDuration(ch.durationSec) }}</span>
+                                            <span>{{ getChapterProgressPercent(ch.chapter) }}%</span>
+                                            @if (isChapterCompleted(ch.chapter)) {
+                                                <span class="chapter-completed-badge">
+                                                    <i class="bi bi-check2"></i> {{ tr('Read', 'Leído') }}
+                                                </span>
+                                            }
+                                        </div>
                                     </div>
+                                    <button class="btn btn-sm btn-outline-light rounded-pill"
+                                        [disabled]="updatingChapterStatus()"
+                                        (click)="toggleChapterReadStatus(ch.chapter); $event.stopPropagation()">
+                                        @if (isChapterCompleted(ch.chapter)) {
+                                            {{ tr('Unread', 'No leído') }}
+                                        } @else {
+                                            {{ tr('Read', 'Leído') }}
+                                        }
+                                    </button>
                                     <button class="btn btn-sm btn-dark rounded-pill"
                                         (click)="playChapter(ch.chapter); $event.stopPropagation()">
                                         <i class="bi bi-play-fill"></i>
