@@ -61,6 +61,8 @@ import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/sc
 import { ResumePaymentWarning } from './COMPONENTS/ITEMS/resume-payment-warning/resume-payment-warning';
 import { Partners } from './SCREEN/screen/partners/partners';
 import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-story/screen-create-your-story';
+import { AudiobookSelectCover } from './COMPONENTS/ITEMS/audiobook-select-cover/audiobook-select-cover';
+import { AudiobookSelectCountryVoice } from './COMPONENTS/ITEMS/audiobook-select-country-voice/audiobook-select-country-voice';
 
 @NgModule({
     declarations: [
@@ -116,6 +118,8 @@ import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-sto
         ResumePaymentWarning,
         Partners,
         ScreenCreateYourStory,
+        AudiobookSelectCover,
+        AudiobookSelectCountryVoice,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

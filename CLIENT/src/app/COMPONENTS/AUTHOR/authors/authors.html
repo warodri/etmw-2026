@@ -2,13 +2,17 @@
     @for (item of latestAuthors(); track item ) {
         <div class="m-3 d-flex justify-content-start align-items-center gap-3" style="max-width: 280px;">
             <div>
-                <img [src]="item.userId.profilePicture" style="width:70px; height:70px; object-fit:cover" 
-                    class="rounded-circle shadow overflow-hidden pointer" (click)="gotoAuthor(item._id)" />
+                @if (item.isAlias) {
+                    <img [src]="SERVER + '/file?id=' + item.profilePicture.filename" style="width:70px; height:70px; object-fit:cover" 
+                        class="rounded-circle shadow overflow-hidden pointer" (click)="gotoAuthor(item._id)" />
+                } @else {
+                    <img [src]="item.userId.profilePicture" style="width:70px; height:70px; object-fit:cover" 
+                        class="rounded-circle shadow overflow-hidden pointer" (click)="gotoAuthor(item._id)" />
+                }
             </div>
             <div>
                 <h5><b>
-                    {{ item.userId.firstName }} 
-                    {{ item.userId.lastName }}
+                    {{ item.penName }} 
                 </b></h5>
                 <div class="mt-1 text-gray-400">
                     <small>Last upload:</small> {{ item.userId.updatedAt | date }}

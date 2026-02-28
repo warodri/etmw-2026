@@ -1,6 +1,7 @@
 <div class="container-fluid">
 
     <div class="col-12 col-md-8 col-lg-8 mx-auto px-3 px-md-0">
+        
         <app-mobile-header></app-mobile-header>
 
         <section class="story-hero text-center px-3">
@@ -9,136 +10,158 @@
         </section>
 
         <section class="story-panel rounded-4 p-4 mb-4">
-            <h5 class="fw-bold mb-3">1. Author aliases</h5>
-            <p class="text-gray-400 mb-3">Create and manage pen names to publish your audiobook.</p>
-
-            <div class="author-form-grid">
-                <div>
-                    <label class="small text-gray-400 mb-2 d-block">Alias name</label>
-                    <input
-                        class="story-input"
-                        type="text"
-                        placeholder="Example: M. Raven"
-                        [value]="authorForm().name"
-                        (input)="onAuthorNameInput($any($event.target).value)"
-                    />
-                </div>
-
-                <div>
-                    <label class="small text-gray-400 mb-2 d-block">Profile picture</label>
-                    <input
-                        class="story-input"
-                        type="file"
-                        accept="image/*"
-                        (change)="onAuthorPictureSelected($event)"
-                    />
-                </div>
-
-                <div class="author-form-bio">
-                    <label class="small text-gray-400 mb-2 d-block">Bio</label>
-                    <textarea
-                        class="story-textarea"
-                        rows="3"
-                        placeholder="Short author biography"
-                        [value]="authorForm().bio"
-                        (input)="onAuthorBioInput($any($event.target).value)"
-                    ></textarea>
-                </div>
-
-                <div class="author-form-bio">
-                    <label class="small text-gray-400 mb-2 d-block">Book taste for this alias</label>
-                    <div class="d-flex gap-2 mb-2">
-                        <input
-                            class="story-input flex-grow-1"
-                            type="text"
-                            placeholder="Example: Ursula K. Le Guin, sci-fi, magical realism"
-                            [value]="authorTasteInput()"
-                            (input)="onAuthorTasteInput($any($event.target).value)"
-                            (keydown)="onAuthorTasteKeydown($event)"
-                            (blur)="addAuthorTasteFromInput()"
-                        />
-                        <button class="btn btn-secondary rounded-3 px-3" (click)="addAuthorTasteFromInput()">Add</button>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2" *ngIf="authorForm().tasteTags.length > 0; else noAuthorTasteTags">
-                        @for (tag of authorForm().tasteTags; track tag) {
-                            <span class="taste-tag">
-                                {{ tag }}
-                                <button class="tag-remove" type="button" (click)="removeAuthorTasteTag(tag)">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </span>
-                        }
-                    </div>
-                    <ng-template #noAuthorTasteTags>
-                        <div class="small text-gray-400">Add at least one taste tag for this alias.</div>
-                    </ng-template>
-                </div>
-
-                <div class="author-preview" *ngIf="authorForm().profilePicturePreview">
-                    <img [src]="authorForm().profilePicturePreview" alt="Alias profile picture preview" />
-                </div>
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <h5 class="fw-bold m-0">1. Author aliases</h5>
+                @if (aliasPanelExpanded()) {
+                    @if (authorAliases().length > 0) {
+                        <button class="btn btn-sm btn-outline-light rounded-pill" (click)="closeAliasPanel()">Hide</button>
+                    }
+                } @else {
+                    <button class="btn btn-sm btn-outline-light rounded-pill" (click)="openAliasPanel()">Manage aliases</button>
+                }
             </div>
 
-            <div class="d-flex flex-wrap gap-2 mt-3">
-                <button
-                    class="btn btn-primary rounded-pill px-4"
-                    (click)="saveAuthorAlias()"
-                    [disabled]="!canSaveAuthorAlias() || savingAlias()"
-                >
-                    {{ editingAuthorId() ? 'Update alias' : 'Create alias' }}
-                </button>
-                <button
-                    class="btn btn-outline-light rounded-pill px-4"
-                    (click)="cancelAuthorEdit()"
-                    [disabled]="!hasDirtyAuthorForm()"
-                >
-                    Clear
-                </button>
-            </div>
-
-            @if (authorAliases().length === 0) {
-                <div class="small text-gray-400 mt-3">No author aliases yet. Create one to continue.</div>
+            @if (!aliasPanelExpanded() && authorAliases().length > 0) {
+                <p class="text-gray-400 mb-2">Alias panel hidden. Reopen when you want to create/edit aliases.</p>
+                <div class="alias-collapsed-summary" *ngIf="getSelectedAuthorAlias() as selectedAlias">
+                    <div class="d-flex align-items-center gap-2">
+                        <img class="author-avatar" [src]="selectedAlias.profilePictureUrl" [alt]="selectedAlias.name" />
+                        <div>
+                            <div class="small text-gray-400">Current alias</div>
+                            <div class="fw-semibold">{{ selectedAlias.name }}</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary rounded-pill" (click)="startNewAlias()">Create new alias</button>
+                </div>
             } @else {
-                <div class="d-flex flex-column gap-2 mt-3">
-                    @for (author of authorAliases(); track author.id) {
-                        <div class="author-card" [class.author-card-selected]="selectedAuthorAliasId() === author.id">
-                            <div class="author-card-main">
-                                <img class="author-avatar" [src]="author.profilePictureUrl" [alt]="author.name" />
-                                <div>
-                                    <div class="fw-semibold">{{ author.name }}</div>
-                                    <div class="small text-gray-400 word-break">{{ getAuthorBioPreview(author) }}</div>
-                                    @if (isBioExpandable(author)) {
-                                        <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleBioExpanded(author.id)">
-                                            {{ isBioExpanded(author.id) ? 'Show less bio' : 'Show full bio' }}
-                                        </button>
-                                    }
+                <p class="text-gray-400 mb-3">Create and manage pen names to publish your audiobook.</p>
 
-                                    <div class="d-flex flex-wrap gap-1 mt-2" *ngIf="author.tasteTags.length > 0">
-                                        @for (tag of getVisibleTasteTags(author); track tag) {
-                                            <span class="taste-tag small">{{ tag }}</span>
+                <div class="author-form-grid">
+                    <div>
+                        <label class="small text-gray-400 mb-2 d-block">Alias name</label>
+                        <input
+                            class="story-input"
+                            type="text"
+                            placeholder="Example: M. Raven"
+                            [value]="authorForm().name"
+                            (input)="onAuthorNameInput($any($event.target).value)"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="small text-gray-400 mb-2 d-block">Profile picture</label>
+                        <input
+                            class="story-input"
+                            type="file"
+                            accept="image/*"
+                            (change)="onAuthorPictureSelected($event)"
+                        />
+                    </div>
+
+                    <div class="author-form-bio">
+                        <label class="small text-gray-400 mb-2 d-block">Bio</label>
+                        <textarea
+                            class="story-textarea"
+                            rows="3"
+                            placeholder="Short author biography"
+                            [value]="authorForm().bio"
+                            (input)="onAuthorBioInput($any($event.target).value)"
+                        ></textarea>
+                    </div>
+
+                    <div class="author-form-bio">
+                        <label class="small text-gray-400 mb-2 d-block">Book taste for this alias</label>
+                        <div class="d-flex gap-2 mb-2">
+                            <input
+                                class="story-input flex-grow-1"
+                                type="text"
+                                placeholder="Example: Ursula K. Le Guin, sci-fi, magical realism"
+                                [value]="authorTasteInput()"
+                                (input)="onAuthorTasteInput($any($event.target).value)"
+                                (keydown)="onAuthorTasteKeydown($event)"
+                                (blur)="addAuthorTasteFromInput()"
+                            />
+                            <button class="btn btn-secondary rounded-3 px-3" (click)="addAuthorTasteFromInput()">Add</button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" *ngIf="authorForm().tasteTags.length > 0; else noAuthorTasteTags">
+                            @for (tag of authorForm().tasteTags; track tag) {
+                                <span class="taste-tag">
+                                    {{ tag }}
+                                    <button class="tag-remove" type="button" (click)="removeAuthorTasteTag(tag)">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                            }
+                        </div>
+                        <ng-template #noAuthorTasteTags>
+                            <div class="small text-gray-400">Add at least one taste tag for this alias.</div>
+                        </ng-template>
+                    </div>
+
+                    <div class="author-preview" *ngIf="authorForm().profilePicturePreview">
+                        <img [src]="authorForm().profilePicturePreview" alt="Alias profile picture preview" />
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button
+                        class="btn btn-primary rounded-pill px-4"
+                        (click)="saveAuthorAlias()"
+                        [disabled]="!canSaveAuthorAlias() || savingAlias()">
+                        {{ editingAuthorId() ? 'Update alias' : 'Create alias' }}
+                    </button>
+                    <button
+                        class="btn btn-outline-light rounded-pill px-4"
+                        (click)="cancelAuthorEdit()"
+                        [disabled]="!hasDirtyAuthorForm()">
+                        Clear
+                    </button>
+                </div>
+
+                @if (authorAliases().length === 0) {
+                    <div class="small text-gray-400 mt-3">No author aliases yet. Create one to continue.</div>
+                } @else {
+                    <div class="d-flex flex-column gap-2 mt-3">
+                        @for (author of authorAliases(); track author.id) {
+                            <div class="author-card" [class.author-card-selected]="selectedAuthorAliasId() === author.id">
+                                <div class="author-card-main">
+                                    <img class="author-avatar" [src]="author.profilePictureUrl" [alt]="author.name" />
+                                    <div>
+                                        <div class="fw-semibold">{{ author.name }}</div>
+                                        <div class="small text-gray-400 word-break">{{ getAuthorBioPreview(author) }}</div>
+                                        @if (isBioExpandable(author)) {
+                                            <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleBioExpanded(author.id)">
+                                                {{ isBioExpanded(author.id) ? 'Show less bio' : 'Show full bio' }}
+                                            </button>
+                                        }
+
+                                        <div class="d-flex flex-wrap gap-1 mt-2" *ngIf="author.tasteTags.length > 0">
+                                            @for (tag of getVisibleTasteTags(author); track tag) {
+                                                <span class="taste-tag small">{{ tag }}</span>
+                                            }
+                                        </div>
+                                        @if (isTasteExpandable(author)) {
+                                            <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleTasteExpanded(author.id)">
+                                                {{ isTasteExpanded(author.id) ? 'Show less tastes' : ('Show all tastes (' + author.tasteTags.length + ')') }}
+                                            </button>
                                         }
                                     </div>
-                                    @if (isTasteExpandable(author)) {
-                                        <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleTasteExpanded(author.id)">
-                                            {{ isTasteExpanded(author.id) ? 'Show less tastes' : ('Show all tastes (' + author.tasteTags.length + ')') }}
-                                        </button>
-                                    }
+                                </div>
+                                <div class="author-actions">
+                                    <button
+                                        class="btn btn-sm rounded-pill"
+                                        [class.btn-primary]="selectedAuthorAliasId() === author.id"
+                                        [class.btn-secondary]="selectedAuthorAliasId() !== author.id"
+                                        (click)="assignAuthorAlias(author.id)"
+                                    >
+                                        {{ selectedAuthorAliasId() === author.id ? 'Assigned' : 'Assign' }}
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary rounded-pill" (click)="editAuthorAlias(author.id)">Edit</button>
                                 </div>
                             </div>
-                            <div class="author-actions">
-                                <button
-                                    class="btn btn-sm rounded-pill"
-                                    [class.btn-primary]="selectedAuthorAliasId() === author.id"
-                                    [class.btn-secondary]="selectedAuthorAliasId() !== author.id"
-                                    (click)="assignAuthorAlias(author.id)"
-                                >
-                                    {{ selectedAuthorAliasId() === author.id ? 'Assigned' : 'Assign' }}
-                                </button>
-                                <button class="btn btn-sm btn-secondary rounded-pill" (click)="editAuthorAlias(author.id)">Edit</button>
-                            </div>
-                        </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
             }
         </section>
 
@@ -157,6 +180,7 @@
                 <div class="small text-warning mb-3">Create and assign an author alias before sending a story request.</div>
             </ng-template>
 
+            <!-- Type your idea-->
             <textarea
                 class="story-textarea mb-3"
                 rows="4"
@@ -165,12 +189,47 @@
                 (input)="onStoryPromptInput($any($event.target).value)"
             ></textarea>
 
-            <div class="text-end">
+            <!-- Language voice selection -->
+            <div>
+                <app-audiobook-select-country-voice
+                    labelEn="Select voice language"
+                    labelEs="Selecciona el idioma de la voz"
+                    (onValueChanged)="onVoiceLanguageSelected($event)"
+                ></app-audiobook-select-country-voice>
+            </div>
+
+            <!-- Pick your cover file -->
+            <div class="mt-3 p-3 border rounded-3">
+                <div class="d-flex justify-content-center text-center">
+                    @if (!coverFile) {
+                        <div class="py-4">
+                            <app-audiobook-select-cover
+                                (onConverSelected)="onCoverSelected($event)"
+                            ></app-audiobook-select-cover>
+                        </div>
+                    } @else {
+                        <div class="bg-secondary rounded-3 p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi bi-image-fill text-primary" style="font-size: 2rem;"></i>
+                                <div class="flex-grow-1 text-start">
+                                    <div class="fw-semibold">{{ coverFile.name }}</div>
+                                    <div class="small text-gray-400">{{ formatFileSize(coverFile.size) }}</div>
+                                </div>
+                                <button class="btn btn-sm btn-secondary rounded-circle" (click)="removeCoverFile()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Button to send to server -->
+            <div class="mt-3 text-end">
                 <button
                     class="btn btn-primary rounded-pill px-4"
                     (click)="submitStoryRequest()"
-                    [disabled]="!canSubmitStoryRequest()"
-                >
+                    [disabled]="!canSubmitStoryRequest()">
                     Send to server
                 </button>
             </div>
@@ -212,6 +271,31 @@
 
                             <div class="mb-2 fw-semibold">{{ request.prompt }}</div>
 
+                            @if (hasBlueprintContext(request)) {
+                                <div class="bg-secondary rounded-3 p-3 mb-3">
+                                    <div class="small text-gray-400 mb-2">Blueprint context generated by AI</div>
+                                    @if (request.blueprint?.mainConflict) {
+                                        <div class="small mb-2"><span class="text-gray-400">Main conflict:</span> <span class="word-break">{{ request.blueprint.mainConflict }}</span></div>
+                                    }
+                                    @if (request.blueprint?.longTermArc) {
+                                        <div class="small mb-2"><span class="text-gray-400">Long-term arc:</span> <span class="word-break">{{ request.blueprint.longTermArc }}</span></div>
+                                    }
+                                    @if (request.blueprint?.worldRules) {
+                                        <div class="small mb-2"><span class="text-gray-400">World rules:</span> <span class="word-break">{{ request.blueprint.worldRules }}</span></div>
+                                    }
+                                    @if (getBlueprintCharacters(request).length > 0) {
+                                        <div class="small">
+                                            <span class="text-gray-400">Characters:</span>
+                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                @for (name of getBlueprintCharacters(request); track name) {
+                                                    <span class="taste-tag small">{{ name }}</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
                             <div class="chapter-list d-flex flex-column gap-2">
                                 @for (chapter of request.chapters; track chapter.chapter) {
                                     <div class="chapter-row rounded-4 p-3">
@@ -228,22 +312,35 @@
                                         </div>
 
                                         @if (chapter.status === 'ready') {
-                                            <div class="row g-3 align-items-center">
-                                                <div class="col-12 col-sm-4 col-md-3">
-                                                    <img class="chapter-cover rounded-3" [src]="chapter.coverUrl" alt="Generated cover" />
+                                            <div>
+                                                <div class="small text-gray-400 mb-1">{{ chapter.title || ('Chapter ' + chapter.chapter) }}</div>
+                                                <div class="small text-gray-300 word-break mb-2" *ngIf="chapter.summary">{{ chapter.summary }}</div>
+                                                <div class="word-break chapter-content mb-3">{{ chapter.content || 'Loading generated text...' }}</div>
+                                                <div class="mb-2">
+                                                    <label class="small text-gray-400 mb-1 d-block">Regeneration instructions (optional)</label>
+                                                    <textarea
+                                                        class="story-textarea"
+                                                        rows="2"
+                                                        [value]="getChapterRegenerateInput(request.id, chapter.chapter)"
+                                                        (input)="onChapterRegenerateInput(request.id, chapter.chapter, $any($event.target).value)"
+                                                        placeholder="Example: Make this chapter darker, with more dialogue and slower pacing."
+                                                    ></textarea>
                                                 </div>
-                                                <div class="col-12 col-sm-8 col-md-9">
-                                                    <audio class="w-100 mb-3" [src]="chapter.audioUrl" controls></audio>
-                                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                                        <button
-                                                            class="btn btn-primary rounded-pill px-3"
-                                                            (click)="publishChapter(request.id, chapter.chapter)"
-                                                            [disabled]="!canPublish(request, chapter)"
-                                                        >
-                                                            {{ chapter.published ? 'Published' : 'Publish' }}
-                                                        </button>
-                                                        <span class="small text-gray-400" *ngIf="chapter.published">Waiting next chapter generation...</span>
-                                                    </div>
+                                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                                    <button
+                                                        class="btn btn-primary rounded-pill px-3"
+                                                        (click)="publishChapter(request.id, chapter.chapter)"
+                                                        [disabled]="!canPublish(request, chapter)"
+                                                    >
+                                                        {{ chapter.published ? 'Published' : 'Publish' }}
+                                                    </button>
+                                                    <button
+                                                        class="btn btn-secondary rounded-pill px-3"
+                                                        (click)="regenerateChapter(request.id, chapter.chapter)"
+                                                    >
+                                                        Regenerate
+                                                    </button>
+                                                    <span class="small text-gray-400" *ngIf="chapter.published">Waiting next chapter generation...</span>
                                                 </div>
                                             </div>
                                         } @else {
@@ -261,6 +358,6 @@
 
     <div style="height:8rem"></div>
 
-    <app-mobile-footer selected="home"></app-mobile-footer>
+    <app-mobile-footer></app-mobile-footer>
 
 </div>

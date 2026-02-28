@@ -20,12 +20,10 @@ async function run(data, req, res) {
 
         //  Validate password
         if (!password || password != 'car0lina') {
-            if (!userId) {
-                return res.status(200).json({
-                    success: false,
-                    message: 'Invalid user'
-                })
-            }
+            return res.status(200).json({
+                success: false,
+                message: 'Invalid user'
+            })
         }
 
         //  Get the audiobook
@@ -61,6 +59,7 @@ async function run(data, req, res) {
             const fs = require('fs');
             const path = require('path');
             const filePath = path.join(__dirname, '..', selectedChapter.url);
+            const contentType = getAudioContentType(filePath);
             
             // Check if file exists
             if (!fs.existsSync(filePath)) {
@@ -87,7 +86,7 @@ async function run(data, req, res) {
                     'Content-Range': `bytes ${start}-${end}/${fileSize}`,
                     'Accept-Ranges': 'bytes',
                     'Content-Length': chunksize,
-                    'Content-Type': 'audio/mpeg',
+                    'Content-Type': contentType,
                 };
                 
                 res.writeHead(206, head);
@@ -97,7 +96,7 @@ async function run(data, req, res) {
                 // Stream entire file
                 const head = {
                     'Content-Length': fileSize,
-                    'Content-Type': 'audio/mpeg',
+                    'Content-Type': contentType,
                     'Accept-Ranges': 'bytes'
                 };
                 
@@ -114,6 +113,16 @@ async function run(data, req, res) {
             message: 'Unexpected error'
         })
     }
+}
+
+function getAudioContentType(filePath) {
+    const path = require('path');
+    const ext = String(path.extname(filePath || '')).toLowerCase();
+    if (ext === '.wav') return 'audio/wav';
+    if (ext === '.mp3') return 'audio/mpeg';
+    if (ext === '.ogg') return 'audio/ogg';
+    if (ext === '.m4a') return 'audio/mp4';
+    return 'application/octet-stream';
 }
 
 module.exports = {

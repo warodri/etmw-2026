@@ -41,20 +41,30 @@ export class InternetAuthorService extends InternetService {
             }
         }, callback);
     }
-    yourStoryUpsert(recordId: string | null, authorId: string, isAIGenerated: boolean, status: string, blueprint: any, totalChaptersGenerated: number, callback: any) {
+    yourStoryUpsert(
+        recordId: string | null,
+        authorId: string,
+        isAIGenerated: boolean,
+        status: string,
+        blueprint: any,
+        totalChaptersGenerated: number,
+        coverFile: File | null,
+        voiceLanguage: string | null,
+        callback: any
+    ) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
-            action: 'YourStoryUpsert',
-            lang,
-            data: {
-                recordId, 
-                authorId, 
-                isAIGenerated, 
-                status, 
-                blueprint, 
-                totalChaptersGenerated
-            }
-        }, callback);
+        const formData = new FormData();
+        formData.append('action', 'YourStoryUpsert');
+        formData.append('lang', lang);
+        if (recordId) formData.append('recordId', recordId);
+        formData.append('authorId', authorId);
+        formData.append('isAIGenerated', String(isAIGenerated));
+        formData.append('status', status);
+        formData.append('blueprint', JSON.stringify(blueprint || {}));
+        formData.append('totalChaptersGenerated', String(totalChaptersGenerated || 0));
+        if (voiceLanguage) formData.append('voiceLanguage', voiceLanguage);
+        if (coverFile) formData.append('file', coverFile);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
     }
     yourStoryGet(skip: number, limit: number, callback: any) {
         const lang: string = LangUtils.detectLanguage();
@@ -64,6 +74,28 @@ export class InternetAuthorService extends InternetService {
             data: {
                 skip,
                 limit
+            }
+        }, callback);
+    }
+    yourStoryGenerateChapter(storyId: string, chapterNumber: number | null, regenerationInstructions: string | null, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'YourStoryGenerateChapter',
+            lang,
+            data: {
+                storyId,
+                chapterNumber,
+                regenerationInstructions
+            }
+        }, callback);
+    }
+    yourStoryChapterGet(storyId: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'YourStoryChapterGet',
+            lang,
+            data: {
+                storyId
             }
         }, callback);
     }

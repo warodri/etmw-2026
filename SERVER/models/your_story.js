@@ -42,6 +42,19 @@ const StorySchema = new mongoose.Schema({
         default: 'draft'
     },
     blueprint: BlueprintSchema,
+    coverFile: {
+        type: Object,
+        default: null
+    },
+    voiceLanguage: {
+        type: String,
+        default: ''
+    },
+    audiobookId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'etmw2026_audiobooks',
+        default: null
+    },
     totalChaptersGenerated: {
         type: Number,
         default: 0

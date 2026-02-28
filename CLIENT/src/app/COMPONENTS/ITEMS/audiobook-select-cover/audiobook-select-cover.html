@@ -1,0 +1,13 @@
+<div class="mb-3" style="font-size: 3rem;">🖼️</div>
+<h6 class="fw-bold mb-2">{{ tr('Add a Cover Image', 'Agrega una Imagen de Portada') }}</h6>
+<p class="small text-gray-400 mb-3">
+    {{ tr('Supported formats: JPG, PNG (Recommended 1400x1400)', 'Formatos compatibles: JPG, PNG (Recomendado 1400x1400)') }}
+</p>
+<input type="file"
+        #coverInput
+        accept="image/*"
+        (change)="coverSelected($event)"
+        style="display: none;">
+<button class="btn btn-primary rounded-pill px-5" (click)="coverInput.click()">
+    <i class="bi bi-upload"></i> {{ tr('Choose Cover', 'Elegir Portada') }}
+</button>

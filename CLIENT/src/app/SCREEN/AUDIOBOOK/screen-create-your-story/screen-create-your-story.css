@@ -99,6 +99,17 @@
     border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
+.alias-collapsed-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(71, 85, 105, 0.45);
+    background-color: rgba(15, 23, 42, 0.45);
+    border-radius: 12px;
+    padding: 0.7rem;
+}
+
 .author-card {
     display: flex;
     flex-direction: column;
@@ -201,6 +212,13 @@
     aspect-ratio: 4 / 5;
     object-fit: cover;
     border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.chapter-content {
+    max-height: 16rem;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    line-height: 1.55;
 }
 
 @media (min-width: 768px) {

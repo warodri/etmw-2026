@@ -357,19 +357,9 @@
                         <div class="bg-slate-800 rounded-4 p-4 text-center mb-3">
                             @if (!coverFile) {
                                 <div class="py-4">
-                                    <div class="mb-3" style="font-size: 3rem;">🖼️</div>
-                                    <h6 class="fw-bold mb-2">{{ tr('Add a Cover Image', 'Agrega una Imagen de Portada') }}</h6>
-                                    <p class="small text-gray-400 mb-3">
-                                        {{ tr('Supported formats: JPG, PNG (Recommended 1400x1400)', 'Formatos compatibles: JPG, PNG (Recomendado 1400x1400)') }}
-                                    </p>
-                                    <input type="file"
-                                           #coverInput
-                                           accept="image/*"
-                                           (change)="onCoverSelected($event)"
-                                           style="display: none;">
-                                    <button class="btn btn-primary rounded-pill px-5" (click)="coverInput.click()">
-                                        <i class="bi bi-upload"></i> {{ tr('Choose Cover', 'Elegir Portada') }}
-                                    </button>
+                                    <app-audiobook-select-cover
+                                        (onConverSelected)="onCoverSelected($event)"
+                                    ></app-audiobook-select-cover>
                                 </div>
                             } @else {
                                 <div class="bg-secondary rounded-3 p-3">
@@ -433,12 +423,9 @@
                             <div class="small text-gray-400 mt-1 mb-1">
                                 {{ tr('Translate and narrate in a different language', 'Traduce y narra en otro idioma') }}
                             </div>
-                            <select class="contact-input" [(ngModel)]="bookConfig.targetLanguage" (change)="calculateTranslationCost()">
-                                <option value="">{{ tr('Same as source', 'Igual que origen') }}</option>
-                                @for (lang of availableLocales; track lang.code) {
-                                    <option [value]="lang.code">{{ getLocaleLabel(lang.code) }}</option>
-                                }
-                            </select>
+                            <app-audiobook-select-country-voice
+                                (onValueChanged)="voiceLanguageChanged($event)"
+                            ></app-audiobook-select-country-voice>
                             @if (isTranslationEnabled()) {
                                 @if (!translation.useFixedPrice) {
                                     <div class="alert bg-slate-800 border border-primary text-primary mt-2 mb-0 small">

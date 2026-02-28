@@ -8,19 +8,16 @@ const model = new Schema({
         index: true,
         required: true
     },
-
     targetId: {
         type: String,
         index: true,
         required: true
     },
-
     targetType: {
         type: String,
         enum: ['audiobook', 'debate', 'author', 'comment'],
         required: true
     },
-
 
     enabled: {
         type: Boolean,

@@ -1,0 +1,6 @@
+<select class="contact-input" [(ngModel)]="targetLanguage" (change)="informChange()">
+    <option value="">{{ tr(labelEn, labelEs) }}</option>
+    @for (lang of AVAILABLE_LOCALES; track lang.code) {
+        <option [value]="lang.code">{{ GET_LOCALE_LABELS(lang.code) }}</option>
+    }
+</select>

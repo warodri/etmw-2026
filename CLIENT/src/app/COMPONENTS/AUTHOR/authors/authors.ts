@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { InternetAuthorService } from '../../../SERVICES/internet-author.service';
 import { AuthorModel } from '../../../models/author';
 import { Router } from '@angular/router';
+import { Config } from '../../../utils/config';
 
 @Component({
     selector: 'app-authors',
@@ -12,6 +13,8 @@ import { Router } from '@angular/router';
 export class Authors implements OnInit {
 
     latestAuthors = signal<AuthorModel[]>([])
+
+    SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote
 
     constructor(
         private iAuthor: InternetAuthorService,

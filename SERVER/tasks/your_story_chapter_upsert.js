@@ -10,6 +10,7 @@ async function run(data, req, res) {
             content,
             characterProgression,
             hooksForNextChapter,
+            regenerationInstructions,
             wordCount,
             aiModelUsed,
         } = data;
@@ -36,6 +37,7 @@ async function run(data, req, res) {
             existing.content = content;
             existing.characterProgression = characterProgression;
             existing.hooksForNextChapter = hooksForNextChapter;
+            existing.regenerationInstructions = regenerationInstructions;
             existing.wordCount = wordCount;
             existing.aiModelUsed = aiModelUsed;
             await existing.save();
@@ -54,6 +56,7 @@ async function run(data, req, res) {
             doc.content = content;
             doc.characterProgression = characterProgression;
             doc.hooksForNextChapter = hooksForNextChapter;
+            doc.regenerationInstructions = regenerationInstructions;
             doc.wordCount = wordCount;
             doc.aiModelUsed = aiModelUsed;
             const chapter = await doc.save();

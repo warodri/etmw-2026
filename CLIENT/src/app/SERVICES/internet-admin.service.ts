@@ -116,16 +116,17 @@ export class InternetAdminService extends InternetService {
         }, callback);
     }
     
-    convertToMP3(audiobookId: string, params: any, callback: any) {
+    convertToMP3(audiobookId: string, params: any, sampleVoiceFile: File, callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
-            action: 'ConvertToMP3',
-            lang,
-            data: {
-                audiobookId,
-                params
-            }
-        }, callback);
+        const formData = new FormData();
+        formData.append('action', 'ConvertToMP3');
+        formData.append('lang', lang);
+        formData.append('data', JSON.stringify({
+            audiobookId,
+            params
+        }));
+        formData.append('file', sampleVoiceFile);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP, formData, callback);
     }
     
     getStoriesByAudiobook(audiobookId: string, callback: any) {
@@ -161,6 +162,20 @@ export class InternetAdminService extends InternetService {
             pieceIndex
         }));
         formData.append('file', file);
+        this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP, formData, callback);
+    }
+
+    storyTranslateLanguage(storyId: string, targetLanguage: string, sampleVoiceFile: File, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        const formData = new FormData();
+        formData.append('action', 'StoryTranslateLanguage');
+        formData.append('lang', lang);
+        formData.append('data', JSON.stringify({
+            storyId,
+            targetLanguage,
+            narrationStyle: 'Essay'
+        }));
+        formData.append('file', sampleVoiceFile);
         this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP, formData, callback);
     }
 

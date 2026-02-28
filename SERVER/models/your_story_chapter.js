@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const ChapterSchema = new mongoose.Schema({
 
     storyId: {
@@ -11,6 +13,10 @@ const ChapterSchema = new mongoose.Schema({
     content: String,
     characterProgression: String,
     hooksForNextChapter: String,
+    regenerationInstructions: {
+        type: String,
+        default: ''
+    },
     wordCount: Number,
     aiModelUsed: String,
 
@@ -32,4 +38,6 @@ const ChapterSchema = new mongoose.Schema({
 
 });
 
-export default mongoose.model('etmw2026_your_story_chapter', ChapterSchema);   
+ChapterSchema.index({ storyId: 1, chapterNumber: 1 }, { unique: true });
+
+module.exports = mongoose.model('etmw2026_your_story_chapter', ChapterSchema);

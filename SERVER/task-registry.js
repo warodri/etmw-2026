@@ -36,6 +36,7 @@ GetStories = require('./tasks/story_get');
 GetStoriesByAudiobook = require('./tasks/story_get_by_audiobook');
 UpdateAudiobookStory = require('./tasks/story_update');
 StoryUploadNewFile = require('./tasks/story_upload_new_file');
+StoryTranslateLanguage = require('./tasks/story_translate_language');
 
 //
 //  SUBSCRIPTIONS
@@ -136,7 +137,9 @@ const AuthorGetAlias = require('./tasks/author_get_alias');
 YourStoryUpsert = require('./tasks/your_story_upsert');
 YourStoryGet = require('./tasks/your_story_get');
 YourStoryChapterUpsert = require('./tasks/your_story_chapter_upsert');
+YourStoryChapterGet = require('./tasks/your_story_chapter_get');
 YourStoryMemoryUpsert = require('./tasks/your_story_memory_upsert');
+YourStoryGenerateChapter = require('./tasks/your_story_generate_chapter');
 
 const TasksRegistry = {
 
@@ -166,6 +169,7 @@ const TasksRegistry = {
     //  STORIES
     UpdateAudiobookStory,
     StoryUploadNewFile,
+    StoryTranslateLanguage,
     GetStoriesByAudiobook,
     GetStories,
     
@@ -173,7 +177,9 @@ const TasksRegistry = {
     YourStoryGet,
     YourStoryUpsert,
     YourStoryChapterUpsert,
+    YourStoryChapterGet,
     YourStoryMemoryUpsert,
+    YourStoryGenerateChapter,
 
     //  AUTHOR
     AuthorGetAlias,

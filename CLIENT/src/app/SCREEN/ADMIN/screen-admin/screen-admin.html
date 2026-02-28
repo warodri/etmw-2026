@@ -314,23 +314,16 @@
                                                 <div class="text-muted">Aún no hay capítulos convertidos</div>
                                             } @else {
                                                 @for (file of current.audioFiles; track file.chapter) {
-                                                    <div class="list-group-item chapter-item mb-2">
-                                                        <div class="d-flex justify-content-between align-items-center gap-3">
-                                                            <div class="d-flex justify-content-start align-items-center gap-3">
-                                                                <span><strong>Capítulo {{ file.chapter }}</strong></span>
-                                                                <button class="btn btn-sm btn-primary rounded-pill" (click)="playChapter(file.chapter)">
-                                                                    @if (!audioLoading()[file.chapter]) {
-                                                                        <span><i class="bi bi-play-fill"></i> Reproducir</span>
-                                                                    } @else {
-                                                                        <span class="spinner-border spinner-border-sm"></span>
-                                                                    }
-                                                                </button>
-                                                            </div>
-                                                            <small class="text-muted">{{ file.durationSec ? (file.durationSec / 60 | number:'1.0-0') + ' min' : 'N/D' }}</small>
+                                                    <div class="mb-3">
+                                                        <div class="mb-2">
+                                                            <strong>Capítulo {{ file.chapter }}</strong>
+                                                            <small class="text-muted ms-2">{{ file.durationSec ? (file.durationSec / 60 | number:'1.0-0') + ' min' : 'N/D' }}</small>
                                                         </div>
-                                                        @if (audioUrls()[file.chapter]) {
-                                                            <div class="mt-2">
-                                                                <audio controls class="w-100" [src]="audioUrls()[file.chapter]"></audio>
+                                                        @if (getChapterAudioDirectUrl(file); as directUrl) {
+                                                            <div class="mt-2 p-2 rounded border border-secondary-subtle">
+                                                                <div class="small text-muted mb-1">Direct URL debug:</div>
+                                                                <div class="small word-break">{{ directUrl }}</div>
+                                                                <audio controls class="w-100 mt-2" [src]="directUrl"></audio>
                                                             </div>
                                                         }
                                                     </div>
@@ -362,17 +355,25 @@
                                                             </tr>
                                                         -->
                                                         <tr>
-                                                            <th scope="row">Nombre de la voz</th>
-                                                            <td>{{ current.voiceName || 'N/D' }}</td>
+                                                            <td colspan="2">
+                                                                Nombre de la voz: 
+                                                                <b>{{ current.voiceName || 'N/D' }}</b>
+                                                            </td>
                                                         </tr>
                                                         <tr>
-                                                            <th scope="row">Género de la voz</th>
-                                                            <td>{{ current.voiceGender || 'N/D' }}</td>
+                                                            <td colspan="2">
+                                                                Género: <b>{{ (current.voiceGender | uppercase) || 'N/D' }}</b>
+                                                            </td>
                                                         </tr>
                                                         <tr>
-                                                            <th scope="row">Escucha de la voz</th>
-                                                            <td>
-                                                                <audio controls [src]="current.voiceUrl"></audio>
+                                                            <td colspan="2">
+                                                                <div class="mt-2">
+                                                                    <audio controls [src]="current.voiceUrl"></audio>
+                                                                    <div class="mt-2 small text-muted">
+                                                                        Descarga este archivo para luego subirlo 
+                                                                        con el texto de la conversión.  
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                         <!-- 
@@ -433,12 +434,53 @@
                                                 <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($any($event))" placeholder="ej: 100, 240, etc..." min="1" style="max-width: 220px;">
                                             </div>
                                             <!-- Botton para convertir -->
-                                            <div class="d-flex align-items-center gap-2 mt-3">
-                                                <button class="btn btn-primary" (click)="convertPdfToMp3()">
-                                                    <i class="bi bi-file-earmark-music"></i> Convertir PDF a MP3
+                                            <div class="text-center mt-4">
+                                                <button class="btn btn-lg btn-primary" (click)="convertPdfToMp3()">
+                                                    <i class="bi bi-file-earmark-music"></i> Convertir PDF a audio
                                                 </button>
                                             </div>
                                             <div class="small text-muted mt-2">{{ pdfStatus() }}</div>
+                                            @if (pdfTextForConversion()) {
+                                                <div class="mt-3 p-3 rounded border border-secondary-subtle bg-dark-subtle">
+                                                    <div class="fw-bold mb-2">Debug: texto extraído del PDF</div>
+                                                    <div class="small text-muted mb-2">
+                                                        Caracteres extraídos: {{ pdfTextForConversion().length }}
+                                                    </div>
+                                                    <pre class="small mb-0 word-break" style="max-height: 220px; overflow:auto; white-space: pre-wrap;">{{ getPdfTextPreview(1200) }}</pre>
+                                                </div>
+                                            }
+
+                                            @if (conversionDebug(); as debug) {
+                                                <div class="mt-3 p-3 rounded border border-info-subtle bg-info-subtle text-dark">
+                                                    <div class="fw-bold mb-2">Debug: datos de conversión</div>
+                                                    <div class="small"><strong>Source language:</strong> {{ debug?.request?.sourceLanguage || 'N/D' }}</div>
+                                                    <div class="small"><strong>Target language:</strong> {{ debug?.request?.targetLanguage || 'N/D' }}</div>
+                                                    <div class="small"><strong>TTS language (enviado):</strong> {{ debug?.request?.ttsLanguage || 'N/D' }}</div>
+                                                    <div class="small"><strong>Capítulo:</strong> {{ debug?.request?.chapterNumber || 'N/D' }}</div>
+                                                    <div class="small"><strong>Total capítulos:</strong> {{ debug?.request?.totalChapters || 'N/D' }}</div>
+                                                    <div class="small"><strong>Total páginas:</strong> {{ debug?.request?.totalPages || 'N/D' }}</div>
+                                                    <div class="small"><strong>Texto enviado (chars):</strong> {{ debug?.request?.textLength || 0 }}</div>
+
+                                                    @if (debug?.response?.diagnostics) {
+                                                        <hr class="my-2">
+                                                        <div class="small fw-semibold">Server diagnostics</div>
+                                                        <div class="small"><strong>sourceLanguage:</strong> {{ debug.response.diagnostics.sourceLanguage || 'N/D' }}</div>
+                                                        <div class="small"><strong>targetLanguage:</strong> {{ debug.response.diagnostics.targetLanguage || 'N/D' }}</div>
+                                                        <div class="small"><strong>ttsLanguage:</strong> {{ debug.response.diagnostics.ttsLanguage || 'N/D' }}</div>
+                                                        <div class="small"><strong>translationApplied:</strong> {{ debug.response.diagnostics.translationApplied }}</div>
+                                                        <div class="small"><strong>inputTextLength:</strong> {{ debug.response.diagnostics.inputTextLength || 0 }}</div>
+                                                        <div class="small"><strong>finalTextLength:</strong> {{ debug.response.diagnostics.finalTextLength || 0 }}</div>
+                                                        <div class="small mt-1"><strong>inputTextPreview:</strong></div>
+                                                        <pre class="small mb-1 word-break" style="max-height: 120px; overflow:auto; white-space: pre-wrap;">{{ debug.response.diagnostics.inputTextPreview || '' }}</pre>
+                                                        <div class="small"><strong>finalTextPreview:</strong></div>
+                                                        <pre class="small mb-0 word-break" style="max-height: 120px; overflow:auto; white-space: pre-wrap;">{{ debug.response.diagnostics.finalTextPreview || '' }}</pre>
+                                                    }
+                                                    @if (debug?.response?.error) {
+                                                        <hr class="my-2">
+                                                        <div class="small text-danger"><strong>Error:</strong> {{ debug.response.error }}</div>
+                                                    }
+                                                </div>
+                                            }
 
                                             @if (conversionStatusVisible()) {
                                                 <div class="alert mt-3" [class.alert-info]="conversionStatusType() === 'info'" [class.alert-success]="conversionStatusType() === 'success'" [class.alert-danger]="conversionStatusType() === 'danger'">
@@ -459,22 +501,6 @@
                                             </button>
                                         </div>
                                         <div class="card-body">
-                                            <div class="story-create mb-3">
-                                                <div class="d-flex flex-wrap align-items-center gap-2">
-                                                    <div class="fw-bold">Crear historia en otro idioma:</div>
-                                                    <select class="form-select" [ngModel]="storyLanguageInput()" (ngModelChange)="storyLanguageInput.set($any($event))" style="max-width: 200px;">
-                                                        <option value="">Selecciona idioma</option>
-                                                        @for (lang of popularLanguages; track lang.code) {
-                                                            <option [value]="lang.code">{{ lang.label }} ({{ lang.code }})</option>
-                                                        }
-                                                    </select>
-                                                    <button class="btn btn-sm btn-outline-primary" (click)="createStoryForLanguage()">
-                                                        Crear historia
-                                                    </button>
-                                                </div>
-                                                <div class="small text-muted mt-2">Usa el PDF cargado y el número de capítulo actual para generar la historia en el idioma indicado.</div>
-                                            </div>
-
                                             @if (storiesLoading()) {
                                                 <div class="text-center py-3">
                                                     <div class="spinner-border text-primary" role="status"></div>
@@ -490,9 +516,34 @@
                                                     @for (story of stories(); track story._id) {
                                                         <div class="story-item card mb-3">
                                                             <div class="card-body">
-                                                                
-                                                                <span class="badge bg-secondary">Pieces: {{ story.chapterPieces?.length || 0 }}</span>
-
+                                                                <div class="p-2 mb-3 rounded border border-primary-subtle">
+                                                                    <div class="small fw-bold mb-2">Crear esta historia en otro idioma</div>
+                                                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                                                        <select
+                                                                            class="form-select form-select-sm"
+                                                                            [ngModel]="getStoryTargetLanguage(story)"
+                                                                            (ngModelChange)="setStoryTargetLanguage(story._id, $any($event))"
+                                                                            style="max-width: 200px;">
+                                                                            <option value="">Selecciona idioma</option>
+                                                                            @for (lang of popularLanguages; track lang.code) {
+                                                                                <option [value]="lang.code">{{ lang.label }} ({{ lang.code }})</option>
+                                                                            }
+                                                                        </select>
+                                                                        <button
+                                                                            class="btn btn-sm btn-outline-primary"
+                                                                            [disabled]="storyTranslateLoading()[story._id]"
+                                                                            (click)="translateStoryToLanguage(story)">
+                                                                            @if (!storyTranslateLoading()[story._id]) {
+                                                                                <span>Convertir historia</span>
+                                                                            } @else {
+                                                                                <span class="spinner-border spinner-border-sm"></span>
+                                                                            }
+                                                                        </button>
+                                                                    </div>
+                                                                    @if (storyTranslateError()[story._id]) {
+                                                                        <div class="small text-danger mt-2">{{ storyTranslateError()[story._id] }}</div>
+                                                                    }
+                                                                </div>
                                                                 <div class="mt-3 d-flex flex-wrap gap-3 align-items-start">
                                                                     @if (story.image) {
                                                                         <img [src]="SERVER + '/file?id=' + story.image" alt="Story image" class="story-image">

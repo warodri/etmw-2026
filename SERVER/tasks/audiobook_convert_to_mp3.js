@@ -15,7 +15,14 @@ const client = new OpenAI({ apiKey: config.OPEN_AI.API_KEY });
  */
 async function run(data, req, res) {
     try {
-        const payload = (req.body && req.body.data) ? req.body.data : (req.body || data || {});
+        let payload = (req.body && req.body.data) ? req.body.data : (req.body || data || {});
+        if (typeof payload === 'string') {
+            try {
+                payload = JSON.parse(payload);
+            } catch {
+                payload = {};
+            }
+        }
         const audiobookId = payload.audiobookId || req.body?.audiobookId;
         let params = payload.params || req.body?.params || {};
         if (typeof params === 'string') {
@@ -28,19 +35,14 @@ async function run(data, req, res) {
 
         /**
          * params is:
-         *  voiceId: string,
-            text: string,
-            modelId: 'eleven_turbo_v2',
-            stability: number,
-            similarity: number,
-            style: number,
-            speakerBoost: boolean,
-            outputFormat: 'mp3_44100_128',
-            chapterNumber: number,
-            totalChapters: number,
-            totalPages: number,
-            sourceLanguage: string,
-            targetLanguage: string
+         *  text: string,
+         *  language?: string,
+         *  narrationStyle?: 'Documentary' | 'Essay' | 'Fiction' | 'Thriller' | 'Calm' | 'Dramatic',
+         *  chapterNumber: number,
+         *  totalChapters: number,
+         *  totalPages: number,
+         *  sourceLanguage: string,
+         *  targetLanguage: string
          */
 
         //  Validate
@@ -54,6 +56,12 @@ async function run(data, req, res) {
             return res.json({
                 success: false,
                 message: 'Missing chapter text'
+            });
+        }
+        if (!req.file) {
+            return res.json({
+                success: false,
+                message: 'Missing reference audio file (.wav/.mp3)'
             });
         }
 
@@ -89,15 +97,20 @@ async function run(data, req, res) {
             });
         }
 
+        const originalInputText = String(params.text || '');
+
         // Resolve conversion language (locale-aware)
         const sourceLanguage = params.sourceLanguage || audiobook.sourceLanguage || 'en';
         const targetLanguage = params.targetLanguage || audiobook.targetLanguage || sourceLanguage;
         params.sourceLanguage = sourceLanguage;
         params.targetLanguage = targetLanguage;
-        params.language = targetLanguage;
+        params.language = getBaseLanguageCode(params.language || targetLanguage) || 'en';
+        params.referenceAudioPath = req.file.path;
+        params.narrationStyle = params.narrationStyle || params.narration_style || 'Essay';
+        const translated = shouldTranslate(sourceLanguage, targetLanguage);
 
         // Translate only when base language really changes (en -> es, not es-ES -> es-AR)
-        if (shouldTranslate(sourceLanguage, targetLanguage)) {
+        if (translated) {
             params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
         }
         
@@ -114,10 +127,10 @@ async function run(data, req, res) {
         await fs.mkdir(audiobookDir, { recursive: true });
 
         // Generate filename
-        const filename = `chapter_${chapterNumber}_${Date.now()}.mp3`;
+        const filename = `chapter_${chapterNumber}_${Date.now()}.wav`;
         const filepath = path.join(audiobookDir, filename);
 
-        // Save MP3 file
+        // Save WAV file
         await fs.writeFile(filepath, audioBuffer);
 
         // Get audio duration
@@ -194,7 +207,17 @@ async function run(data, req, res) {
                 chapter: chapterNumber,
                 url: relativeUrl,
                 durationSec: durationSec
-            }
+            },
+            diagnostics: {
+                sourceLanguage: params.sourceLanguage,
+                targetLanguage: params.targetLanguage,
+                ttsLanguage: params.language,
+                translationApplied: translated,
+                inputTextLength: originalInputText.length,
+                finalTextLength: String(params.text || '').length,
+                inputTextPreview: buildDebugPreview(originalInputText),
+                finalTextPreview: buildDebugPreview(String(params.text || ''))
+            },
         });
 
     } catch (ex) {
@@ -225,7 +248,7 @@ async function generateStory(audiobook, author, params) {
     chapterPieces = await generateStoryImages(audiobook, params, chapterPieces);
     chapterPieces = await generate10MinuteAudios(audiobook, params, chapterPieces);
     //  "chapterPieces" is ready to store in mongodb
-    await upsertStoryDocument(audiobook, author, params, chapterPieces);
+    return await upsertStoryDocument(audiobook, author, params, chapterPieces);
 }
 
 /**
@@ -411,7 +434,7 @@ function extractImageBase64(response) {
 }
 
 /**
- * Use Eleven Labs to generate an the 10-minute audio
+ * Use TTS service to generate the 10-minute audio
  * And populate "audioUrl"
  */
 async function generate10MinuteAudios(audiobook, params, chapterPieces) {
@@ -426,16 +449,11 @@ async function generate10MinuteAudios(audiobook, params, chapterPieces) {
             throw new Error('No readingText!')
         }
         const newParams = {
-            voiceId: params.voiceId,
             text: readingText,
-            modelId: params.modelId,
-            stability: params.stability,
-            similarity: params.similarity,
-            style: params.style,
-            speakerBoost: params.speakerBoost,
-            outputFormat: params.outputFormat,
-            language: params.language || audiobook.targetLanguage || audiobook.sourceLanguage
-        }
+            language: params.language || audiobook.targetLanguage || audiobook.sourceLanguage,
+            narrationStyle: params.narrationStyle || params.narration_style || 'Essay',
+            referenceAudioPath: params.referenceAudioPath
+        };
         const audioBuffer = await elevenLabsUtils.textToSpeech(newParams);
 
         // Create directory for audiobook if it doesn't exist
@@ -443,10 +461,10 @@ async function generate10MinuteAudios(audiobook, params, chapterPieces) {
         await fs.mkdir(storyDir, { recursive: true });
         
         // Generate filename
-        const filename = `story_${params.chapterNumber}_${item.slideIndex}.mp3`;
+        const filename = `story_${params.chapterNumber}_${item.slideIndex}.wav`;
         const filepath = path.join(storyDir, filename);
         
-        // Save MP3 file
+        // Save WAV file
         await fs.writeFile(filepath, audioBuffer);
 
         //  Add to the returning array
@@ -641,6 +659,13 @@ function getBaseLanguageCode(code) {
     return String(code || '').trim().toLowerCase().split('-')[0];
 }
 
+function buildDebugPreview(text, maxChars = 240) {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+    if (clean.length <= maxChars) return clean;
+    return clean.slice(0, maxChars) + '...';
+}
+
 function shouldTranslate(sourceLanguage, targetLanguage) {
     const sourceBase = getBaseLanguageCode(sourceLanguage);
     const targetBase = getBaseLanguageCode(targetLanguage);
@@ -653,30 +678,16 @@ async function convertTextToSpeechChunked(params) {
     if (!text) {
         throw new Error('Empty text for TTS');
     }
-
-    // Keep margin below 30000 hard limit
-    const chunks = splitTextIntoChunks(text, 28000);
-    if (chunks.length === 1) {
-        return elevenLabsUtils.textToSpeech({ ...params, text });
-    }
-
-    const buffers = [];
-    for (let i = 0; i < chunks.length; i++) {
-        const chunkText = chunks[i];
-        const chunkAudio = await elevenLabsUtils.textToSpeech({
-            ...params,
-            text: chunkText
-        });
-        buffers.push(chunkAudio);
-    }
-
-    // MP3 byte-stream concatenation works for sequential playback
-    return Buffer.concat(buffers);
+    // New TTS service handles sentence-safe chunking internally.
+    return elevenLabsUtils.textToSpeech({ ...params, text });
 }
 
 async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
     const Story = require('../models/story');
-    const chapterNumber = Number(params.chapterNumber || 1);
+    const chapterNumber = Number(params.chapterNumber);
+    if (!Number.isFinite(chapterNumber) || chapterNumber <= 0) {
+        throw new Error('Invalid chapterNumber for story upsert');
+    }
     const totalChapters = Number(params.totalChapters || audiobook.totalPages || chapterNumber || 1);
     const language = params.language || audiobook.targetLanguage || audiobook.sourceLanguage || 'en';
     const firstPiece = chapterPieces[0] || {};
@@ -696,14 +707,20 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
         updatedAt: Date.now()
     };
 
-    await Story.findOneAndUpdate(
+    const saved = await Story.findOneAndUpdate(
         { audiobookId: String(audiobook._id), chapterNumber: chapterNumber, language: language },
         doc,
         { upsert: true, new: true, setDefaultsOnInsert: true }
     );
+
+    return saved;
 }
 
 
 module.exports = {
-    run
+    run,
+    generateStory,
+    translateWithOpenAiChunked,
+    shouldTranslate,
+    getBaseLanguageCode
 }

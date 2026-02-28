@@ -3,7 +3,10 @@
 
 const config = require('../config');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
+const axios = require('axios');
+const FormData = require('form-data');
 
 const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1';
 const API_KEY = config.ELEVENLABS.API_KEY;
@@ -454,7 +457,7 @@ async function getVoicesWithExpression(filters = {}) {
  * @param {Object} params - {voiceId, text, modelId, stability, similarity, style, speakerBoost}
  * @returns {Promise<Buffer>} - Audio buffer
  */
-async function textToSpeech(params) {
+async function textToSpeechElevenLabs(params) {
     const {
         voiceId,
         text,
@@ -517,6 +520,144 @@ async function textToSpeech(params) {
         console.error('Error generating speech:', error);
         throw error;
     }
+}
+
+const TTS_SERVICE_BASE = 'https://amir-tubby-ivey.ngrok-free.dev';
+const TTS_POLL_INTERVAL_MS = 3000;
+const TTS_TIMEOUT_MS = 15 * 60 * 1000;
+const FALLBACK_REFERENCE_PATH = path.join(__dirname, 'tts-fallback-reference.wav');
+
+function createSineWaveWavBuffer({
+    durationSec = 2,
+    sampleRate = 22050,
+    frequency = 220,
+    amplitude = 0.35,
+} = {}) {
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const bytesPerSample = bitsPerSample / 8;
+    const numSamples = Math.floor(durationSec * sampleRate);
+    const dataSize = numSamples * numChannels * bytesPerSample;
+    const buffer = Buffer.alloc(44 + dataSize);
+
+    let offset = 0;
+    buffer.write('RIFF', offset); offset += 4;
+    buffer.writeUInt32LE(36 + dataSize, offset); offset += 4;
+    buffer.write('WAVE', offset); offset += 4;
+    buffer.write('fmt ', offset); offset += 4;
+    buffer.writeUInt32LE(16, offset); offset += 4;
+    buffer.writeUInt16LE(1, offset); offset += 2; // PCM
+    buffer.writeUInt16LE(numChannels, offset); offset += 2;
+    buffer.writeUInt32LE(sampleRate, offset); offset += 4;
+    buffer.writeUInt32LE(sampleRate * numChannels * bytesPerSample, offset); offset += 4;
+    buffer.writeUInt16LE(numChannels * bytesPerSample, offset); offset += 2;
+    buffer.writeUInt16LE(bitsPerSample, offset); offset += 2;
+    buffer.write('data', offset); offset += 4;
+    buffer.writeUInt32LE(dataSize, offset); offset += 4;
+
+    for (let i = 0; i < numSamples; i++) {
+        const t = i / sampleRate;
+        const sample = Math.sin(2 * Math.PI * frequency * t) * amplitude;
+        const pcm = Math.max(-1, Math.min(1, sample));
+        buffer.writeInt16LE(Math.floor(pcm * 32767), offset);
+        offset += 2;
+    }
+
+    return buffer;
+}
+
+async function getOrCreateFallbackReferenceAudio() {
+    try {
+        await fs.access(FALLBACK_REFERENCE_PATH);
+        return FALLBACK_REFERENCE_PATH;
+    } catch (ex) {
+        const wavBuffer = createSineWaveWavBuffer();
+        await fs.writeFile(FALLBACK_REFERENCE_PATH, wavBuffer);
+        return FALLBACK_REFERENCE_PATH;
+    }
+}
+
+async function textToSpeech(params) {
+    const {
+        text,
+        referenceAudioPath,
+        language = 'en',
+        narrationStyle = 'Essay',
+        baseUrl = TTS_SERVICE_BASE,
+        pollIntervalMs = TTS_POLL_INTERVAL_MS,
+        timeoutMs = TTS_TIMEOUT_MS,
+    } = params || {};
+
+    const cleanText = String(text || '').trim();
+    if (!cleanText) {
+        throw new Error('No text for TTS');
+    }
+
+    let filePath = referenceAudioPath;
+    if (!filePath) {
+        filePath = await getOrCreateFallbackReferenceAudio();
+    }
+
+    const ext = String(path.extname(filePath || '')).toLowerCase();
+    if (!['.wav', '.mp3'].includes(ext)) {
+        throw new Error('referenceAudioPath must point to .wav or .mp3');
+    }
+    if (!fsSync.existsSync(filePath)) {
+        throw new Error(`Reference audio does not exist: ${filePath}`);
+    }
+
+    const form = new FormData();
+    const normalizedLanguage = getLanguageCode(String(language || 'en'));
+    form.append('file', fsSync.createReadStream(filePath));
+    form.append('text', cleanText);
+    form.append('language', String(normalizedLanguage || 'en'));
+    form.append('narration_style', String(narrationStyle || 'Essay'));
+
+    const queueResponse = await axios.post(`${baseUrl}/api/tts`, form, {
+        headers: form.getHeaders(),
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        validateStatus: () => true,
+    });
+
+    if (queueResponse.status !== 202 || !queueResponse.data?.queueId) {
+        throw new Error(`TTS queue failed: ${queueResponse.status} ${JSON.stringify(queueResponse.data || {})}`);
+    }
+
+    const queueId = queueResponse.data.queueId;
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+        const pollResponse = await axios.get(`${baseUrl}/api/tts/${queueId}`, {
+            responseType: 'arraybuffer',
+            validateStatus: () => true,
+        });
+
+        const contentType = String(pollResponse.headers?.['content-type'] || '');
+        if (pollResponse.status === 202) {
+            await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+            continue;
+        }
+
+        if (pollResponse.status === 500 && contentType.includes('application/json')) {
+            let errMessage = 'TTS job failed';
+            try {
+                const parsed = JSON.parse(Buffer.from(pollResponse.data).toString('utf-8'));
+                errMessage = parsed.error || errMessage;
+            } catch {
+                // no-op
+            }
+            throw new Error(errMessage);
+        }
+
+        if (pollResponse.status === 200 && contentType.includes('audio/wav')) {
+            return Buffer.from(pollResponse.data);
+        }
+
+        throw new Error(`Unexpected TTS poll response: ${pollResponse.status} (${contentType})`);
+    }
+
+    throw new Error('TTS polling timeout');
 }
 
 /**
@@ -846,6 +987,7 @@ module.exports = {
     downloadVoiceSample,
     getModels,
     getVoicesWithExpression,
+    textToSpeechElevenLabs,
     textToSpeech,
     getVoicePricingTier,
     supportsExpression,

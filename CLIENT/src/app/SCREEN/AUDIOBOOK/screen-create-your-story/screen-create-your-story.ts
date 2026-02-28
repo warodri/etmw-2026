@@ -9,8 +9,11 @@ type ServerStoryStatus = 'draft' | 'publishing' | 'published' | 'archived';
 type StoryChapter = {
     chapter: number;
     status: PipelineStatus;
+    title?: string;
+    summary?: string;
+    content?: string;
+    regenerationInstructions?: string;
     coverUrl?: string;
-    audioUrl?: string;
     published: boolean;
 };
 
@@ -69,8 +72,17 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     expandedBioIds = signal<Record<string, boolean>>({});
     expandedTasteIds = signal<Record<string, boolean>>({});
+    chapterRegenerateInput = signal<Record<string, string>>({});
+    aliasPanelExpanded = signal(true);
+    private aliasPanelInit = false;
 
     private activeTimers: number[] = [];
+
+    //  Cover file for the audiobook
+    coverFile: File | null = null;
+
+    //  Language Selected for the voice
+    voiceLanguage = '';
 
     constructor(
         private iAuthor: InternetAuthorService,
@@ -87,6 +99,16 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.clearTimers();
         this.revokeAuthorPreviewUrl();
+    }
+
+    onCoverSelected(file: File) {
+        if (file) {
+            this.coverFile = file;
+        }
+    }
+
+    onVoiceLanguageSelected(language: string) {
+        this.voiceLanguage = String(language || '').trim();
     }
 
     onAuthorNameInput(value: string): void {
@@ -200,6 +222,9 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                             this.selectedAuthorAliasId.set(found.id);
                         }
                     }
+                    if (this.authorAliases().length > 0) {
+                        this.aliasPanelExpanded.set(false);
+                    }
                     this.toast.show('Alias saved successfully.');
                 });
             }
@@ -234,6 +259,21 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     cancelAuthorEdit(): void {
         this.resetAuthorForm();
+    }
+
+    openAliasPanel(): void {
+        this.aliasPanelExpanded.set(true);
+    }
+
+    closeAliasPanel(): void {
+        if (this.authorAliases().length > 0) {
+            this.aliasPanelExpanded.set(false);
+        }
+    }
+
+    startNewAlias(): void {
+        this.resetAuthorForm();
+        this.aliasPanelExpanded.set(true);
     }
 
     getSelectedAuthorAlias(): AuthorAlias | null {
@@ -312,6 +352,14 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         if (!prompt || !selectedAuthor) {
             return;
         }
+        if (!this.voiceLanguage) {
+            this.toast.show('Please select a voice language.');
+            return;
+        }
+        if (!this.coverFile) {
+            this.toast.show('Please select a cover image.');
+            return;
+        }
 
         this.sendingStory.set(true);
 
@@ -324,6 +372,8 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             'draft',
             blueprint,
             0,
+            this.coverFile,
+            this.voiceLanguage,
             (response: any) => {
                 this.sendingStory.set(false);
 
@@ -342,12 +392,18 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 }
 
                 this.storyPrompt.set('');
+                this.voiceLanguage = '';
+                this.coverFile = null;
             }
         );
     }
 
     canSubmitStoryRequest(): boolean {
-        return !!this.storyPrompt().trim() && !!this.selectedAuthorAliasId() && !this.sendingStory();
+        return !!this.storyPrompt().trim()
+            && !!this.selectedAuthorAliasId()
+            && !!this.voiceLanguage
+            && !!this.coverFile
+            && !this.sendingStory();
     }
 
     publishChapter(requestId: string, chapterNumber: number): void {
@@ -402,6 +458,89 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         return !!prev && prev.published;
     }
 
+    getChapterRegenerateKey(requestId: string, chapterNumber: number): string {
+        return `${requestId}:${chapterNumber}`;
+    }
+
+    getChapterRegenerateInput(requestId: string, chapterNumber: number): string {
+        const key = this.getChapterRegenerateKey(requestId, chapterNumber);
+        const localValue = this.chapterRegenerateInput()[key];
+        if (typeof localValue === 'string' && localValue.length > 0) {
+            return localValue;
+        }
+
+        const request = this.submissions().find(item => item.id === requestId);
+        const chapter = request?.chapters.find(item => item.chapter === chapterNumber);
+        return String(chapter?.regenerationInstructions || '');
+    }
+
+    onChapterRegenerateInput(requestId: string, chapterNumber: number, value: string): void {
+        const key = this.getChapterRegenerateKey(requestId, chapterNumber);
+        this.chapterRegenerateInput.update(state => ({ ...state, [key]: value }));
+    }
+
+    regenerateChapter(requestId: string, chapterNumber: number): void {
+        const request = this.submissions().find(item => item.id === requestId);
+        if (!request || !requestId || requestId.startsWith('local_story_')) {
+            return;
+        }
+
+        const key = this.getChapterRegenerateKey(requestId, chapterNumber);
+        const regenerationInstructions = (this.chapterRegenerateInput()[key] || '').trim();
+
+        this.updateChapterStatus(requestId, chapterNumber, 'generating');
+
+        this.iAuthor.yourStoryGenerateChapter(
+            requestId,
+            chapterNumber,
+            regenerationInstructions || null,
+            (response: any) => {
+                if (!response?.success) {
+                    this.toast.show(response?.message || this.toast.getMessageErrorUnexpected());
+                    this.updateChapterStatus(requestId, chapterNumber, 'ready');
+                    return;
+                }
+
+                const generatedChapter = response?.chapter || {};
+                const generatedChapterNumber = Math.max(1, Number(generatedChapter?.chapterNumber || chapterNumber));
+
+                this.submissions.update(list => list.map(item => {
+                    if (item.id !== requestId) {
+                        return item;
+                    }
+
+                    const chapters = item.chapters.map(ch => {
+                        if (ch.chapter !== generatedChapterNumber) {
+                            return ch;
+                        }
+                        const updatedChapter: StoryChapter = {
+                            ...ch,
+                            status: 'ready',
+                            title: String(generatedChapter?.title || ch.title || `Chapter ${generatedChapterNumber}`),
+                            summary: String(generatedChapter?.summary || ch.summary || ''),
+                            content: String(generatedChapter?.content || ch.content || ''),
+                            regenerationInstructions: String(generatedChapter?.regenerationInstructions || regenerationInstructions || ''),
+                            coverUrl: this.generateCoverSvg(item.prompt, generatedChapterNumber),
+                        };
+                        return updatedChapter;
+                    });
+
+                    return {
+                        ...item,
+                        blueprint: response?.story?.blueprint || item.blueprint,
+                        chapters,
+                        status: this.getRequestStatus(chapters),
+                    };
+                }));
+
+                this.chapterRegenerateInput.update(state => ({
+                    ...state,
+                    [key]: String(generatedChapter?.regenerationInstructions || regenerationInstructions || '')
+                }));
+            }
+        );
+    }
+
     getStatusLabel(status: PipelineStatus): string {
         if (status === 'processing') return 'Processing';
         if (status === 'generating') return 'Generating';
@@ -410,6 +549,30 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     formatDateTime(epoch: number): string {
         return new Date(epoch).toLocaleString();
+    }
+
+    getBlueprintCharacters(request: StoryRequest): string[] {
+        const characters = request?.blueprint?.characters;
+        if (!Array.isArray(characters)) {
+            return [];
+        }
+
+        return characters
+            .map((item: any) => {
+                if (typeof item === 'string') return item.trim();
+                if (item && typeof item === 'object') return String(item.name || '').trim();
+                return '';
+            })
+            .filter((name: string) => !!name);
+    }
+
+    hasBlueprintContext(request: StoryRequest): boolean {
+        const blueprint = request?.blueprint || {};
+        const hasConflict = !!String(blueprint.mainConflict || '').trim();
+        const hasArc = !!String(blueprint.longTermArc || '').trim();
+        const hasRules = !!String(blueprint.worldRules || '').trim();
+        const hasCharacters = this.getBlueprintCharacters(request).length > 0;
+        return hasConflict || hasArc || hasRules || hasCharacters;
     }
 
     private loadAliases(onDone?: () => void): void {
@@ -437,6 +600,13 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 this.selectedAuthorAliasId.set(aliases[0]?.id || '');
             }
 
+            if (!this.aliasPanelInit) {
+                this.aliasPanelExpanded.set(aliases.length === 0);
+                this.aliasPanelInit = true;
+            } else if (aliases.length === 0) {
+                this.aliasPanelExpanded.set(true);
+            }
+
             onDone?.();
         });
     }
@@ -457,7 +627,63 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 : [];
 
             this.submissions.set(stories);
+            this.hydrateStoryChapters(stories);
         });
+    }
+
+    private hydrateStoryChapters(stories: StoryRequest[]): void {
+        for (const story of stories) {
+            if (!story.id || story.id.startsWith('local_story_')) {
+                continue;
+            }
+
+            this.iAuthor.yourStoryChapterGet(story.id, (response: any) => {
+                if (!response?.success) {
+                    return;
+                }
+
+                const serverChapters = Array.isArray(response.chapters) ? response.chapters : [];
+                if (serverChapters.length === 0) {
+                    return;
+                }
+
+                this.submissions.update(list => list.map(request => {
+                    if (request.id !== story.id) {
+                        return request;
+                    }
+
+                    const chaptersByNumber = new Map<number, StoryChapter>();
+                    for (const chapter of request.chapters) {
+                        chaptersByNumber.set(Number(chapter.chapter), chapter);
+                    }
+
+                    for (const serverChapter of serverChapters) {
+                        const chapterNumber = Number(serverChapter?.chapterNumber || 0);
+                        if (!chapterNumber) {
+                            continue;
+                        }
+
+                        chaptersByNumber.set(chapterNumber, {
+                            chapter: chapterNumber,
+                            status: 'ready',
+                            published: true,
+                            title: String(serverChapter?.title || `Chapter ${chapterNumber}`),
+                            summary: String(serverChapter?.summary || ''),
+                            content: String(serverChapter?.content || ''),
+                            regenerationInstructions: String(serverChapter?.regenerationInstructions || ''),
+                            coverUrl: this.generateCoverSvg(request.prompt, chapterNumber),
+                        });
+                    }
+
+                    const merged = Array.from(chaptersByNumber.values()).sort((a, b) => a.chapter - b.chapter);
+                    return {
+                        ...request,
+                        chapters: merged,
+                        status: this.getRequestStatus(merged),
+                    };
+                }));
+            });
+        }
     }
 
     private mapServerAlias(raw: any): AuthorAlias {
@@ -511,7 +737,6 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                     status: 'ready',
                     published: true,
                     coverUrl: this.generateCoverSvg(prompt, chapter),
-                    audioUrl: this.getMockAudioUrl(chapter),
                 });
             }
             return result;
@@ -528,25 +753,63 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     private scheduleChapterPipeline(requestId: string, chapterNumber: number): void {
-        const generatingTimer = window.setTimeout(() => {
-            this.updateChapterStatus(requestId, chapterNumber, 'generating');
-            const req = this.submissions().find(item => item.id === requestId);
-            if (req) {
-                this.persistStory(req, 'publishing', req.totalChaptersGenerated);
-            }
-        }, 1800);
+        this.updateChapterStatus(requestId, chapterNumber, 'generating');
+        const req = this.submissions().find(item => item.id === requestId);
+        if (req) {
+            this.persistStory(req, 'publishing', req.totalChaptersGenerated);
+        }
 
-        const readyTimer = window.setTimeout(() => {
-            this.updateChapterStatus(requestId, chapterNumber, 'ready');
-            this.attachChapterAssets(requestId, chapterNumber);
-            const req = this.submissions().find(item => item.id === requestId);
-            if (req) {
-                req.totalChaptersGenerated = Math.max(req.totalChaptersGenerated, chapterNumber);
-                this.persistStory(req, 'published', req.totalChaptersGenerated);
-            }
-        }, 3600);
+        if (!requestId || requestId.startsWith('local_story_')) {
+            return;
+        }
 
-        this.activeTimers.push(generatingTimer, readyTimer);
+        this.iAuthor.yourStoryGenerateChapter(requestId, null, null, (response: any) => {
+            if (!response?.success) {
+                this.toast.show(response?.message || this.toast.getMessageErrorUnexpected());
+                this.updateChapterStatus(requestId, chapterNumber, 'processing');
+                return;
+            }
+
+            const generatedChapter = response?.chapter || {};
+            const generatedChapterNumber = Math.max(1, Number(generatedChapter?.chapterNumber || chapterNumber));
+
+            this.submissions.update(list => list.map(request => {
+                if (request.id !== requestId) {
+                    return request;
+                }
+
+                const existing = request.chapters.find(ch => ch.chapter === generatedChapterNumber);
+                const baseChapter: StoryChapter = existing || {
+                    chapter: generatedChapterNumber,
+                    status: 'processing',
+                    published: false,
+                };
+
+                const updatedChapter: StoryChapter = {
+                    ...baseChapter,
+                    status: 'ready',
+                    title: String(generatedChapter?.title || baseChapter.title || `Chapter ${generatedChapterNumber}`),
+                    summary: String(generatedChapter?.summary || baseChapter.summary || ''),
+                    content: String(generatedChapter?.content || baseChapter.content || ''),
+                    regenerationInstructions: String(generatedChapter?.regenerationInstructions || baseChapter.regenerationInstructions || ''),
+                    coverUrl: this.generateCoverSvg(request.prompt, generatedChapterNumber),
+                };
+
+                const other = request.chapters.filter(ch => ch.chapter !== generatedChapterNumber);
+                const chapters = [...other, updatedChapter].sort((a, b) => a.chapter - b.chapter);
+
+                const nextTotalFromServer = Number(response?.story?.totalChaptersGenerated || request.totalChaptersGenerated);
+                const totalChaptersGenerated = Math.max(nextTotalFromServer, generatedChapterNumber);
+
+                return {
+                    ...request,
+                    blueprint: response?.story?.blueprint || request.blueprint,
+                    chapters,
+                    status: this.getRequestStatus(chapters),
+                    totalChaptersGenerated,
+                };
+            }));
+        });
     }
 
     private updateChapterStatus(requestId: string, chapterNumber: number, status: PipelineStatus): void {
@@ -585,7 +848,6 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 return {
                     ...chapter,
                     coverUrl: this.generateCoverSvg(request.prompt, chapterNumber),
-                    audioUrl: this.getMockAudioUrl(chapterNumber),
                 };
             });
 
@@ -608,6 +870,8 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             status,
             request.blueprint,
             totalChaptersGenerated,
+            null,
+            null,
             (_response: any) => {
                 // Fire-and-forget; UI already reflects local progress.
             }
@@ -737,16 +1001,6 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
     }
 
-    private getMockAudioUrl(chapterNumber: number): string {
-        const tone = (chapterNumber % 3) + 1;
-        const files = [
-            'https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3',
-            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-        ];
-        return files[tone - 1];
-    }
-
     private clearTimers(): void {
         this.activeTimers.forEach(timerId => window.clearTimeout(timerId));
         this.activeTimers = [];
@@ -788,5 +1042,17 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&apos;');
+    }
+
+    formatFileSize(bytes: number): string {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    removeCoverFile() {
+        this.coverFile = null;
     }
 }

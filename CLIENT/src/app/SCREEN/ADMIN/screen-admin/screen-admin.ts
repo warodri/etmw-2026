@@ -62,6 +62,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     pdfStatus = signal('');
     pdfTextForConversion = signal('');
     pdfNameForConversion = signal('');
+    conversionDebug = signal<any | null>(null);
     selectedPdfFile = signal<File | null>(null);
     selectedSampleVoiceFile = signal<File | null>(null);
 
@@ -93,6 +94,9 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     storiesError = signal('');
     storyExpanded = signal<Record<string, boolean>>({});
     storyLanguageInput = signal('');
+    storyTranslateLanguageInput = signal<Record<string, string>>({});
+    storyTranslateLoading = signal<Record<string, boolean>>({});
+    storyTranslateError = signal<Record<string, string>>({});
     storyEditId = signal<string | null>(null);
     storyEditSaving = signal(false);
     storyFileUploading = signal(false);
@@ -280,6 +284,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.pdfTextForConversion.set('');
         this.pdfNameForConversion.set('');
         this.pdfStatus.set('');
+        this.conversionDebug.set(null);
         this.selectedPdfFile.set(null);
         this.stories.set([]);
         this.storiesError.set('');
@@ -411,8 +416,13 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     private convertPdfToMp3WithLanguage(languageOverride?: string) {
         const current = this.currentAudiobook();
         if (!current) return;
+        const sampleVoiceFile = this.selectedSampleVoiceFile();
         if (!this.pdfTextForConversion()) {
             alert('Primero carga un PDF válido.');
+            return;
+        }
+        if (!sampleVoiceFile) {
+            alert('Por favor selecciona un archivo de voz de referencia (.wav o .mp3).');
             return;
         }
         if (!this.chapterNumberInput()) {
@@ -432,34 +442,49 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         const totalChapters = parseInt(this.totalChaptersInput(), 10);
         const totalPages = parseInt(this.totalPagesInput(), 10);
         const sourceLanguage = current.sourceLanguage;
-        const targetLanguage = current.targetLanguage;
+        const targetLanguage = languageOverride || current.targetLanguage || current.sourceLanguage;
+        const ttsLanguage = (targetLanguage || 'en').split('-')[0];
+
+        this.conversionDebug.set({
+            request: {
+                sourceLanguage: sourceLanguage || '',
+                targetLanguage: targetLanguage || '',
+                ttsLanguage,
+                chapterNumber,
+                totalChapters,
+                totalPages,
+                textLength: this.pdfTextForConversion().length,
+                textPreview: this.getPdfTextPreview(900),
+            },
+            response: null
+        });
 
         this.conversionStatusVisible.set(true);
         this.conversionStatusType.set('info');
-        this.conversionStatusText.set('Convirtiendo a MP3...');
-
-        const stability = current.stability || 50;
-        const clarity = current.clarity || 75;
+        this.conversionStatusText.set('Convirtiendo texto a audio...');
 
         this.internetAdmin.convertToMP3(
             current._id,
             {
-                voiceId: current.voiceId,
                 text: this.pdfTextForConversion(),
-                modelId: 'eleven_turbo_v2',
-                stability: stability / 100,
-                similarity: clarity / 100,
-                style: current.useExpression ? 0.5 : 0,
-                speakerBoost: true,
-                outputFormat: 'mp3_44100_128',
+                language: targetLanguage || 'en',
+                narrationStyle: 'Essay',
                 chapterNumber,
                 totalChapters,
                 totalPages,
                 sourceLanguage,
                 targetLanguage
             },
+            sampleVoiceFile,
             (result: any) => {
                 if (result && result.success) {
+                    this.conversionDebug.update((state) => ({
+                        ...(state || {}),
+                        response: {
+                            diagnostics: result?.diagnostics || null,
+                            chapter: result?.chapter || null
+                        }
+                    }));
                     this.conversionStatusText.set('¡Conversión exitosa!');
                     this.conversionStatusType.set('success');
                     this.chapterNumberInput.set('');
@@ -469,6 +494,13 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
                         this.loadStoriesForCurrentAudiobook();
                     }, 1500);
                 } else {
+                    this.conversionDebug.update((state) => ({
+                        ...(state || {}),
+                        response: {
+                            diagnostics: result?.diagnostics || null,
+                            error: result?.message || 'Error desconocido'
+                        }
+                    }));
                     this.conversionStatusText.set('Error en la conversión: ' + (result?.message || 'Error desconocido'));
                     this.conversionStatusType.set('danger');
                 }
@@ -486,6 +518,61 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
             return;
         }
         this.convertPdfToMp3WithLanguage(this.storyLanguageInput());
+    }
+
+    getStoryTargetLanguage(story: any): string {
+        const storyId = String(story?._id || '');
+        const selected = this.storyTranslateLanguageInput()[storyId];
+        if (selected) return selected;
+        return this.storyLanguageInput() || story?.language || '';
+    }
+
+    setStoryTargetLanguage(storyId: string, value: string) {
+        this.storyTranslateLanguageInput.update((map) => ({
+            ...map,
+            [storyId]: value
+        }));
+    }
+
+    translateStoryToLanguage(story: any) {
+        const current = this.currentAudiobook();
+        const sampleVoiceFile = this.selectedSampleVoiceFile();
+        const storyId = String(story?._id || '');
+        const targetLanguage = this.getStoryTargetLanguage(story);
+
+        if (!current?._id) {
+            alert('No hay audiolibro seleccionado.');
+            return;
+        }
+        if (!storyId) {
+            alert('Historia inválida.');
+            return;
+        }
+        if (!sampleVoiceFile) {
+            alert('Por favor selecciona un archivo de voz de referencia (.wav o .mp3).');
+            return;
+        }
+        if (!targetLanguage) {
+            alert('Selecciona un idioma destino para esta historia.');
+            return;
+        }
+
+        this.storyTranslateLoading.update((map) => ({ ...map, [storyId]: true }));
+        this.storyTranslateError.update((map) => ({ ...map, [storyId]: '' }));
+
+        this.internetAdmin.storyTranslateLanguage(storyId, targetLanguage, sampleVoiceFile, (result: any) => {
+            this.storyTranslateLoading.update((map) => ({ ...map, [storyId]: false }));
+            if (!result?.success) {
+                this.storyTranslateError.update((map) => ({
+                    ...map,
+                    [storyId]: result?.message || 'No se pudo traducir la historia.'
+                }));
+                return;
+            }
+
+            this.storyTranslateError.update((map) => ({ ...map, [storyId]: '' }));
+            this.loadStoriesForCurrentAudiobook();
+        });
     }
 
     playChapter(chapterNumber: number) {
@@ -510,7 +597,8 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
                     alert('No se pudo cargar el audio');
                     return;
                 }
-                const blob = new Blob([buffer], { type: 'audio/mpeg' });
+                const mimeType = this.detectAudioMimeType(buffer, chapterNumber);
+                const blob = new Blob([buffer], { type: mimeType });
                 const url = URL.createObjectURL(blob);
                 const existing = this.audioUrls()[chapterNumber];
                 if (existing) {
@@ -522,6 +610,36 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
                 }));
             }
         );
+    }
+
+    getChapterAudioDirectUrl(file: any): string | null {
+        if (!file?.url) return null;
+        return `${this.SERVER}/file?id=/${file.url}`;
+    }
+
+    private detectAudioMimeType(buffer: ArrayBuffer, chapterNumber: number): string {
+        const bytes = new Uint8Array(buffer);
+        if (bytes.length >= 12) {
+            const riff = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+            const wave = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]);
+            if (riff === 'RIFF' && wave === 'WAVE') {
+                return 'audio/wav';
+            }
+        }
+        if (bytes.length >= 3) {
+            const id3 = String.fromCharCode(bytes[0], bytes[1], bytes[2]);
+            if (id3 === 'ID3') {
+                return 'audio/mpeg';
+            }
+        }
+
+        const current = this.currentAudiobook();
+        const chapter = current?.audioFiles?.find((f: any) => Number(f.chapter) === Number(chapterNumber));
+        const url = String(chapter?.url || '').toLowerCase();
+        if (url.endsWith('.wav')) return 'audio/wav';
+        if (url.endsWith('.mp3')) return 'audio/mpeg';
+
+        return 'audio/wav';
     }
 
     getOpenFileUrl() {
@@ -564,6 +682,17 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
             this.storiesLoading.set(false);
             if (result && result.success && Array.isArray(result.stories)) {
                 this.stories.set(result.stories);
+                this.storyTranslateLanguageInput.update((map) => {
+                    const next = { ...map };
+                    for (const story of result.stories) {
+                        const id = String(story?._id || '');
+                        if (!id) continue;
+                        if (!next[id]) {
+                            next[id] = this.storyLanguageInput() || story?.language || '';
+                        }
+                    }
+                    return next;
+                });
             } else {
                 this.stories.set([]);
                 this.storiesError.set(result?.message || 'No se pudieron cargar las historias');
@@ -768,5 +897,12 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
             script.onerror = () => reject();
             document.body.appendChild(script);
         });
+    }
+
+    getPdfTextPreview(maxChars: number = 900): string {
+        const text = String(this.pdfTextForConversion() || '').trim();
+        if (!text) return '';
+        if (text.length <= maxChars) return text;
+        return text.slice(0, maxChars) + '...';
     }
 }

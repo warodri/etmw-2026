@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const ChapterMemorySchema = new mongoose.Schema({
 
     storyId: {
@@ -26,4 +28,6 @@ const ChapterMemorySchema = new mongoose.Schema({
 
 });
 
-export default mongoose.model('etmw2026_your_story_chapter_memory', ChapterMemorySchema);   
+ChapterMemorySchema.index({ storyId: 1, chapterNumber: 1 }, { unique: true });
+
+module.exports = mongoose.model('etmw2026_your_story_chapter_memory', ChapterMemorySchema);
