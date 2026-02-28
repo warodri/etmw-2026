@@ -121,7 +121,7 @@ function getMissingBlueprintFields(blueprint) {
     return missing;
 }
 
-async function openAiEnrichBlueprint({ blueprint, condensedMemory }) {
+async function openAiEnrichBlueprint({ blueprint, condensedMemory, targetLanguage }) {
     const missingFields = getMissingBlueprintFields(blueprint);
     if (missingFields.length === 0) {
         return {
@@ -144,7 +144,7 @@ async function openAiEnrichBlueprint({ blueprint, condensedMemory }) {
             {
                 role: 'user',
                 content: JSON.stringify({
-                    instructions: 'Generate missing blueprint fields with continuity-safe details.',
+                    instructions: `Generate missing blueprint fields with continuity-safe details. Write values in this language: ${String(targetLanguage || 'en')}.`,
                     requiredFields: ['mainConflict', 'longTermArc', 'worldRules', 'characters'],
                     outputShape: {
                         mainConflict: 'string',
@@ -194,6 +194,7 @@ async function openAiCreateChapter({
     chapterNumber,
     condensedMemory,
     regenerationInstructions,
+    targetLanguage,
 }) {
     const openAiClient = getClient();
 
@@ -212,6 +213,7 @@ RULES:
 - Do NOT contradict previous events.
 - Keep prose optimized for spoken narration.
 - Write with clear paragraph breaks.
+- Write ALL generated text values (title, summary, content, characterProgression, hooksForNextChapter) in: ${String(targetLanguage || 'en')}.
 
 OUTPUT FORMAT (strict JSON):
 {
@@ -227,6 +229,7 @@ Avoid markdown wrappers and return JSON only.
 
     const user = {
         chapterNumber,
+        targetLanguage: String(targetLanguage || 'en'),
         blueprint,
         condensedMemory: condensedMemory || 'No prior chapters yet.',
         regenerationInstructions: String(regenerationInstructions || '').trim() || 'No extra instructions.',
@@ -254,6 +257,7 @@ async function openAiSummarizeChapterMemory({
     chapterText,
     chapterSummary,
     priorCondensedMemory,
+    targetLanguage,
 }) {
     const openAiClient = getClient();
 
@@ -263,7 +267,8 @@ async function openAiSummarizeChapterMemory({
         priorCondensedMemory: priorCondensedMemory || '',
         chapterSummary: String(chapterSummary || ''),
         chapterText: String(chapterText || '').slice(0, 24000),
-        instructions: 'Create around 200 words summarizing key events, character progression, unresolved threads, and continuity facts required for next chapters.'
+        targetLanguage: String(targetLanguage || 'en'),
+        instructions: `Create around 200 words summarizing key events, character progression, unresolved threads, and continuity facts required for next chapters. Write in ${String(targetLanguage || 'en')}.`
     };
 
     const completion = await openAiClient.chat.completions.create({
@@ -273,7 +278,7 @@ async function openAiSummarizeChapterMemory({
         messages: [
             {
                 role: 'system',
-                content: 'Return strict JSON with a single field {"memory":"..."}. The memory should be about 200 words and continuity-focused.'
+                content: 'Return strict JSON with a single field {"memory":"..."}. The memory should be about 200 words, continuity-focused, and in the requested targetLanguage.'
             },
             {
                 role: 'user',

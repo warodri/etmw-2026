@@ -166,6 +166,7 @@ function sanitizeAudiobook(doc) {
         ...obj,
         audioFiles: audioFiles.map((file) => ({
             chapter: file.chapter,
+            url: file.url,
             durationSec: file.durationSec
         }))
     };

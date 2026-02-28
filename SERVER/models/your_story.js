@@ -50,6 +50,10 @@ const StorySchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    chapterLanguage: {
+        type: String,
+        default: 'en'
+    },
     audiobookId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'etmw2026_audiobooks',

@@ -141,6 +141,8 @@ YourStoryChapterUpsert = require('./tasks/your_story_chapter_upsert');
 YourStoryChapterGet = require('./tasks/your_story_chapter_get');
 YourStoryMemoryUpsert = require('./tasks/your_story_memory_upsert');
 YourStoryGenerateChapter = require('./tasks/your_story_generate_chapter');
+YourStoryConvertChapterAudio = require('./tasks/your_story_convert_chapter_audio');
+YourStoryDeleteChapterAudio = require('./tasks/your_story_delete_chapter_audio');
 
 const TasksRegistry = {
 
@@ -181,6 +183,8 @@ const TasksRegistry = {
     YourStoryChapterGet,
     YourStoryMemoryUpsert,
     YourStoryGenerateChapter,
+    YourStoryConvertChapterAudio,
+    YourStoryDeleteChapterAudio,
 
     //  AUTHOR
     AuthorGetAlias,

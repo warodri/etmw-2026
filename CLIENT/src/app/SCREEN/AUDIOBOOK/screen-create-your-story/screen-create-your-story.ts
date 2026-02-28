@@ -1,7 +1,11 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { InternetAuthorService } from '../../../SERVICES/internet-author.service';
+import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { ToastService } from '../../../SERVICES/toast';
 import { UtilsService } from '../../../utils/utils-service';
+import { Config } from '../../../utils/config';
+import { ProcessedVoice } from '../../../models/voices';
+import { AVAILABLE_LANGUAGES } from '../../../DATA/country-list';
 
 type PipelineStatus = 'processing' | 'generating' | 'ready';
 type ServerStoryStatus = 'draft' | 'publishing' | 'published' | 'archived';
@@ -14,6 +18,8 @@ type StoryChapter = {
     content?: string;
     regenerationInstructions?: string;
     coverUrl?: string;
+    audioUrl?: string;
+    audioDurationSec?: number;
     published: boolean;
 };
 
@@ -28,6 +34,7 @@ type AuthorAlias = {
 
 type StoryRequest = {
     id: string;
+    audiobookId?: string;
     prompt: string;
     status: PipelineStatus;
     serverStatus: ServerStoryStatus;
@@ -37,6 +44,11 @@ type StoryRequest = {
     authorAliasName: string;
     authorAliasPicture: string;
     totalChaptersGenerated: number;
+    voiceLanguage?: string;
+    chapterLanguage?: string;
+    voiceId?: string;
+    voiceName?: string;
+    voiceUrl?: string;
     blueprint: any;
     chapters: StoryChapter[];
 };
@@ -73,6 +85,8 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     expandedBioIds = signal<Record<string, boolean>>({});
     expandedTasteIds = signal<Record<string, boolean>>({});
     chapterRegenerateInput = signal<Record<string, string>>({});
+    chapterAudioConverting = signal<Record<string, boolean>>({});
+    chapterAudioInterrupted = signal<Record<string, boolean>>({});
     aliasPanelExpanded = signal(true);
     private aliasPanelInit = false;
 
@@ -83,9 +97,18 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     //  Language Selected for the voice
     voiceLanguage = '';
+    chapterLanguage = 'en';
+    availableLanguages = AVAILABLE_LANGUAGES;
+    availableVoices = signal<ProcessedVoice[]>([]);
+    loadingVoices = signal(false);
+    selectedVoiceId = signal('');
+    showAllVoices = signal(false);
+    playingVoiceId = signal('');
+    private voicePreviewAudio?: HTMLAudioElement;
 
     constructor(
         private iAuthor: InternetAuthorService,
+        private iAudiobook: InternetAudiobookService,
         private toast: ToastService,
         private utils: UtilsService,
     ) {}
@@ -99,6 +122,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.clearTimers();
         this.revokeAuthorPreviewUrl();
+        this.stopVoicePreview();
     }
 
     onCoverSelected(file: File) {
@@ -109,6 +133,18 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     onVoiceLanguageSelected(language: string) {
         this.voiceLanguage = String(language || '').trim();
+        this.selectedVoiceId.set('');
+        this.availableVoices.set([]);
+        this.showAllVoices.set(false);
+        this.stopVoicePreview();
+        if (this.voiceLanguage) {
+            this.loadVoicesByLanguage(this.voiceLanguage);
+        }
+    }
+
+    onChapterLanguageSelected(language: string): void {
+        const normalized = String(language || '').trim();
+        this.chapterLanguage = normalized || 'en';
     }
 
     onAuthorNameInput(value: string): void {
@@ -356,6 +392,10 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             this.toast.show('Please select a voice language.');
             return;
         }
+        if (!this.chapterLanguage) {
+            this.toast.show('Please select a chapter language.');
+            return;
+        }
         if (!this.coverFile) {
             this.toast.show('Please select a cover image.');
             return;
@@ -374,6 +414,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             0,
             this.coverFile,
             this.voiceLanguage,
+            this.chapterLanguage,
             (response: any) => {
                 this.sendingStory.set(false);
 
@@ -392,7 +433,6 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 }
 
                 this.storyPrompt.set('');
-                this.voiceLanguage = '';
                 this.coverFile = null;
             }
         );
@@ -402,6 +442,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         return !!this.storyPrompt().trim()
             && !!this.selectedAuthorAliasId()
             && !!this.voiceLanguage
+            && !!this.chapterLanguage
             && !!this.coverFile
             && !this.sendingStory();
     }
@@ -416,6 +457,10 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         if (!chapter || chapter.status !== 'ready' || chapter.published) {
             return;
         }
+        if (!chapter.audioUrl) {
+            this.toast.show('Generate chapter audio before publishing.');
+            return;
+        }
 
         chapter.published = true;
 
@@ -424,6 +469,10 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             this.persistStory(request, 'published', request.totalChaptersGenerated);
         }
 
+        this.queueNextChapter(request, chapterNumber);
+    }
+
+    private queueNextChapter(request: StoryRequest, chapterNumber: number): void {
         const hasNextChapter = chapterNumber < request.maxChapters;
         if (!hasNextChapter) {
             return;
@@ -449,6 +498,9 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         if (chapter.status !== 'ready' || chapter.published) {
             return false;
         }
+        if (!chapter.audioUrl) {
+            return false;
+        }
 
         if (chapter.chapter === 1) {
             return true;
@@ -456,6 +508,54 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
         const prev = request.chapters.find(item => item.chapter === chapter.chapter - 1);
         return !!prev && prev.published;
+    }
+
+    canGenerateNextChapter(request: StoryRequest, chapter: StoryChapter): boolean {
+        if (chapter.status !== 'ready') {
+            return false;
+        }
+        if (!chapter.audioUrl) {
+            return false;
+        }
+        if (chapter.chapter >= request.maxChapters) {
+            return false;
+        }
+        const nextChapterNumber = chapter.chapter + 1;
+        const nextExists = request.chapters.some(item => item.chapter === nextChapterNumber);
+        if (nextExists) {
+            return false;
+        }
+
+        if (chapter.published) {
+            return true;
+        }
+
+        if (chapter.chapter === 1) {
+            return true;
+        }
+
+        const prev = request.chapters.find(item => item.chapter === chapter.chapter - 1);
+        return !!prev && prev.published;
+    }
+
+    generateNextChapter(requestId: string, chapterNumber: number): void {
+        const request = this.submissions().find(item => item.id === requestId);
+        if (!request) {
+            return;
+        }
+        const chapter = request.chapters.find(item => item.chapter === chapterNumber);
+        if (!chapter) {
+            return;
+        }
+        if (!this.canGenerateNextChapter(request, chapter)) {
+            this.toast.show('Complete this chapter (including audio) before generating the next one.');
+            return;
+        }
+        if (chapter.published) {
+            this.queueNextChapter(request, chapterNumber);
+            return;
+        }
+        this.publishChapter(requestId, chapterNumber);
     }
 
     getChapterRegenerateKey(requestId: string, chapterNumber: number): string {
@@ -482,6 +582,11 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     regenerateChapter(requestId: string, chapterNumber: number): void {
         const request = this.submissions().find(item => item.id === requestId);
         if (!request || !requestId || requestId.startsWith('local_story_')) {
+            return;
+        }
+        const chapter = request.chapters.find(item => item.chapter === chapterNumber);
+        if (chapter?.audioUrl) {
+            this.toast.show('Delete chapter audio first before regenerating text.');
             return;
         }
 
@@ -627,6 +732,17 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 : [];
 
             this.submissions.set(stories);
+            if (!this.voiceLanguage) {
+                const preferredLanguage = String(stories.find((item: StoryRequest) => !!String(item.voiceLanguage || '').trim())?.voiceLanguage || '').trim();
+                if (preferredLanguage) {
+                    this.voiceLanguage = preferredLanguage;
+                    this.loadVoicesByLanguage(preferredLanguage);
+                }
+            }
+            if (!this.chapterLanguage) {
+                const preferredChapterLanguage = String(stories.find((item: StoryRequest) => !!String(item.chapterLanguage || '').trim())?.chapterLanguage || '').trim();
+                this.chapterLanguage = preferredChapterLanguage || 'en';
+            }
             this.hydrateStoryChapters(stories);
         });
     }
@@ -663,10 +779,12 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                             continue;
                         }
 
+                        const existingChapter = chaptersByNumber.get(chapterNumber);
                         chaptersByNumber.set(chapterNumber, {
+                            ...(existingChapter || {}),
                             chapter: chapterNumber,
                             status: 'ready',
-                            published: true,
+                            published: existingChapter?.published ?? true,
                             title: String(serverChapter?.title || `Chapter ${chapterNumber}`),
                             summary: String(serverChapter?.summary || ''),
                             content: String(serverChapter?.content || ''),
@@ -682,7 +800,11 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                         status: this.getRequestStatus(merged),
                     };
                 }));
+
+                this.attachAudiobookChapterAudio(story.id);
             });
+
+            this.attachAudiobookChapterAudio(story.id);
         }
     }
 
@@ -713,6 +835,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
         return {
             id,
+            audiobookId: raw?.audiobookId ? String(raw.audiobookId) : '',
             prompt,
             status: pipelineStatus,
             serverStatus,
@@ -722,6 +845,11 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             authorAliasName: authorAlias?.name || 'Unknown alias',
             authorAliasPicture: authorAlias?.profilePictureUrl || 'nouser.png',
             totalChaptersGenerated,
+            voiceLanguage: String(raw?.voiceLanguage || ''),
+            chapterLanguage: String(raw?.chapterLanguage || raw?.voiceLanguage || 'en'),
+            voiceId: '',
+            voiceName: '',
+            voiceUrl: '',
             blueprint: raw?.blueprint || {},
             chapters,
         };
@@ -793,6 +921,8 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                     content: String(generatedChapter?.content || baseChapter.content || ''),
                     regenerationInstructions: String(generatedChapter?.regenerationInstructions || baseChapter.regenerationInstructions || ''),
                     coverUrl: this.generateCoverSvg(request.prompt, generatedChapterNumber),
+                    audioUrl: undefined,
+                    audioDurationSec: undefined,
                 };
 
                 const other = request.chapters.filter(ch => ch.chapter !== generatedChapterNumber);
@@ -804,9 +934,295 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 return {
                     ...request,
                     blueprint: response?.story?.blueprint || request.blueprint,
+                    audiobookId: response?.story?.audiobookId ? String(response.story.audiobookId) : request.audiobookId,
+                    voiceLanguage: String(response?.story?.voiceLanguage || request.voiceLanguage || ''),
+                    chapterLanguage: String(response?.story?.chapterLanguage || request.chapterLanguage || 'en'),
                     chapters,
                     status: this.getRequestStatus(chapters),
                     totalChaptersGenerated,
+                };
+            }));
+        });
+    }
+
+    private loadVoicesByLanguage(locale: string) {
+        const selectedLocale = String(locale || '').trim();
+        if (!selectedLocale) return;
+        this.loadingVoices.set(true);
+        this.iAudiobook.getVoicesByTier(selectedLocale, true, (response: any) => {
+            this.loadingVoices.set(false);
+            if (response?.success) {
+                const voices = Array.isArray(response.voices) ? response.voices : [];
+                this.availableVoices.set(voices);
+                this.showAllVoices.set(false);
+                const currentSelectedId = this.selectedVoiceId();
+                const hasCurrentSelection = !!voices.find((voice: ProcessedVoice) => String(voice?.id || '') === currentSelectedId);
+                if (!hasCurrentSelection) {
+                    const withPreview = voices.find((voice: ProcessedVoice) => !!String(voice?.previewUrl || '').trim());
+                    const fallback = withPreview || voices[0];
+                    this.selectedVoiceId.set(String(fallback?.id || ''));
+                }
+            } else {
+                this.availableVoices.set([]);
+                this.selectedVoiceId.set('');
+            }
+        });
+    }
+
+    selectVoice(voice: ProcessedVoice): void {
+        this.selectedVoiceId.set(String(voice?.id || ''));
+    }
+
+    getVisibleVoices(): ProcessedVoice[] {
+        const voices = this.availableVoices();
+        if (this.showAllVoices()) return voices;
+        return voices.slice(0, 4);
+    }
+
+    canShowAllVoices(): boolean {
+        return this.availableVoices().length > 4;
+    }
+
+    getVisibleVoicesSummary(): string {
+        const total = this.availableVoices().length;
+        const visible = this.getVisibleVoices().length;
+        return `Showing ${visible} of ${total} voices`;
+    }
+
+    toggleShowAllVoices(): void {
+        this.showAllVoices.update((value) => !value);
+    }
+
+    playVoicePreview(voice: ProcessedVoice, event?: Event): void {
+        event?.stopPropagation();
+        const sampleUrl = String(voice?.previewUrl || '').trim();
+        if (!sampleUrl) {
+            this.toast.show('This voice does not have a preview sample.');
+            return;
+        }
+
+        if (this.voicePreviewAudio) {
+            this.voicePreviewAudio.pause();
+            this.voicePreviewAudio.currentTime = 0;
+            this.voicePreviewAudio = undefined;
+        }
+
+        this.voicePreviewAudio = new Audio(sampleUrl);
+        this.playingVoiceId.set(String(voice?.id || ''));
+        this.voicePreviewAudio.onended = () => this.playingVoiceId.set('');
+        this.voicePreviewAudio.onerror = () => this.playingVoiceId.set('');
+        this.voicePreviewAudio.play().catch(() => {
+            this.playingVoiceId.set('');
+            this.toast.show('Could not play this voice preview.');
+        });
+    }
+
+    private stopVoicePreview(): void {
+        if (!this.voicePreviewAudio) return;
+        try {
+            this.voicePreviewAudio.pause();
+            this.voicePreviewAudio.currentTime = 0;
+        } catch {
+            // no-op
+        }
+        this.voicePreviewAudio = undefined;
+        this.playingVoiceId.set('');
+    }
+
+    getSelectedVoice(): ProcessedVoice | null {
+        const selectedId = this.selectedVoiceId();
+        if (!selectedId) return null;
+        return this.availableVoices().find(v => v.id === selectedId) || null;
+    }
+
+    hasSelectedVoice(): boolean {
+        return !!this.getSelectedVoice();
+    }
+
+    private getChapterAudioKey(requestId: string, chapterNumber: number): string {
+        return `${requestId}:${chapterNumber}`;
+    }
+
+    isChapterAudioConverting(requestId: string, chapterNumber: number): boolean {
+        return !!this.chapterAudioConverting()[this.getChapterAudioKey(requestId, chapterNumber)];
+    }
+
+    isChapterAudioInterrupted(requestId: string, chapterNumber: number): boolean {
+        return !!this.chapterAudioInterrupted()[this.getChapterAudioKey(requestId, chapterNumber)];
+    }
+
+    isAnyChapterAudioConverting(): boolean {
+        const values = Object.values(this.chapterAudioConverting());
+        return values.some((value) => !!value);
+    }
+
+    canConvertChapterAudio(request: StoryRequest, chapter: StoryChapter): boolean {
+        const selectedVoice = this.getEffectiveVoice(request);
+        return chapter.status === 'ready'
+            && !chapter.audioUrl
+            && !!selectedVoice
+            && !!String(selectedVoice.voiceUrl || '').trim()
+            && !!(request.voiceLanguage || this.voiceLanguage)
+            && !this.isChapterAudioConverting(request.id, chapter.chapter);
+    }
+
+    convertChapterAudio(requestId: string, chapterNumber: number): void {
+        const request = this.submissions().find(item => item.id === requestId);
+        if (!request || !request.id || !request.audiobookId) return;
+
+        const chapter = request.chapters.find(item => item.chapter === chapterNumber);
+        if (!chapter || chapter.status !== 'ready') return;
+        if (chapter.audioUrl) {
+            this.toast.show('This chapter already has generated audio.');
+            return;
+        }
+
+        const selectedVoice = this.getEffectiveVoice(request);
+        if (!selectedVoice) {
+            this.toast.show('Please select a voice before converting chapter audio.');
+            return;
+        }
+        if (!String(selectedVoice.voiceUrl || '').trim()) {
+            this.toast.show('The selected voice has no preview URL to use as reference audio.');
+            return;
+        }
+
+        const voiceLanguage = request.voiceLanguage || this.voiceLanguage;
+        if (!voiceLanguage) {
+            this.toast.show('Please select voice language first.');
+            return;
+        }
+
+        const key = this.getChapterAudioKey(requestId, chapterNumber);
+        this.chapterAudioConverting.update(map => ({ ...map, [key]: true }));
+        this.chapterAudioInterrupted.update(map => ({ ...map, [key]: false }));
+
+        this.iAuthor.yourStoryConvertChapterAudio(
+            requestId,
+            chapterNumber,
+            String(selectedVoice.voiceId || ''),
+            String(selectedVoice.voiceName || ''),
+            String(selectedVoice.voiceUrl || ''),
+            String(voiceLanguage || ''),
+            (response: any) => {
+                this.chapterAudioConverting.update(map => ({ ...map, [key]: false }));
+                if (!response?.success) {
+                    this.chapterAudioInterrupted.update(map => ({ ...map, [key]: true }));
+                    return;
+                }
+                this.chapterAudioInterrupted.update(map => ({ ...map, [key]: false }));
+
+                const chapterAudio = response?.chapterAudio || null;
+                this.submissions.update(list => list.map(item => {
+                    if (item.id !== requestId) return item;
+                    const chapters = item.chapters.map(ch => {
+                        if (ch.chapter !== chapterNumber) return ch;
+                        return {
+                            ...ch,
+                            audioUrl: chapterAudio?.url || ch.audioUrl,
+                            audioDurationSec: Number(chapterAudio?.durationSec || ch.audioDurationSec || 0)
+                        };
+                    });
+                    return {
+                        ...item,
+                        voiceId: String(selectedVoice.voiceId || item.voiceId || ''),
+                        voiceName: String(selectedVoice.voiceName || item.voiceName || ''),
+                        voiceUrl: String(selectedVoice.voiceUrl || item.voiceUrl || ''),
+                        voiceLanguage: String(voiceLanguage || item.voiceLanguage || ''),
+                        chapters
+                    };
+                }));
+            }
+        );
+    }
+
+    deleteChapterAudio(requestId: string, chapterNumber: number): void {
+        const request = this.submissions().find(item => item.id === requestId);
+        if (!request) return;
+
+        const chapter = request.chapters.find(item => item.chapter === chapterNumber);
+        if (!chapter?.audioUrl) return;
+
+        const key = this.getChapterAudioKey(requestId, chapterNumber);
+        this.chapterAudioConverting.update(map => ({ ...map, [key]: true }));
+
+        this.iAuthor.yourStoryDeleteChapterAudio(requestId, chapterNumber, (response: any) => {
+            this.chapterAudioConverting.update(map => ({ ...map, [key]: false }));
+            if (!response?.success) {
+                this.toast.show(response?.message || this.toast.getMessageErrorUnexpected());
+                return;
+            }
+
+            this.submissions.update(list => list.map(item => {
+                if (item.id !== requestId) return item;
+                return {
+                    ...item,
+                    chapters: item.chapters.map(ch =>
+                        ch.chapter === chapterNumber
+                            ? { ...ch, audioUrl: undefined, audioDurationSec: undefined }
+                            : ch
+                    )
+                };
+            }));
+        });
+    }
+
+    private getEffectiveVoice(request: StoryRequest): { voiceId: string; voiceName: string; voiceUrl: string } | null {
+        const selectedVoice = this.getSelectedVoice();
+        if (selectedVoice) {
+            return {
+                voiceId: String(selectedVoice.id || ''),
+                voiceName: String(selectedVoice.name || ''),
+                voiceUrl: String(selectedVoice.previewUrl || ''),
+            };
+        }
+
+        const requestVoiceId = String(request?.voiceId || '').trim();
+        const requestVoiceUrl = String(request?.voiceUrl || '').trim();
+        if (requestVoiceId && requestVoiceUrl) {
+            return {
+                voiceId: requestVoiceId,
+                voiceName: String(request?.voiceName || ''),
+                voiceUrl: requestVoiceUrl,
+            };
+        }
+
+        return null;
+    }
+
+    private attachAudiobookChapterAudio(requestId: string): void {
+        const request = this.submissions().find(item => item.id === requestId);
+        const audiobookId = String(request?.audiobookId || '');
+        if (!request || !audiobookId) return;
+
+        this.iAudiobook.audiobookFindById(audiobookId, (response: any) => {
+            if (!response?.success) return;
+            const audiobook = response?.audiobook
+                || (Array.isArray(response?.audiobooks) ? response.audiobooks[0] : null);
+            if (!audiobook) return;
+            const files = Array.isArray(audiobook?.audioFiles) ? audiobook.audioFiles : [];
+            const byChapter = new Map<number, any>();
+            for (const item of files) {
+                const chapter = Number(item?.chapter || 0);
+                if (chapter > 0) byChapter.set(chapter, item);
+            }
+
+            this.submissions.update(list => list.map(storyRequest => {
+                if (storyRequest.id !== requestId) return storyRequest;
+                return {
+                    ...storyRequest,
+                    voiceId: String(audiobook?.voiceId || storyRequest.voiceId || ''),
+                    voiceName: String(audiobook?.voiceName || storyRequest.voiceName || ''),
+                    voiceUrl: String(audiobook?.voiceUrl || storyRequest.voiceUrl || ''),
+                    voiceLanguage: String(audiobook?.targetLanguage || storyRequest.voiceLanguage || ''),
+                    chapters: storyRequest.chapters.map(ch => {
+                        const audio = byChapter.get(Number(ch.chapter));
+                        return {
+                            ...ch,
+                            audioUrl: audio?.url || ch.audioUrl,
+                            audioDurationSec: Number(audio?.durationSec || ch.audioDurationSec || 0)
+                        };
+                    })
                 };
             }));
         });
@@ -872,6 +1288,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             totalChaptersGenerated,
             null,
             null,
+            request.chapterLanguage || this.chapterLanguage || 'en',
             (_response: any) => {
                 // Fire-and-forget; UI already reflects local progress.
             }
@@ -913,6 +1330,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     private buildBlueprint(prompt: string, author: AuthorAlias): any {
+        const selectedLanguageName = this.availableLanguages.find((item) => String(item.code) === String(this.chapterLanguage || ''))?.name || this.chapterLanguage || 'English';
         return {
             storyTitle: prompt.slice(0, 72),
             genre: author.tasteTags[0] || 'General',
@@ -923,7 +1341,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             longTermArc: '',
             worldRules: '',
             characters: [],
-            chapterGenerationInstructions: `Use these taste references: ${author.tasteTags.join(', ')}`,
+            chapterGenerationInstructions: `Use these taste references: ${author.tasteTags.join(', ')}. Write all chapter text in ${selectedLanguageName}.`,
         };
     }
 
@@ -1050,6 +1468,12 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    getChapterAudioUrl(audioUrl?: string): string {
+        if (!audioUrl) return '';
+        const server = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+        return `${server}/file?id=/${audioUrl}`;
     }
 
     removeCoverFile() {

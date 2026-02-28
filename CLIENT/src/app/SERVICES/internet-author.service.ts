@@ -50,6 +50,7 @@ export class InternetAuthorService extends InternetService {
         totalChaptersGenerated: number,
         coverFile: File | null,
         voiceLanguage: string | null,
+        chapterLanguage: string | null,
         callback: any
     ) {
         const lang: string = LangUtils.detectLanguage();
@@ -63,6 +64,7 @@ export class InternetAuthorService extends InternetService {
         formData.append('blueprint', JSON.stringify(blueprint || {}));
         formData.append('totalChaptersGenerated', String(totalChaptersGenerated || 0));
         if (voiceLanguage) formData.append('voiceLanguage', voiceLanguage);
+        if (chapterLanguage) formData.append('chapterLanguage', chapterLanguage);
         if (coverFile) formData.append('file', coverFile);
         this.internetCommon?.doPostFormData(this.SERVER + '/' + this.APP_SECURE, formData, callback);
     }
@@ -96,6 +98,41 @@ export class InternetAuthorService extends InternetService {
             lang,
             data: {
                 storyId
+            }
+        }, callback);
+    }
+    yourStoryConvertChapterAudio(
+        storyId: string,
+        chapterNumber: number,
+        voiceId: string,
+        voiceName: string,
+        voiceUrl: string,
+        voiceLanguage: string,
+        callback: any
+    ) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'YourStoryConvertChapterAudio',
+            lang,
+            data: {
+                storyId,
+                chapterNumber,
+                voiceId,
+                voiceName,
+                voiceUrl,
+                voiceLanguage,
+                narrationStyle: 'Essay'
+            }
+        }, callback);
+    }
+    yourStoryDeleteChapterAudio(storyId: string, chapterNumber: number, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'YourStoryDeleteChapterAudio',
+            lang,
+            data: {
+                storyId,
+                chapterNumber
             }
         }, callback);
     }

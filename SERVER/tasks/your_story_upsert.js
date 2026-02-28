@@ -7,6 +7,7 @@ async function run(data, req, res) {
         const status = payload.status || req.body.status || 'draft';
         const totalChaptersGenerated = Number(payload.totalChaptersGenerated || req.body.totalChaptersGenerated || 0);
         const voiceLanguage = String(payload.voiceLanguage || req.body.voiceLanguage || '').trim();
+        const chapterLanguage = String(payload.chapterLanguage || req.body.chapterLanguage || '').trim();
         const isAIGeneratedRaw = payload.isAIGenerated ?? req.body.isAIGenerated;
         const isAIGenerated = (isAIGeneratedRaw === true || String(isAIGeneratedRaw).toLowerCase() === 'true');
 
@@ -67,6 +68,7 @@ async function run(data, req, res) {
             existing.totalChaptersGenerated = totalChaptersGenerated;
             if (file) existing.coverFile = file;
             if (voiceLanguage) existing.voiceLanguage = voiceLanguage;
+            if (chapterLanguage) existing.chapterLanguage = chapterLanguage;
             existing.updatedAt = Date.now();
             await existing.save();
 
@@ -82,6 +84,9 @@ async function run(data, req, res) {
                         ab.targetLanguage = voiceLanguage;
                         ab.voiceId = voiceLanguage;
                         ab.voiceName = voiceLanguage;
+                    }
+                    if (chapterLanguage) {
+                        ab.sourceLanguage = chapterLanguage;
                     }
                     const title = String(blueprint?.storyTitle || '').trim();
                     const description = String(blueprint?.storyFoundation || '').trim();
@@ -122,6 +127,7 @@ async function run(data, req, res) {
         storyDoc.blueprint = blueprint;
         storyDoc.coverFile = file;
         storyDoc.voiceLanguage = voiceLanguage;
+        storyDoc.chapterLanguage = chapterLanguage || voiceLanguage;
         storyDoc.totalChaptersGenerated = totalChaptersGenerated;
         const story = await storyDoc.save();
 
@@ -131,9 +137,10 @@ async function run(data, req, res) {
         const genre = String(blueprint?.genre || '').trim();
 
         const audiobook = new AudioBook();
+        audiobook.userId = String(userId);
         audiobook.uploadMethod = 'ai_story';
         audiobook.authorId = author._id;
-        audiobook.sourceLanguage = voiceLanguage;
+        audiobook.sourceLanguage = chapterLanguage || voiceLanguage;
         audiobook.targetLanguage = voiceLanguage;
         audiobook.voiceId = voiceLanguage;
         audiobook.voiceName = voiceLanguage;
