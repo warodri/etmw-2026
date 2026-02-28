@@ -8,6 +8,7 @@ import { UtilsService } from '../../../utils/utils-service';
 import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { ListeningProgressModel } from '../../../models/listening-progress';
 import { InternetService } from '../../../SERVICES/internet.service';
+import { getLocaleLabel } from '../../../COMPONENTS/ITEMS/audiobook-select-country-voice/audiobook-select-country-voice';
 
 @Component({
     selector: 'app-screen-item-detail',
@@ -107,6 +108,14 @@ export class ScreenItemDetail implements OnInit {
         if (book.pipelineStatus === 'failed') return 'Failed';
         if (book.pipelineStatus === 'tts_processing') return 'Processing';
         return 'Pending';
+    }
+
+    getAudiobookLanguageLabel(): string {
+        const book = this.audiobook();
+        if (!book) return 'N/A';
+        const locale = (book.targetLanguage || book.sourceLanguage || '').trim();
+        if (!locale) return 'N/A';
+        return getLocaleLabel(locale);
     }
 
     formatDuration(totalSeconds: number | undefined): string {

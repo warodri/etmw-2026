@@ -5,6 +5,8 @@ import { InternetStoryService } from '../../../SERVICES/internet-stories.service
 import { Config } from '../../../utils/config';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { LANGUAGE_MAP } from '../../../DATA/country-list';
+import { InternetReactionService } from '../../../SERVICES/internet-reaction.services';
+import { Router } from '@angular/router';
 
 type ChapterPiece = {
     title: string,
@@ -39,6 +41,12 @@ type Story = {
     updatedAt?: number,
 };
 
+type StoryGroup = {
+    audiobookId: string,
+    stories: Story[],
+    activeStory: Story
+};
+
 @Component({
   selector: 'app-screen-stories',
   standalone: false,
@@ -52,6 +60,10 @@ export class ScreenStories implements OnInit {
     myUser = signal<UserModel | null>(null);
 
     stories = signal<Story[]>([])
+    selectedStoryByAudiobook = signal<Record<string, string>>({})
+    likedByAudiobook = signal<Record<string, boolean>>({})
+    likePendingByAudiobook = signal<Record<string, boolean>>({})
+    likeCountByAudiobook = signal<Record<string, number>>({})
 
     SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote
 
@@ -255,14 +267,21 @@ export class ScreenStories implements OnInit {
     private chapterAccessMap = new Map<string, boolean>();
     private storageKey = 'etmw_last_story_id';
     private muteKey = 'etmw_story_muted';
+    isMobileViewport = true;
 
     constructor(
         private iUser: InternetUserService,
         private iStory: InternetStoryService,
-        private iAudiobook: InternetAudiobookService
+        private iAudiobook: InternetAudiobookService,
+        private iReaction: InternetReactionService,
+        private router: Router
     ) {}
 
     ngOnInit(): void {
+        this.updateViewportMode();
+        if (typeof window !== 'undefined') {
+            window.addEventListener('resize', this.onResize);
+        }
         this.loadMyUser(() => {
             this.loadStories();
         })
@@ -278,12 +297,27 @@ export class ScreenStories implements OnInit {
     }
 
     ngOnDestroy(): void {
+        if (typeof window !== 'undefined') {
+            window.removeEventListener('resize', this.onResize);
+        }
         if (this.observer) this.observer.disconnect();
         this.audioMap.forEach((audio) => {
             audio.pause();
             audio.src = '';
         });
         this.audioMap.clear();
+    }
+
+    private onResize = () => {
+        this.updateViewportMode();
+    };
+
+    private updateViewportMode() {
+        if (typeof window === 'undefined') {
+            this.isMobileViewport = true;
+            return;
+        }
+        this.isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
     }
 
     loadMyUser(callback: any) {
@@ -300,26 +334,191 @@ export class ScreenStories implements OnInit {
         this.iStory.getStories((response: any) => {
             console.log('getStories', response)
             if (response && response.success) {
-                for (let item of response.stories) {
-                    if (!item.image) {
-                        item.image = 'story-fallback-img.jpeg';
-                    } else {
-                        item.image = this.toServerFileUrl(item.image);
+                const stories = Array.isArray(response.stories) ? response.stories : [];
+                const uniqueClientIds = new Set<string>();
+                const normalizedStories = stories.map((rawItem: any, index: number) => {
+                    const chapterPieces = Array.isArray(rawItem?.chapterPieces) ? rawItem.chapterPieces : [];
+                    const baseId = String(rawItem?._id || `${rawItem?.audiobookId || 'audiobook'}:${rawItem?.chapterNumber || index}`);
+                    let clientId = baseId;
+                    while (uniqueClientIds.has(clientId)) {
+                        clientId = `${baseId}:${index}`;
                     }
-                    for (let subItem of item.chapterPieces) {
-                        if (!subItem.audioImage) {
-                            subItem.audioImage = 'story-fallback-img.jpeg';
-                        } else {
-                            subItem.audioImage = this.toServerFileUrl(subItem.audioImage);
+                    uniqueClientIds.add(clientId);
+
+                    return {
+                        ...rawItem,
+                        _id: clientId,
+                        image: rawItem?.image ? this.toServerFileUrl(rawItem.image) : 'story-fallback-img.jpeg',
+                        chapterPieces: chapterPieces.map((piece: any) => ({
+                            ...piece,
+                            audioImage: piece?.audioImage ? this.toServerFileUrl(piece.audioImage) : 'story-fallback-img.jpeg',
+                            audioUrl: piece?.audioUrl ? this.toServerFileUrl(piece.audioUrl) : piece?.audioUrl
+                        }))
+                    };
+                });
+
+                normalizedStories.sort((a: any, b: any) => {
+                    const audiobookCompare = String(a?.audiobookId || '').localeCompare(String(b?.audiobookId || ''));
+                    if (audiobookCompare !== 0) return audiobookCompare;
+                    return Number(a?.chapterNumber || 0) - Number(b?.chapterNumber || 0);
+                });
+
+                this.stories.set(normalizedStories);
+                this.selectedStoryByAudiobook.update((prev) => {
+                    const next = { ...prev };
+                    const validIds = new Set(normalizedStories.map((story: Story) => story._id));
+                    Object.keys(next).forEach((k) => {
+                        if (!validIds.has(next[k])) {
+                            delete next[k];
                         }
-                        if (subItem.audioUrl) {
-                            subItem.audioUrl = this.toServerFileUrl(subItem.audioUrl);
-                        }
-                    }
-                }
-                this.stories.set(response.stories);
+                    });
+                    return next;
+                });
+                this.loadMyLikesForStories(normalizedStories);
             }
         })
+    }
+
+    toggleLike(story: Pick<Story, '_id' | 'audiobookId'>) {
+        const audiobookId = String(story?.audiobookId || '').trim();
+        if (!audiobookId) return;
+        if (this.isLikePending(audiobookId)) return;
+
+        const currentLiked = this.isLiked(audiobookId);
+        const currentCount = this.getLikeCount(audiobookId);
+        const nextLiked = !currentLiked;
+        const nextCount = Math.max(0, currentCount + (nextLiked ? 1 : -1));
+
+        this.setLikePending(audiobookId, true);
+        this.setLikedState(audiobookId, nextLiked);
+        this.setLikeCount(audiobookId, nextCount);
+
+        this.iReaction.reactionUpsert(
+            audiobookId,
+            'audiobook',
+            'like',
+            (response: any) => {
+                this.setLikePending(audiobookId, false);
+                if (response && response.success) {
+                    const serverLiked = typeof response.reacted === 'boolean' ? response.reacted : nextLiked;
+                    const serverCount = Number(response.totalReactions);
+                    this.setLikedState(audiobookId, serverLiked);
+                    if (Number.isFinite(serverCount)) {
+                        this.setLikeCount(audiobookId, serverCount);
+                    }
+                    return;
+                }
+                this.setLikedState(audiobookId, currentLiked);
+                this.setLikeCount(audiobookId, currentCount);
+            }
+        );
+    }
+
+    isLiked(audiobookId: string): boolean {
+        return this.likedByAudiobook()[String(audiobookId || '').trim()] === true;
+    }
+
+    isLikePending(audiobookId: string): boolean {
+        return this.likePendingByAudiobook()[String(audiobookId || '').trim()] === true;
+    }
+
+    getLikeCount(audiobookId: string): number {
+        const key = String(audiobookId || '').trim();
+        return Number(this.likeCountByAudiobook()[key] || 0);
+    }
+
+    private setLikedState(audiobookId: string, liked: boolean) {
+        const key = String(audiobookId || '').trim();
+        if (!key) return;
+        this.likedByAudiobook.update((map) => ({ ...map, [key]: liked }));
+    }
+
+    private setLikePending(audiobookId: string, pending: boolean) {
+        const key = String(audiobookId || '').trim();
+        if (!key) return;
+        this.likePendingByAudiobook.update((map) => ({ ...map, [key]: pending }));
+    }
+
+    private setLikeCount(audiobookId: string, count: number) {
+        const key = String(audiobookId || '').trim();
+        if (!key) return;
+        this.likeCountByAudiobook.update((map) => ({ ...map, [key]: Math.max(0, Number(count || 0)) }));
+    }
+
+    private loadMyLikesForStories(stories: Story[]) {
+        const ids = Array.from(
+            new Set(
+                stories
+                    .map((item) => String(item?.audiobookId || '').trim())
+                    .filter((item) => !!item)
+            )
+        );
+
+        if (ids.length === 0) {
+            this.likedByAudiobook.set({});
+            return;
+        }
+
+        this.iReaction.reactionGetMine(
+            null,
+            'audiobook',
+            ids,
+            (response: any) => {
+                if (!response || !response.success) return;
+                const mine = new Set(
+                    (response.reactions || []).map((item: any) => String(item?.targetId || ''))
+                );
+
+                const likedMap: Record<string, boolean> = {};
+                ids.forEach((id) => {
+                    likedMap[id] = mine.has(id);
+                });
+                this.likedByAudiobook.set(likedMap);
+            }
+        );
+    }
+
+    storyGroups(): StoryGroup[] {
+        const groups = new Map<string, Story[]>();
+        for (const story of this.stories()) {
+            const key = story.audiobookId || story._id;
+            if (!groups.has(key)) {
+                groups.set(key, []);
+            }
+            groups.get(key)!.push(story);
+        }
+
+        const selected = this.selectedStoryByAudiobook();
+        const result: StoryGroup[] = [];
+        groups.forEach((stories, audiobookId) => {
+            const selectedId = selected[audiobookId];
+            const activeStory = stories.find((story) => story._id === selectedId) || stories[0];
+            if (activeStory) {
+                result.push({
+                    audiobookId,
+                    stories,
+                    activeStory
+                });
+            }
+        });
+        return result;
+    }
+
+    selectStoryForAudiobook(audiobookId: string, storyId: string) {
+        this.selectedStoryByAudiobook.update((current) => ({
+            ...current,
+            [audiobookId]: storyId
+        }));
+    }
+
+    storyCountExcludingPresentation(group: StoryGroup): number {
+        return Math.max(0, group.stories.length - 1);
+    }
+
+    gotoDebate(audiobookId: string) {
+        const id = String(audiobookId || '').trim();
+        if (!id) return;
+        this.router.navigate(['app/debate', id]);
     }
 
     onTouchStart(event: TouchEvent, storyId: string) {

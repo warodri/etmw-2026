@@ -102,7 +102,6 @@ export class AudiobookSelectCountryVoice {
     targetLanguage = '';
 
     AVAILABLE_LOCALES = availableLocales;
-
     GET_LOCALE_LABELS = getLocaleLabel
 
     language: 'en' | 'es' = 'en';

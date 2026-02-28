@@ -3,6 +3,11 @@ const Schema = mongoose.Schema;
 
 const model = new Schema({
 
+    userId: {
+        type: String,
+        index: true,
+        required: true
+    },
     file: {
         type: Object
     },

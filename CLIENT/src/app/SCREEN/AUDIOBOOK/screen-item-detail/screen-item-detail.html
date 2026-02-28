@@ -40,19 +40,20 @@
                                 <span class="chip chip-primary">{{ getPrimaryCategory() }}</span>
                                 <span class="chip">{{ formatDuration(audiobook()?.totalAudioDurationSec || 0) }}</span>
                                 <span class="chip">{{ getChapters().length }} chapters</span>
+                                <span class="chip">{{ getAudiobookLanguageLabel() }}</span>
                                 <span class="chip">{{ getStatusLabel() }}</span>
                             </div>
                             <p class="mt-4 detail-desc word-break">
                                 {{ audiobook()?.description || 'No description available.' }}
                             </p>
                             <div class="d-flex gap-2 mt-3">
-                                <button class="btn btn-primary rounded-pill px-4" (click)="playSelectedChapter()">
+                                <button class="btn btn-primary rounded-pill px-3" style="min-width: 110px;" (click)="playSelectedChapter()">
                                     <i class="bi bi-play-fill"></i> Play
                                 </button>
-                                <button class="btn btn-secondary rounded-pill px-4" (click)="shareCurrentPage()">
+                                <button class="btn btn-secondary rounded-pill px-3" style="min-width: 110px;" (click)="shareCurrentPage()">
                                     <i class="bi bi-share"></i> Share
                                 </button>
-                                <button class="btn btn-secondary rounded-pill px-4" (click)="gotoDebate()">
+                                <button class="btn btn-secondary rounded-pill px-3" style="min-width: 110px;" (click)="gotoDebate()">
                                     💬 &nbsp;Debate
                                 </button>
                             </div>

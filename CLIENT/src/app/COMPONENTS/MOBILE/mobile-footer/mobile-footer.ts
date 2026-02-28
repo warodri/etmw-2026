@@ -41,4 +41,8 @@ export class MobileFooter implements OnInit {
         this.router.navigate([route])
     }
 
+    gotoMyStuff() {
+        this.router.navigate(['app/my-stuff'])
+    }
+
 }

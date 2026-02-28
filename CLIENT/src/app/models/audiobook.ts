@@ -2,6 +2,7 @@ export interface AudiobookModel {
 
     _id: string,
 
+    userd: string,
     file: any,
     coverFile: string,
     coverFileMimetype: string,

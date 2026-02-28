@@ -406,10 +406,10 @@
                             <div class="small text-gray-400 mt-1 mb-1">
                                 {{ tr('The language your book is written in', 'El idioma en el que está escrito tu libro') }}
                             </div>
-                            <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage" (change)="calculateTranslationCost()">
+                            <select class="contact-input" [(ngModel)]="bookConfig.sourceLanguage" (ngModelChange)="sourceLanguageChanged($event)">
                                 <option value="">{{ tr('Select language...', 'Selecciona un idioma...') }}</option>
-                                @for (lang of availableLanguages; track lang.code) {
-                                    <option [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
+                                @for (lang of AVAILABLE_LOCALES; track lang.code) {
+                                    <option [value]="lang.code">{{ GET_LOCALE_LABELS(lang.code) }}</option>
                                 }
                             </select>
                         </div>

@@ -44,6 +44,24 @@
                 </div>
             }
 
+            @if (availableLanguages().length > 0) {
+                <div class="mt-3">
+                    <label class="small text-gray-400">{{ tr('Languages', 'Idiomas') }}</label>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @for (langItem of availableLanguages(); track langItem.code) {
+                            <button
+                                type="button"
+                                class="btn btn-sm rounded-pill language-pill"
+                                [class.btn-primary]="isLanguageSelected(langItem.code)"
+                                [class.btn-outline-light]="!isLanguageSelected(langItem.code)"
+                                (click)="toggleLanguage(langItem.code)">
+                                {{ langItem.label }} ({{ langItem.count }})
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
             @if (showFilters()) {
                 <div class="mt-3 bg-secondary rounded-4 p-3">
                     <div class="row g-3">
@@ -66,6 +84,7 @@
                             <label class="form-check-label small" for="filterMine">{{ tr('My audiobooks', 'Mis audiolibros') }}</label>
                         </div>
                     </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-3">
                         <button class="btn btn-secondary rounded-pill px-4" (click)="clearFilters()">
                             {{ tr('Clear', 'Limpiar') }}
@@ -133,6 +152,7 @@
                 <div #categoryResultsAnchor class="pb-5">
                     <app-category-with-audiobooks
                         [category]="selectedCategoryObj"
+                        [languageFilters]="selectedLanguages()"
                     ></app-category-with-audiobooks>
                 </div>
             }
@@ -151,7 +171,7 @@
                     <!-- Horizontal scrolling cards -->
                     <div class="d-flex flex-nowrap gap-3 overflow-x-auto pb-3">
                         @for (item of audiobooksTrendingNow(); track item) {
-                            <div class="flex-shrink-0" style="width: 450px;">
+                            <div class="flex-shrink-0" style="width: 600px;">
                                 <app-item [audiobook]="item" template="md"></app-item>
                             </div>
                         }
@@ -170,9 +190,9 @@
                 </div>
     
                 <!-- Enhanced category cards -->
-                <div class="row g-3">
+                <div class="mt-2 row g-3 px-2 px-md-0">
                     @for (category of categoryCards(); track category.name) {
-                        <div class="col-6 col-md-4 col-lg-3">
+                        <div class="col-12 col-md-4 category-card-col">
                             <div class="bg-secondary rounded-4 p-4 text-center pointer position-relative overflow-hidden category-card"  style="transition: all 0.3s ease; min-height: 140px;" (click)="selectCategory(category)">
                                 
                                 <!-- Gradient overlay -->
@@ -196,11 +216,11 @@
                                                 <tbody>
                                                     @for (child of category.children; track child.name) {
                                                         <tr>
-                                                            <td class="text-start small">
+                                                            <td class="text-start">
                                                                 {{ child.name }}  &nbsp;
                                                             </td>
                                                             <td>
-                                                                <span class="small">
+                                                                <span>
                                                                     {{ (child.count || 0) ? ('' + (child.count || 0)) : '0' }}
                                                                 </span>
                                                             </td>

@@ -5,6 +5,12 @@ import { AudiobookFindPayload, InternetAudiobookService } from '../../../SERVICE
 import { AudiobookModel } from '../../../models/audiobook';
 import { LangUtils } from '../../../utils/lang';
 
+type AudiobookLanguageOption = {
+    code: string;
+    count: number;
+    label: string;
+};
+
 @Component({
     selector: 'app-item-list',
     standalone: false,
@@ -12,6 +18,7 @@ import { LangUtils } from '../../../utils/lang';
     styleUrl: './item-list.css',
 })
 export class ItemList implements OnInit, OnChanges {
+    private readonly languageStorageKey = 'etmw-audiobook-find-languages';
     @Input() initialQuery: string | null = null;
     @Input() initialAuthorId: string | null = null;
     @Input() initialSection: 'trending' | 'for-you' | null = null;
@@ -35,6 +42,8 @@ export class ItemList implements OnInit, OnChanges {
     filterPipelineStatus = '';
     filterCategory = '';
     searchLimit = 20;
+    availableLanguages = signal<AudiobookLanguageOption[]>([]);
+    selectedLanguages = signal<string[]>([]);
 
     gradients: Array<string> = [
         'linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.1) 100%)',
@@ -68,7 +77,9 @@ export class ItemList implements OnInit, OnChanges {
 
     ngOnInit(): void {
         this.language = LangUtils.detectLanguage();
+        this.loadLanguageFiltersFromStorage();
         this.searchResultPrefix = this.tr('Results', 'Resultados');
+        this.getAvailableLanguages();
         this.getCategories();
         this.getTrendingNow();
         this.applyInitialSearchFromRoute();
@@ -105,7 +116,36 @@ export class ItemList implements OnInit, OnChanges {
             if (response && response.success) {
                 this.audiobooksTrendingNow.set(response.audiobooks);
             }
-        })
+        }, { languages: this.selectedLanguages() })
+    }
+
+    getAvailableLanguages() {
+        this.iAudiobook.audiobookGetLanguages((response: any) => {
+            if (!response || !response.success) return;
+            const rows = Array.isArray(response.languages) ? response.languages : [];
+            const options: AudiobookLanguageOption[] = rows
+                .map((item: any) => {
+                    const code = String(item?.code || '').trim().toLowerCase();
+                    const count = Number(item?.count || 0);
+                    if (!code) return null;
+                    return {
+                        code,
+                        count,
+                        label: this.getLanguageLabel(code)
+                    };
+                })
+                .filter((item: AudiobookLanguageOption | null): item is AudiobookLanguageOption => !!item);
+
+            this.availableLanguages.set(options);
+
+            const availableCodes = new Set(options.map((item) => item.code));
+            const nextSelected = this.selectedLanguages().filter((code) => availableCodes.has(code));
+            if (nextSelected.length !== this.selectedLanguages().length) {
+                this.selectedLanguages.set(nextSelected);
+                this.persistLanguageFilters(nextSelected);
+                this.refreshByLanguageSelection();
+            }
+        });
     }
 
     buildCategoryCards(categories: Array<CategoryModel>): Array<CategoryModel & { children: CategoryModel[] }> {
@@ -156,6 +196,8 @@ export class ItemList implements OnInit, OnChanges {
         this.filterMyAudiobooks = false;
         this.filterPipelineStatus = '';
         this.filterCategory = '';
+        this.selectedLanguages.set([]);
+        this.persistLanguageFilters([]);
         this.activeFilters = [];
         this.forceShowSearchResults = false;
         this.performSearch(true);
@@ -177,6 +219,7 @@ export class ItemList implements OnInit, OnChanges {
             myAudiobooks: this.filterMyAudiobooks,
             published: this.filterPublished,
             pipelineStatus: this.filterPipelineStatus ? [this.filterPipelineStatus] : [],
+            languages: this.selectedLanguages(),
             limit: this.searchLimit,
             skip: 0
         };
@@ -194,6 +237,10 @@ export class ItemList implements OnInit, OnChanges {
         if (this.filterMyAudiobooks) filters.push(this.tr('My Audiobooks', 'Mis Audiolibros'));
         if (this.filterPublished === true) filters.push(this.tr('Published', 'Publicado'));
         if (this.filterPublished === false) filters.push(this.tr('Unpublished', 'Sin publicar'));
+        const languageNames = this.selectedLanguages().map((code) => this.getLanguageLabel(code));
+        if (languageNames.length > 0) {
+            filters.push(`${this.tr('Languages', 'Idiomas')}: ${languageNames.join(', ')}`);
+        }
         return filters;
     }
 
@@ -229,6 +276,7 @@ export class ItemList implements OnInit, OnChanges {
             this.fetchSearchResults({
                 section,
                 published: true,
+                languages: this.selectedLanguages(),
                 limit: this.searchLimit,
                 skip: 0
             });
@@ -243,6 +291,7 @@ export class ItemList implements OnInit, OnChanges {
             this.fetchSearchResults({
                 authorIds: [authorId],
                 published: true,
+                languages: this.selectedLanguages(),
                 limit: this.searchLimit,
                 skip: 0
             });
@@ -259,6 +308,7 @@ export class ItemList implements OnInit, OnChanges {
             this.fetchSearchResults({
                 categories: [category],
                 published: true,
+                languages: this.selectedLanguages(),
                 limit: this.searchLimit,
                 skip: 0
             });
@@ -281,6 +331,82 @@ export class ItemList implements OnInit, OnChanges {
             }
             this.resetSearchResults();
         });
+    }
+
+    toggleLanguage(code: string) {
+        const base = String(code || '').trim().toLowerCase();
+        if (!base) return;
+
+        const current = this.selectedLanguages();
+        const hasIt = current.includes(base);
+        const next = hasIt
+            ? current.filter((item) => item !== base)
+            : [...current, base];
+
+        this.selectedLanguages.set(next);
+        this.persistLanguageFilters(next);
+        this.activeFilters = this.buildActiveFilters();
+        this.refreshByLanguageSelection();
+    }
+
+    isLanguageSelected(code: string): boolean {
+        return this.selectedLanguages().includes(String(code || '').toLowerCase());
+    }
+
+    private refreshByLanguageSelection() {
+        if (this.shouldShowResults()) {
+            this.performSearch(true);
+            return;
+        }
+        this.getTrendingNow();
+    }
+
+    private loadLanguageFiltersFromStorage() {
+        try {
+            const raw = localStorage.getItem(this.languageStorageKey);
+            if (!raw) {
+                this.selectedLanguages.set([]);
+                return;
+            }
+
+            const parsed = JSON.parse(raw);
+            const values = Array.isArray(parsed) ? parsed : [];
+            const sanitized = values
+                .map((item) => String(item || '').trim().toLowerCase())
+                .filter((item) => !!item);
+
+            this.selectedLanguages.set(Array.from(new Set(sanitized)));
+        } catch (ex) {
+            this.selectedLanguages.set([]);
+        }
+    }
+
+    private persistLanguageFilters(values: string[]) {
+        try {
+            localStorage.setItem(this.languageStorageKey, JSON.stringify(values));
+        } catch (ex) {
+            // Ignore persistence failures (private mode / blocked storage)
+        }
+    }
+
+    private getLanguageLabel(code: string): string {
+        const base = String(code || '').trim().toLowerCase();
+        const labels: Record<string, string> = {
+            en: this.tr('English', 'Inglés'),
+            es: this.tr('Spanish', 'Español'),
+            fr: this.tr('French', 'Francés'),
+            de: this.tr('German', 'Alemán'),
+            it: this.tr('Italian', 'Italiano'),
+            pt: this.tr('Portuguese', 'Portugués'),
+            nl: this.tr('Dutch', 'Neerlandés'),
+            ru: this.tr('Russian', 'Ruso'),
+            zh: this.tr('Chinese', 'Chino'),
+            ja: this.tr('Japanese', 'Japonés'),
+            ko: this.tr('Korean', 'Coreano'),
+            ar: this.tr('Arabic', 'Árabe'),
+            hi: this.tr('Hindi', 'Hindi')
+        };
+        return labels[base] || base.toUpperCase();
     }
 
     selectCategory(category: CategoryModel & { children: CategoryModel[] }) {

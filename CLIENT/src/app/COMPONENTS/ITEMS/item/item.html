@@ -26,6 +26,10 @@
                                 <i class="bi bi-book"></i>
                                 <span>{{ getChapterCount() }} {{ tr('chapters', 'capítulos') }}</span>
                             </div>
+                            <div class="work-meta-item">
+                                <i class="bi bi-translate"></i>
+                                <span>{{ getAudiobookLanguageLabel() }}</span>
+                            </div>
                             <div class="work-meta-item" [class.text-warning]="getStatusLabel() === 'Published'">
                                 <i class="bi bi-check-circle"></i>
                                 <span>{{ getStatusLabelTr() }}</span>
@@ -60,12 +64,15 @@
                     <img style="width:70px; height: 120px; object-fit: cover;" class="rounded-3" [src]="getCoverUrl()" (click)="viewItem()" />
                 </div>
                 <div>
-                    <div class="mt-2 d-flex justify-content-start align-items-center gap-2">
+                    <div class="mt-2 flex-wrap d-flex justify-content-start align-items-center gap-2">
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
                             {{ getDurationLabel() }}
                         </div>
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
                             {{ getStatusLabelTr() }}
+                        </div>
+                        <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small">
+                            {{ getAudiobookLanguageLabel() }}
                         </div>
                         <div class="bg-dark text-gray-400 rounded-4 px-2 pt-1 pb-1 small text-truncate" style="max-width: 50%;">
                             {{ audiobook.authorName }}
@@ -111,6 +118,10 @@
                     <div class="work-meta-item">
                         <i class="bi bi-book"></i>
                         <span>{{ audiobook.audioFiles.length }} {{ tr('chapters', 'capítulos') }}</span>
+                    </div>
+                    <div class="work-meta-item">
+                        <i class="bi bi-translate"></i>
+                        <span>{{ getAudiobookLanguageLabel() }}</span>
                     </div>
                     <!-- <div class="work-meta-item">
                         <i class="bi bi-star-fill text-warning"></i>

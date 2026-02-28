@@ -8,7 +8,6 @@ import { PromoCodeModel } from '../../../models/promo-codes';
 import { UtilClass } from '../../../utils/utils';
 import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.service';
 import { Language, ProcessedVoice } from '../../../models/voices';
-import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
 import { LangUtils } from '../../../utils/lang';
 import { availableLocales, getLocaleLabel } from '../../../COMPONENTS/ITEMS/audiobook-select-country-voice/audiobook-select-country-voice';
 
@@ -109,22 +108,8 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         categories: [] as string[]
     };
 
-    availableLanguages = [
-        { code: 'en', name: 'English', flag: '🇬🇧' },
-        { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-        { code: 'fr', name: 'French', flag: '🇫🇷' },
-        { code: 'de', name: 'German', flag: '🇩🇪' },
-        { code: 'it', name: 'Italian', flag: '🇮🇹' },
-        { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
-        { code: 'pl', name: 'Polish', flag: '🇵🇱' },
-        { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
-        { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-        { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
-        { code: 'zh', name: 'Chinese', flag: '🇨🇳' },
-        { code: 'ko', name: 'Korean', flag: '🇰🇷' },
-        { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
-        { code: 'ru', name: 'Russian', flag: '🇷🇺' }
-    ];
+    AVAILABLE_LOCALES = availableLocales;
+    GET_LOCALE_LABELS = getLocaleLabel;
 
     
 
@@ -621,6 +606,11 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         this.calculateTranslationCost();
     }
 
+    sourceLanguageChanged(language: string) {
+        this.bookConfig.sourceLanguage = (language || '').trim();
+        this.calculateTranslationCost();
+    }
+
     calculateTranslationCost() {
         const regionDetected = this.regionDetected() || 'global';
         let total = 0;
@@ -649,7 +639,15 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
     }
 
     loadVoicesByLanguage() {
-        const locale = this.bookConfig.targetLanguage || null;
+        const targetLanguage = (this.bookConfig.targetLanguage || '').trim();
+        const sourceLanguage = (this.bookConfig.sourceLanguage || '').trim();
+        const locale = targetLanguage || sourceLanguage;
+
+        console.log('targetLanguage', this.bookConfig.targetLanguage);
+        console.log('sourceLanguage', this.bookConfig.sourceLanguage)
+        // No source/target selected yet: do not load voices.
+        if (!locale) return;
+
         this.iAudiobook.getVoicesByTier(locale, true, (response: any) => {
             if (response && response.success) {
                 this.availableVoices.set(response.voices || [])
@@ -668,10 +666,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
 
     // Step 5: Review
     getLanguageName(code: string): string {
-        const lang = this.availableLanguages.find(l => l.code === code);
-        if (lang) return lang.name;
-        const locale = availableLocales.find(l => l.code === code);
-        return locale ? getLocaleLabel(locale.code) : code;
+        return getLocaleLabel(code);
     }
 
     getVoiceName(voiceId: string): string {

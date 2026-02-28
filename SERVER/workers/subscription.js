@@ -13,6 +13,11 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
     if (!ab) return false;
     if (ab.userId == userId) return true;
 
+    //  Is the user the owner of the book?
+    if (ab.userId == userId) {
+        return true;
+    }
+
     //  Get this user's subscription
     const Subscription = require('../models/subscription');
     const sub = await Subscription.findOne({

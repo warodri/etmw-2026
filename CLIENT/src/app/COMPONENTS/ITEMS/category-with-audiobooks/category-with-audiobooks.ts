@@ -12,6 +12,7 @@ import { InternetAudiobookService } from '../../../SERVICES/interent-audiobook.s
 export class CategoryWithAudiobooks implements OnInit, OnChanges {
 
     @Input() category: (CategoryModel & { children?: CategoryModel[] }) | null = null;
+    @Input() languageFilters: string[] = [];
     
     children = signal<Array<CategoryModel>>([]);
     audiobooks = signal<Array<AudiobookModel>>([]);
@@ -29,7 +30,7 @@ export class CategoryWithAudiobooks implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['category']) {
+        if (changes['category'] || changes['languageFilters']) {
             this.resetAndLoad();
         }
     }
@@ -60,6 +61,7 @@ export class CategoryWithAudiobooks implements OnInit, OnChanges {
         this.iAudiobook.audiobookFind({
             query: null,
             categories,
+            languages: this.languageFilters || [],
             myAudiobooks: false,
             published: true,
             pipelineStatus: [],

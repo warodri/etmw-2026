@@ -3,6 +3,7 @@ import { AudiobookModel } from '../../../models/audiobook';
 import { UtilsService } from '../../../utils/utils-service';
 import { Router } from '@angular/router';
 import { LangUtils } from '../../../utils/lang';
+import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
 
 @Component({
     selector: 'app-item',
@@ -69,6 +70,25 @@ export class Item {
         if (label === 'Processing') return this.tr('Processing', 'Procesando');
         if (label === 'Pending') return this.tr('Pending', 'Pendiente');
         return label;
+    }
+
+    getAudiobookLanguageLabel(): string {
+        if (!this.audiobook) return this.tr('N/A', 'N/D');
+
+        const locale = (this.audiobook.targetLanguage || this.audiobook.sourceLanguage || '').trim();
+        if (!locale) return this.tr('N/A', 'N/D');
+
+        const [lang, region] = locale.split('-');
+        const languageMap: Record<string, string> = LANGUAGE_MAP;
+        const regionMap: Record<string, string> = REGION_MAP;
+
+        if (!lang) return locale;
+
+        const languageName = languageMap[lang] || lang;
+        if (!region) return languageName;
+
+        const regionName = regionMap[region] || region;
+        return `${languageName} (${regionName})`;
     }
 
     private getFallbackCover(): string {

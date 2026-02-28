@@ -13,6 +13,7 @@ export interface AudiobookFindPayload {
     myAudiobooks?: boolean | null;
     published?: boolean | null;
     pipelineStatus?: string[] | null;
+    languages?: string[] | null;
     limit?: number | null;
     skip?: number | null;
 }
@@ -172,14 +173,28 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    audiobookFindBySection(section: 'trending' | 'for-you', callback: any) {
+    audiobookFindBySection(
+        section: 'trending' | 'for-you',
+        callback: any,
+        options?: { languages?: string[] | null }
+    ) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'AudiobookFindBySection',
             lang,
             data: {
                 section,
+                languages: options?.languages || [],
             }
+        }, callback);
+    }
+
+    audiobookGetLanguages(callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'AudiobookGetLanguages',
+            lang,
+            data: {}
         }, callback);
     }
 

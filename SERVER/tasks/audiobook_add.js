@@ -84,6 +84,7 @@ async function run(data, req, res) {
         //  Add audiobook
         const AudioBook = require('../models/audiobook');
         const ab = new AudioBook();
+        ab.userId = userId;
         ab.file = file;
         ab.uploadMethod = uploadMethod;
         ab.referralCode = referralCode;

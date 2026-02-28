@@ -4,107 +4,145 @@
         
         <app-mobile-header></app-mobile-header>
 
-        <div class="stories-feed">
-            @for (story of stories(); track story._id) {
-                <div class="story-card" #storyItem [attr.data-story-id]="story._id"
-                    (touchstart)="onTouchStart($event, story._id)"
-                    (touchmove)="onTouchMove($event, story._id)"
-                    (touchend)="onTouchEnd($event, story._id)">
-                    
-                    <div class="story-slider" [style.width.%]="slideCount(story) * 100" [style.transform]="'translateX(' + (-story.slideIndex * 100) + '%)'">
-                        <!-- THIS IS THE COVER FOR THE STORY -->
-                        <div class="story-slide">
-                            <img class="story-image" [src]="story.image" [alt]="story.author" style="max-width: 35%;">
-                            <div class="story-overlay" style="max-width: 35%;">
-                                <div class="story-title">{{ story.title }}</div>
-                                <div class="story-quote">{{ story.subtitle }}</div>
-                                <div class="story-language pt-1 pb-1">
-                                    {{ languageLabel(story.language) }}
-                                </div>
-                                <!-- <div class="story-quote">{{ story.quote }}</div> -->
-                                <div class="story-actions">
-                                    <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
-                                    <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                    <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(story._id)">See More</button>
-                                </div>
-                            </div>
-                        </div>
+        @if (!isMobileViewport) {
+            <div class="desktop-stories-notice">
+                <div class="desktop-stories-notice-title">Stories is a mobile-first experience</div>
+                <div class="desktop-stories-notice-body">
+                    This section is intended for phones. To preview it on desktop, enable mobile device simulation in Chrome DevTools.
+                </div>
+            </div>
+        }
+
+        @if (isMobileViewport) {
+            <div class="stories-feed">
+                @for (group of storyGroups(); track group.audiobookId) {
+                    <div class="story-card" #storyItem [attr.data-story-id]="group.activeStory._id"
+                        (touchstart)="onTouchStart($event, group.activeStory._id)"
+                        (touchmove)="onTouchMove($event, group.activeStory._id)"
+                        (touchend)="onTouchEnd($event, group.activeStory._id)">
                         
-                        <!-- SHOW EACH PIECE OF THE CHAPTER -->
-                        @for (piece of displayPieces(story); track $index) {
-                            @if (!piece.audioUrl) {
-                                <!-- SHOW THIS WHEN NO MORE CHAPTERS OR END OF THE AUDIOBOOK -->
-                                <div class="story-slide">
-                                    @if (story.chapterNumber == story.totalChapters) {
-                                        <!-- END OF THE AUDIOBOOK -->
-                                        <img class="story-image" src="the-end.png" alt="The End!" style="max-width: 35%;">
-                                    } @else {
-                                        <!-- MORE CHAPTERS TO COME -->
-                                        <img class="story-image" src="more-chapters-to-come.png" alt="More chapters to come!" style="max-width: 35%;">
-                                        <div class="story-overlay text-center" style="max-width: 35%; top:73%">
-                                            <h1 class="pt-4 fw-bold text-primary">{{ piece.title }}</h1>
-                                            <h3>{{ piece.quote }}</h3>
-                                            <h3>{{ piece.readingText }}</h3>
+                        <div class="story-slider" [style.width.%]="slideCount(group.activeStory) * 100" [style.transform]="'translateX(' + (-group.activeStory.slideIndex * 100) + '%)'">
+                            <!-- THIS IS THE COVER FOR THE STORY -->
+                            <div class="story-slide">
+                                <img class="story-image" [src]="group.activeStory.image" [alt]="group.activeStory.author" style="max-width: 35%;">
+                                <div class="story-overlay" style="max-width: 35%;">
+                                    <div class="story-title">{{ group.activeStory.title }}</div>
+                                    <div class="story-quote">{{ group.activeStory.subtitle }}</div>
+                                    <div class="story-language pt-1 pb-1">
+                                        {{ languageLabel(group.activeStory.language) }}
+                                    </div>
+                                    @if (group.stories.length > 1) {
+                                        <div class="story-meta">
+                                            {{ storyCountExcludingPresentation(group) }} stories available
                                         </div>
                                     }
-                                </div>
-                            } @else {
-                                <!-- THIS IS THE CHAPTER WITH IMAGE, AUDIO AND TEXT TO READ -->
-                                <div class="story-slide">
-                                    <!-- The Image -->
-                                    <img class="story-image" [src]="piece.audioImage" [alt]="story.author" style="max-width: 35%;">
-                                    <!-- The button to mute -->
-                                    <button class="story-audio-fab" (click)="toggleMute(story._id, $index)">
-                                        <i class="bi" [class.bi-volume-up]="!piece.isMuted" [class.bi-volume-mute]="piece.isMuted"></i>
-                                    </button>
-                                    <!-- The content -->
-                                    <div class="story-overlay story-overlay-compact" style="max-width: 34%;">
-                                        <div class="mb-3 story-audio-bar">
-                                            <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(story._id, $index)">
-                                                <i class="bi" [class.bi-play-fill]="!piece.isPlaying" [class.bi-pause-fill]="piece.isPlaying"></i>
-                                            </button>
-                                            <div class="story-audio-progress">
-                                                <div class="story-audio-progress-fill" [style.width.%]="piece.progress"></div>
-                                            </div>
-                                        </div>
-                                        @if (piece.playbackError) {
-                                            <div class="small text-warning mb-2">{{ piece.playbackError }}</div>
-                                        }
-                                        <div class="story-title">{{ piece.title }}</div>
-                                        <div class="story-language pt-1 pb-1">
-                                            {{ languageLabel(story.language) }}
-                                        </div>
-                                        <div class="story-quote">{{ piece.quote }}</div>
-                                        <div class="story-body story-body-scroll"
-                                             [class.expanded]="piece.expanded"
-                                             (click)="toggleExpand(story._id, $index)">
-                                            {{ piece.readingText }}
-                                        </div>
-                                        <div class="story-actions">
-                                            <button class="btn btn-sm btn-light rounded-pill">❤️ Like</button>
-                                            <button class="btn btn-sm btn-light rounded-pill">💬 Discuss</button>
-                                            @if (piece.hasResume) {
-                                                <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(story._id, $index)">
-                                                    Continue
-                                                </button>
+                                    <!-- <div class="story-quote">{{ story.quote }}</div> -->
+                                    <div class="story-actions">
+                                        <button
+                                            class="btn btn-sm rounded-pill"
+                                            [class.btn-light]="!isLiked(group.activeStory.audiobookId)"
+                                            [class.btn-danger]="isLiked(group.activeStory.audiobookId)"
+                                            [disabled]="isLikePending(group.activeStory.audiobookId)"
+                                            (click)="toggleLike(group.activeStory)">
+                                            {{ isLiked(group.activeStory.audiobookId) ? '❤️ Liked' : '❤️ Like' }}
+                                            @if (getLikeCount(group.activeStory.audiobookId) > 0) {
+                                                <span>&nbsp;({{ getLikeCount(group.activeStory.audiobookId) }})</span>
                                             }
-                                        </div>
+                                        </button>
+                                        <button class="btn btn-sm btn-light rounded-pill" (click)="gotoDebate(group.activeStory.audiobookId)">💬 Discuss</button>
+                                        <button class="btn btn-sm btn-light rounded-pill" (click)="showMore(group.activeStory._id)">See More</button>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <!-- SHOW EACH PIECE OF THE CHAPTER -->
+                            @for (piece of displayPieces(group.activeStory); track $index) {
+                                @if (!piece.audioUrl) {
+                                    <!-- SHOW THIS WHEN NO MORE CHAPTERS OR END OF THE AUDIOBOOK -->
+                                    <div class="story-slide">
+                                        @if (group.activeStory.chapterNumber == group.activeStory.totalChapters) {
+                                            <!-- END OF THE AUDIOBOOK -->
+                                            <img class="story-image" src="the-end.png" alt="The End!" style="max-width: 35%;">
+                                        } @else {
+                                            <!-- MORE CHAPTERS TO COME -->
+                                            <img class="story-image" src="more-chapters-to-come.png" alt="More chapters to come!" style="max-width: 35%;">
+                                            <div class="story-overlay text-center" style="max-width: 35%; top:73%">
+                                                <h1 class="pt-4 fw-bold text-primary">{{ piece.title }}</h1>
+                                                <h3>{{ piece.quote }}</h3>
+                                                <h3>{{ piece.readingText }}</h3>
+                                            </div>
+                                        }
+                                    </div>
+                                } @else {
+                                    <!-- THIS IS THE CHAPTER WITH IMAGE, AUDIO AND TEXT TO READ -->
+                                    <div class="story-slide">
+                                        <!-- The Image -->
+                                        <img class="story-image" [src]="piece.audioImage" [alt]="group.activeStory.author" style="max-width: 35%;">
+                                        <!-- The button to mute -->
+                                        <button class="story-audio-fab" (click)="toggleMute(group.activeStory._id, $index)">
+                                            <i class="bi" [class.bi-volume-up]="!piece.isMuted" [class.bi-volume-mute]="piece.isMuted"></i>
+                                        </button>
+                                        <!-- The content -->
+                                        <div class="story-overlay story-overlay-compact" style="max-width: 34%;">
+                                            <div class="mb-3 story-audio-bar">
+                                                <button class="btn btn-sm btn-light rounded-circle" (click)="toggleAudio(group.activeStory._id, $index)">
+                                                    <i class="bi" [class.bi-play-fill]="!piece.isPlaying" [class.bi-pause-fill]="piece.isPlaying"></i>
+                                                </button>
+                                                <div class="story-audio-progress">
+                                                    <div class="story-audio-progress-fill" [style.width.%]="piece.progress"></div>
+                                                </div>
+                                            </div>
+                                            @if (piece.playbackError) {
+                                                <div class="small text-warning mb-2">{{ piece.playbackError }}</div>
+                                            }
+                                            <div class="story-title">{{ piece.title }}</div>
+                                            <div class="story-language pt-1 pb-1">
+                                                {{ languageLabel(group.activeStory.language) }}
+                                            </div>
+                                            <div class="story-quote">{{ piece.quote }}</div>
+                                            <div class="story-body story-body-scroll"
+                                                [class.expanded]="piece.expanded"
+                                                (click)="toggleExpand(group.activeStory._id, $index)">
+                                                {{ piece.readingText }}
+                                            </div>
+                                            <div class="story-actions">
+                                                <button
+                                                    class="btn btn-sm rounded-pill"
+                                                    [class.btn-light]="!isLiked(group.activeStory.audiobookId)"
+                                                    [class.btn-danger]="isLiked(group.activeStory.audiobookId)"
+                                                    [disabled]="isLikePending(group.activeStory.audiobookId)"
+                                                    (click)="toggleLike(group.activeStory)">
+                                                    {{ isLiked(group.activeStory.audiobookId) ? '❤️ Liked' : '❤️ Like' }}
+                                                    @if (getLikeCount(group.activeStory.audiobookId) > 0) {
+                                                        <span>&nbsp;({{ getLikeCount(group.activeStory.audiobookId) }})</span>
+                                                    }
+                                                </button>
+                                                <button class="btn btn-sm btn-light rounded-pill" (click)="gotoDebate(group.activeStory.audiobookId)">💬 Discuss</button>
+                                                @if (piece.hasResume) {
+                                                    <button class="btn btn-sm btn-primary rounded-pill" (click)="continueStory(group.activeStory._id, $index)">
+                                                        Continue
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             }
-                        }
-                    </div>
+                        </div>
 
-                    <div class="story-indicators">
-                        @for (dot of slideDots(story); track dot) {
-                            <div class="dot" [class.active]="story.slideIndex === dot"></div>
-                        }
+                        <div class="story-indicators">
+                            @for (dot of slideDots(group.activeStory); track dot) {
+                                <div class="dot" [class.active]="group.activeStory.slideIndex === dot"></div>
+                            }
+                        </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
 
     </div>
 </div>
 
-<app-mobile-footer></app-mobile-footer>
+@if (isMobileViewport) {
+    <app-mobile-footer></app-mobile-footer>
+}

@@ -5,6 +5,28 @@
     padding-bottom: 2rem;
 }
 
+.desktop-stories-notice {
+    margin: 12px 0 16px 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    background: linear-gradient(180deg, rgba(251, 191, 36, 0.16), rgba(251, 191, 36, 0.06));
+    color: #f8fafc;
+}
+
+.desktop-stories-notice-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.desktop-stories-notice-body {
+    margin-top: 4px;
+    font-size: 0.86rem;
+    color: #e2e8f0;
+    line-height: 1.45;
+}
+
 
 .story-card {
     position: relative;
@@ -122,6 +144,14 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.story-meta {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
 }
 
 .story-actions .btn {

@@ -1,0 +1,86 @@
+<div class="container-fluid">
+    
+    <div class="col-12 col-md-7 col-lg-7 mx-auto px-3 px-md-0 pb-5">
+
+        <app-mobile-header></app-mobile-header>
+
+        <div class="hero-card rounded-bottom-xl px-4 pt-3 pb-4 sticky-top">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <button class="btn btn-link text-white p-0" (click)="goBack()">
+                    <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
+                </button>
+                <h3 class="fw-bold m-0 flex-grow-1 text-center">
+                    My Favorites & Bookmarks
+                </h3>
+                <button class="btn btn-outline-light btn-sm rounded-pill px-3"
+                        [disabled]="loading() || reloading()"
+                        (click)="refresh()">
+                    @if (reloading()) {
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Refreshing
+                        </span>
+                    } @else {
+                        <span>Refresh</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        @if (loading()) {
+            <div class="rounded-4 p-4 text-center text-gray-400 mt-4 etwm-bg-muted">
+                Loading your library...
+            </div>
+        } @else {
+            @if (errorMessage()) {
+                <div class="rounded-4 p-4 text-center mt-4 etwm-bg-muted">
+                    <div class="fw-bold mb-2">Something went wrong</div>
+                    <div class="text-gray-400 small mb-3">{{ errorMessage() }}</div>
+                    <button class="btn btn-primary rounded-pill px-4" (click)="refresh()">Try Again</button>
+                </div>
+            } @else {
+                <section class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <h4 class="m-0 fw-bold">Favorites</h4>
+                        <span class="small text-gray-400">{{ likedAudiobooks().length }}</span>
+                    </div>
+                    @if (likedAudiobooks().length === 0) {
+                        <div class="rounded-4 p-4 text-center text-gray-400 etwm-bg-muted">
+                            No liked audiobooks yet.
+                        </div>
+                    } @else {
+                        <div class="d-flex flex-column gap-3">
+                            @for (audiobook of likedAudiobooks(); track audiobook._id) {
+                                <app-item [audiobook]="audiobook" template="md"></app-item>
+                            }
+                        </div>
+                    }
+                </section>
+
+                <section class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <h4 class="m-0 fw-bold">Bookmarks</h4>
+                        <span class="small text-gray-400">{{ bookmarkedAudiobooks().length }}</span>
+                    </div>
+                    @if (bookmarkedAudiobooks().length === 0) {
+                        <div class="rounded-4 p-4 text-center text-gray-400 etwm-bg-muted">
+                            No bookmarked audiobooks yet.
+                        </div>
+                    } @else {
+                        <div class="d-flex flex-column gap-3">
+                            @for (audiobook of bookmarkedAudiobooks(); track audiobook._id) {
+                                <app-item [audiobook]="audiobook" template="md"></app-item>
+                            }
+                        </div>
+                    }
+                </section>
+            }
+        }
+
+    </div>
+
+    <div style="height:8rem"></div>
+
+    <app-mobile-footer selected="fav"></app-mobile-footer>
+
+</div>

@@ -620,15 +620,24 @@ async function textToSpeech(params) {
         validateStatus: () => true,
     });
 
-    if (queueResponse.status !== 202 || !queueResponse.data?.queueId) {
+    if (queueResponse.status !== 200 && queueResponse.status !== 202) {
         throw new Error(`TTS queue failed: ${queueResponse.status} ${JSON.stringify(queueResponse.data || {})}`);
     }
 
-    const queueId = queueResponse.data.queueId;
+    const { queueId, pollUrl } = queueResponse.data || {};
+    if (!queueId) {
+        throw new Error(`TTS queue failed: missing queueId ${JSON.stringify(queueResponse.data || {})}`);
+    }
+
+    const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
+    const rawPollUrl = String(pollUrl || '').trim();
+    const pollEndpoint = rawPollUrl
+        ? (rawPollUrl.startsWith('http') ? rawPollUrl : `${normalizedBaseUrl}${rawPollUrl.startsWith('/') ? '' : '/'}${rawPollUrl}`)
+        : `${normalizedBaseUrl}/api/tts/${queueId}`;
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < timeoutMs) {
-        const pollResponse = await axios.get(`${baseUrl}/api/tts/${queueId}`, {
+        const pollResponse = await axios.get(pollEndpoint, {
             responseType: 'arraybuffer',
             validateStatus: () => true,
         });

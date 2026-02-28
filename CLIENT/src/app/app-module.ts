@@ -63,6 +63,7 @@ import { Partners } from './SCREEN/screen/partners/partners';
 import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-story/screen-create-your-story';
 import { AudiobookSelectCover } from './COMPONENTS/ITEMS/audiobook-select-cover/audiobook-select-cover';
 import { AudiobookSelectCountryVoice } from './COMPONENTS/ITEMS/audiobook-select-country-voice/audiobook-select-country-voice';
+import { ScreenMyFavsAndBookmarks } from './SCREEN/AUDIOBOOK/screen-my-favs-and-bookmarks/screen-my-favs-and-bookmarks';
 
 @NgModule({
     declarations: [
@@ -120,6 +121,7 @@ import { AudiobookSelectCountryVoice } from './COMPONENTS/ITEMS/audiobook-select
         ScreenCreateYourStory,
         AudiobookSelectCover,
         AudiobookSelectCountryVoice,
+        ScreenMyFavsAndBookmarks,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [
