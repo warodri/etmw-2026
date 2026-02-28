@@ -97,3 +97,114 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 12px;
 }
+
+.admin-screen .card,
+.admin-screen .story-editor,
+.admin-screen .story-piece-editor {
+    background: var(--color-bg-slate-800);
+    border: 1px solid var(--color-border);
+    color: #fff;
+}
+
+.admin-screen .card-header,
+.admin-screen .card-footer {
+    background: var(--color-bg-slate-900);
+    border-color: var(--color-border);
+    color: #fff;
+}
+
+.admin-screen .table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(96, 165, 250, 0.05);
+    --bs-table-hover-bg: rgba(96, 165, 250, 0.08);
+    --bs-table-border-color: var(--color-border);
+    color: #fff;
+}
+
+.admin-screen .table > :not(caption) > * > * {
+    background-color: transparent;
+    color: #fff;
+}
+
+.admin-table-head th {
+    background: var(--color-bg-slate-900);
+    color: var(--color-primary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-screen .form-control,
+.admin-screen .form-select {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: var(--color-border);
+    color: #fff;
+}
+
+.admin-screen .form-control::placeholder {
+    color: var(--color-gray-400);
+}
+
+.admin-screen .form-control:focus,
+.admin-screen .form-select:focus {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(96, 165, 250, 0.2);
+    color: #fff;
+}
+
+.admin-screen .form-check-input {
+    background-color: rgba(0, 0, 0, 0.35);
+    border-color: var(--color-border);
+}
+
+.admin-screen .text-muted {
+    color: var(--color-gray-400) !important;
+}
+
+.admin-screen .btn-outline-secondary {
+    color: #d8dee9;
+    border-color: #5f6b7c;
+}
+
+.admin-screen .btn-outline-secondary:hover {
+    background: #5f6b7c;
+    border-color: #5f6b7c;
+    color: #fff;
+}
+
+.admin-screen .border-secondary-subtle,
+.admin-screen .border-primary-subtle,
+.admin-screen .border-info-subtle {
+    border-color: var(--color-border) !important;
+}
+
+.admin-screen .bg-dark-subtle {
+    background: rgba(0, 0, 0, 0.22) !important;
+}
+
+.conversion-debug {
+    background: rgba(37, 99, 235, 0.14);
+}
+
+.admin-screen .alert-info {
+    background: rgba(37, 99, 235, 0.16);
+    color: #d5e6ff;
+    border-color: rgba(96, 165, 250, 0.35);
+}
+
+.admin-screen .alert-success {
+    background: rgba(38, 181, 121, 0.16);
+    color: #d3f7e8;
+    border-color: rgba(38, 181, 121, 0.35);
+}
+
+.admin-screen .alert-danger {
+    background: rgba(209, 75, 98, 0.16);
+    color: #ffd6de;
+    border-color: rgba(209, 75, 98, 0.35);
+}
+
+.badge-soft {
+    background: rgba(96, 165, 250, 0.16);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: #dcecff;
+}
