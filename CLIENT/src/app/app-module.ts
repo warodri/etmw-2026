@@ -65,6 +65,7 @@ import { AudiobookSelectCover } from './COMPONENTS/ITEMS/audiobook-select-cover/
 import { AudiobookSelectCountryVoice } from './COMPONENTS/ITEMS/audiobook-select-country-voice/audiobook-select-country-voice';
 import { ScreenMyFavsAndBookmarks } from './SCREEN/AUDIOBOOK/screen-my-favs-and-bookmarks/screen-my-favs-and-bookmarks';
 import { ScreenPromoCode } from './SCREEN/SYSTEM/screen-promo-code/screen-promo-code';
+import { ScreenSubscriptionSettings } from './SCREEN/SYSTEM/screen-subscription-settings/screen-subscription-settings';
 
 @NgModule({
     declarations: [
@@ -124,6 +125,7 @@ import { ScreenPromoCode } from './SCREEN/SYSTEM/screen-promo-code/screen-promo-
         AudiobookSelectCountryVoice,
         ScreenMyFavsAndBookmarks,
         ScreenPromoCode,
+        ScreenSubscriptionSettings,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     imports: [

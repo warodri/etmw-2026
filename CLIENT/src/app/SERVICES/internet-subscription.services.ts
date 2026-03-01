@@ -16,7 +16,7 @@ export class InternetSubscriptionService extends InternetService {
 
     subscriptionGetConfig(callback: any) {
         const lang: string = LangUtils.detectLanguage();
-        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
             action: 'SubscriptionGetConfig',
             lang,
             data: {

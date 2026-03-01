@@ -224,7 +224,6 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
         private internet: InternetService,
         private toast: ToastService,
         private router: Router,
-        private route: ActivatedRoute,
     ) {}
 
     ngOnInit(): void {

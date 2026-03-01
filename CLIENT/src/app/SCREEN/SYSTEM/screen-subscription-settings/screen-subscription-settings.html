@@ -1,0 +1,67 @@
+<div class="container-fluid">
+
+    <div class="col-12 col-md-8 col-lg-8 mx-auto px-3 px-md-0">
+
+        <app-mobile-header></app-mobile-header>
+
+        <div class="px-4 mb-3 d-flex flex-wrap justify-content-start align-items-center gap-2">
+            <h1 class="m-0">Enter To My World</h1>
+            <h5 class="m-0 text-gray-400 pt-2">Audiobooks, debates and your own stories</h5>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center px-2 py-3" style="min-height: calc(100vh - 220px);">
+            <div class="w-100 bg-secondary rounded-5 p-4 p-md-5 border-primary-2x position-relative overflow-hidden subscription-shell">
+                <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
+                    <div>
+                        <h3 class="mb-2">Subscriptions</h3>
+                        <p class="text-gray-400 mb-0">
+                            Manage which updates you want to receive by email.
+                        </p>
+                    </div>
+                    <span class="channel-badge text-uppercase">Email</span>
+                </div>
+
+                <div class="subscription-list">
+                    @for (item of subscriptions(); track item) {
+                        <section class="mb-4">
+                            <h4 class="mb-3 text-primary">{{ item.labelEn }}</h4>
+
+                            @for (innerItem of item.sections; track innerItem) {
+                                <div class="section-block mb-3 p-4">
+                                    <h5 class="mb-3 section-title">{{ innerItem.labelEn }}</h5>
+
+                                    @for (sub of getSectionSubscriptions(innerItem); track sub.code) {
+                                        <label class="subscription-row border rounded-3 d-flex justify-content-between align-items-center gap-3">
+                                            <div>
+                                                <div class="subscription-label">{{ sub.labelEn }}</div>
+                                                <div class="text-gray-400 small">
+                                                    {{ sub.selected ? 'Subscribed' : 'Not subscribed' }}
+                                                </div>
+                                            </div>
+
+                                            <div class="toggle-wrap">
+                                                <input
+                                                    class="toggle-input"
+                                                    type="checkbox"
+                                                    [id]="'sub-' + sub.code"
+                                                    [checked]="sub.selected"
+                                                    (change)="sub.selected = $any($event.target).checked"
+                                                />
+                                                <span class="toggle-slider"></span>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            }
+                        </section>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="height:8rem"></div>
+
+    <app-mobile-footer></app-mobile-footer>
+</div>

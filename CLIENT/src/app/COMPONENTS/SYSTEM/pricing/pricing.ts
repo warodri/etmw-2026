@@ -38,10 +38,28 @@ export class Pricing implements OnInit {
             price: number,
             booksPerMonth: number
         }
-    } | null>(null);
+    } | null>({
+        unlimited: {
+            productId: 'fallback-unlimited',
+            price: 14.99,
+            booksPerMonth: 9999
+        },
+        reader: {
+            productId: 'fallback-reader',
+            price: 9.99,
+            booksPerMonth: 10
+        },
+        explorer: {
+            productId: 'fallback-explorer',
+            price: 6.49,
+            booksPerMonth: 5
+        }
+    });
 
     //  Flags
     showLogin = signal<boolean>(false);
+    checkoutPlanPending = signal<'Explorer' | 'Reader' | 'Unlimited' | null>(null);
+    configLoadFailed = signal<boolean>(false);
 
     constructor(
         private router: Router,
@@ -64,9 +82,12 @@ export class Pricing implements OnInit {
             console.log('subscriptionGetConfig', response);
             if (response && response.success) {
                 this.prices.set(response.config)
+                this.configLoadFailed.set(false);
                 console.log('this.prices', this.prices())
-                callback();
+            } else {
+                this.configLoadFailed.set(true);
             }
+            callback();
         })
     }
 
@@ -125,13 +146,16 @@ export class Pricing implements OnInit {
     }
 
     getStripeUrl(plan: 'Unlimited' | 'Reader' | 'Explorer') {
+        if (this.checkoutPlanPending()) return;
         const selectedRegion = this.selectedRegion();
         if (selectedRegion) {
+            this.checkoutPlanPending.set(plan);
             this.iSubscription.subscriptionGenerateStripeUrl(plan, selectedRegion, (response: any) => {
                 if (response && response.success && response.checkoutUrl) {
                     // Open Stripe 
                     location.href = response.checkoutUrl;
                 } else {
+                    this.checkoutPlanPending.set(null);
                     this.toast.show(this.toast.getMessageErrorUnexpected());
                 }
             })

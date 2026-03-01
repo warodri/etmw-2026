@@ -4,6 +4,7 @@ import { InternetUserService } from '../../../SERVICES/internet-user.service';
 import { UserModel } from '../../../models/user';
 import { CategoryModel } from '../../../models/categories';
 import { LangUtils } from '../../../utils/lang';
+import { Config } from '../../../utils/config';
 
 @Component({
     selector: 'app-screen-mobile-main',
@@ -12,7 +13,10 @@ import { LangUtils } from '../../../utils/lang';
     styleUrl: './screen-mobile-main.css',
 })
 export class ScreenMobileMain implements OnInit {
+    
     language: 'en' | 'es' = 'en';
+
+    VERSION = Config.VERSION;
 
     constructor(
         private router: Router,

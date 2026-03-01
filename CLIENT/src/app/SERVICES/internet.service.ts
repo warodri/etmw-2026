@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Config } from '../utils/config';
 import { InternetCommon } from '../utils/internet.common';
 import { LangUtils } from '../utils/lang';
+import { NotificationSubscription } from '../models/notification-subscription';
 
 @Injectable({
     providedIn: 'root'
@@ -138,5 +139,31 @@ export class InternetService {
             }
         }, callback);
     }
+
+    //  NOTIFICATION SUBSCRIPTIONS
+
+    notificationSubscriptionGet(token: string, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'NotificationSubscriptionGet',
+            lang,
+            data: {
+                token,
+            }
+        }, callback);
+    }
+
+    notificationSubscriptionUpsert(token: string, payload: NotificationSubscription[], callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
+            action: 'NotificationSubscriptionUpsert',
+            lang,
+            data: {
+                token,
+                payload
+            }
+        }, callback);
+    }
+
 
 }

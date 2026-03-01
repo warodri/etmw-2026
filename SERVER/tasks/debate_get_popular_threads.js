@@ -107,6 +107,7 @@ async function run(data, req, res) {
                     score
                 };
             })
+            .filter((thread) => thread.likeCount > 0)
             .sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
                 return Number(b.createdAt || 0) - Number(a.createdAt || 0);

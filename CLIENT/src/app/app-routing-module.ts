@@ -23,6 +23,7 @@ import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/sc
 import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-story/screen-create-your-story';
 import { ScreenMyFavsAndBookmarks } from './SCREEN/AUDIOBOOK/screen-my-favs-and-bookmarks/screen-my-favs-and-bookmarks';
 import { ScreenPromoCode } from './SCREEN/SYSTEM/screen-promo-code/screen-promo-code';
+import { ScreenSubscriptionSettings } from './SCREEN/SYSTEM/screen-subscription-settings/screen-subscription-settings';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -82,6 +83,9 @@ const routes: Routes = [
 
     //  Partners
     { path: 'partners/:id', component: ScreenPartners },
+
+    //  System - Subscriptions
+    { path: 'app/subscriptions/:token', component: ScreenSubscriptionSettings },
 
     //  Admin
     { path: 'app/admin', component: ScreenAdminComponent },

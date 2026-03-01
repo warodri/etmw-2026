@@ -1,11 +1,12 @@
 const config = require('../config');
 
-async function sendEmailToUser(toEmail, subject, html, lang) {
+async function sendEmailToUser(toEmail, subject, html, unsuscribeUrl, lang) {
     try {
         const templateHtml = getTemplate(
             subject,
             html,
-            lang == 'es' ? 'Responde a este mensaje si no quieres recibir notificaciones' : `Reply to this message if you don't want to receive more notifications`
+            unsuscribeUrl,
+            lang
         )
         sendEmail(toEmail, subject, templateHtml, () => {
             console.log('EMAIL ENVIADO A ' + toEmail)
@@ -149,7 +150,7 @@ function getLoginCodeTemplate(code, lang) {
     `
 }
 
-function getTemplate(title, html, unsuscribeUrl = 'Reply to this Email if you want to unsuscribe <br>from this type of messages. Thank you!') {
+function getTemplate(title, html, unsuscribeUrl, lang) {
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -160,7 +161,12 @@ function getTemplate(title, html, unsuscribeUrl = 'Reply to this Email if you wa
     <title>Enter To My World</title>
     <!--[if mso]>
     <style type="text/css">
-        body, table, td {font-family: Arial, sans-serif !important;}
+        body, table, td { 
+            font-family: Arial, sans-serif !important; 
+        }
+        .text-light {
+            color: white!important
+        }
     </style>
     <![endif]-->
 </head>
@@ -195,7 +201,7 @@ function getTemplate(title, html, unsuscribeUrl = 'Reply to this Email if you wa
                             </h2>
                             
                             <!-- Main Message -->
-                            <p style="margin: 0 0 25px 0; color: #9ca3af; font-size: 16px; line-height: 1.75;">
+                            <p style="margin: 0 0 25px 0; color: #ffffff; font-size: 16px; line-height: 1.75;">
                                 ${html}
                             </p>
                             
@@ -320,8 +326,7 @@ function getTemplate(title, html, unsuscribeUrl = 'Reply to this Email if you wa
                             
                             <p style="margin: 0; color: #6b7280; font-size: 12px;">
                                 You're receiving this email because you have an account with Enter To My World.<br>
-                                <a href="${unsuscribeUrl}" style="color: #60a5fa; text-decoration: none;">Unsubscribe</a> | 
-                                <a href="https://entertomyworld.com" style="color: #60a5fa; text-decoration: none;">Preferences</a>
+                                <a href="${unsuscribeUrl}" style="color: #60a5fa; text-decoration: none;">Unsubscribe</a> 
                             </p>
                             
                         </td>

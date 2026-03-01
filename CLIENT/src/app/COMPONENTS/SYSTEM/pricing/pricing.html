@@ -1,6 +1,11 @@
 @let pricesObj = prices();
 
 @if (pricesObj) {
+    @if (configLoadFailed()) {
+        <div class="alert alert-warning rounded-4 mb-4 text-center">
+            {{ tr('Live pricing is temporarily unavailable. Showing fallback prices while checkout stays enabled.', 'Los precios en vivo no están disponibles temporalmente. Mostramos precios de respaldo mientras el pago sigue habilitado.') }}
+        </div>
+    }
     <div class="text-center mb-5">
         <h2 class="section-title">
             {{ tr(mainTitle, 'Elige Tu Plan') }}
@@ -21,7 +26,9 @@
                 Explorer Plan 
             -->
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="pricing-card">
+                <div class="pricing-card pointer"
+                    (click)="getStripeUrl('Explorer')"
+                    [class.pricing-card-disabled]="checkoutPlanPending() !== null">
                     <div class="pricing-header">
                         <h3 class="pricing-plan-name">{{ tr('Explorer', 'Explorador') }}</h3>
                         <div class="pricing-plan-subtitle">{{ tr('Perfect to start', 'Perfecto para empezar') }}</div>
@@ -59,8 +66,14 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         {{ tr('We deliver 1 chapter of each book daily', 'Entregamos 1 capítulo de cada libro diariamente') }}
                     </div>
-                    <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Explorer')">
-                        {{ tr('Start listening', 'Comenzar a escuchar') }}
+                    <button class="btn btn-secondary w-100 btn-lg rounded-pill mt-4"
+                        [disabled]="checkoutPlanPending() !== null"
+                        (click)="getStripeUrl('Explorer'); $event.stopPropagation()">
+                        @if (checkoutPlanPending() === 'Explorer') {
+                            {{ tr('Redirecting...', 'Redirigiendo...') }}
+                        } @else {
+                            {{ tr('Start listening', 'Comenzar a escuchar') }}
+                        }
                     </button>
                 </div>
             </div>
@@ -69,7 +82,9 @@
                 Reader Plan (Most Popular) 
             -->
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="pricing-card pricing-card-popular">
+                <div class="pricing-card pricing-card-popular pointer"
+                    (click)="getStripeUrl('Reader')"
+                    [class.pricing-card-disabled]="checkoutPlanPending() !== null">
                     <div class="pricing-badge">
                         ⭐ {{ tr('Most Popular', 'Más Popular') }}
                     </div>
@@ -110,8 +125,14 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         {{ tr('We deliver 1 chapter of each book daily', 'Entregamos 1 capítulo de cada libro diariamente') }}
                     </div>
-                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Reader')">
-                        {{ tr('Start listening', 'Comenzar a escuchar') }}
+                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4"
+                        [disabled]="checkoutPlanPending() !== null"
+                        (click)="getStripeUrl('Reader'); $event.stopPropagation()">
+                        @if (checkoutPlanPending() === 'Reader') {
+                            {{ tr('Redirecting...', 'Redirigiendo...') }}
+                        } @else {
+                            {{ tr('Start listening', 'Comenzar a escuchar') }}
+                        }
                     </button>
                 </div>
             </div>
@@ -120,7 +141,9 @@
                 Unlimited Plan 
             -->
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="pricing-card">
+                <div class="pricing-card pointer"
+                    (click)="getStripeUrl('Unlimited')"
+                    [class.pricing-card-disabled]="checkoutPlanPending() !== null">
                     <div class="pricing-header">
                         <h3 class="pricing-plan-name">{{ tr('Unlimited', 'Ilimitado') }}</h3>
                         <div class="pricing-plan-subtitle">{{ tr('For passionate readers', 'Para lectores apasionados') }}</div>
@@ -158,8 +181,14 @@
                     <div class="border rounded-4 p-3 text-primary" style="border-color:white!important">
                         {{ tr('You have access to all the chapters', 'Tienes acceso a todos los capítulos') }}
                     </div>
-                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4" (click)="getStripeUrl('Unlimited')">
-                        {{ tr('Go unlimited', 'Ir a ilimitado') }}
+                    <button class="btn btn-primary w-100 btn-lg rounded-pill mt-4"
+                        [disabled]="checkoutPlanPending() !== null"
+                        (click)="getStripeUrl('Unlimited'); $event.stopPropagation()">
+                        @if (checkoutPlanPending() === 'Unlimited') {
+                            {{ tr('Redirecting...', 'Redirigiendo...') }}
+                        } @else {
+                            {{ tr('Go unlimited', 'Ir a ilimitado') }}
+                        }
                     </button>
                 </div>
             </div>

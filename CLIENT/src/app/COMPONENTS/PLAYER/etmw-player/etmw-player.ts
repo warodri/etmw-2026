@@ -30,6 +30,13 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
     }
 
     playChapter(chapterNumber: number) {
+        if (!this.hasActivePlan()) {
+            this.loadingAudio.set(false);
+            this.audioLoaded.set(false);
+            this.audiobookNotAvailableForThisUser.set(false);
+            this.errorMessage.set(this.tr('You need an active plan to listen.', 'Necesitas un plan activo para escuchar.'));
+            return;
+        }
         this.loadingAudio.set(true);
         this.isChapterAllowed(chapterNumber, (success: boolean) => {
             if (success) {
@@ -51,6 +58,28 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
                 this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
             }
         })
+    }
+
+    override togglePlay() {
+        if (this.isPlaying) {
+            super.togglePlay();
+            return;
+        }
+
+        if (!this.hasActivePlan()) {
+            this.audioLoaded.set(false);
+            this.audiobookNotAvailableForThisUser.set(false);
+            this.errorMessage.set(this.tr('You need an active plan to listen.', 'Necesitas un plan activo para escuchar.'));
+            return;
+        }
+
+        const chapterNumber = this.chapterNumber();
+        if (!this.audioElement || !this.audioElement.src) {
+            this.playChapter(chapterNumber);
+            return;
+        }
+
+        super.togglePlay();
     }
 
     override autoPlayChapter(chapterNumber: number) {

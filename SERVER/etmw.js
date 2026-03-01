@@ -148,6 +148,11 @@ SharedMongoose.initMongoose( async () => {
 
     http.listen(PORT, '0.0.0.0', () => {
         console.log(`Enter To My World server listening on port ${PORT}`);
+
+        //  Test send email
+        const test = require('./tasks/email_send');
+        // test.newChapterAvailable('en', '69939fa60adfca90a24a7f71', '69a36a8ffd95ac15641024e3', 2)
+
     })
 
 })

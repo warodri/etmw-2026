@@ -96,7 +96,12 @@ export class ScreenPlayer implements OnInit, OnDestroy {
                 this.getListeningProgress(() => {
                     this.subscriptionGetMine(() => {
                         this.generateWaveform();
-                        this.startPlayback();            
+                        if (this.hasActivePlan()) {
+                            this.startPlayback();
+                        } else {
+                            this.audioLoaded.set(false);
+                            this.audiobookNotAvailableForThisUser.set(false);
+                        }
                         this.loading.set(false);
                     })
                 })
@@ -460,6 +465,16 @@ export class ScreenPlayer implements OnInit, OnDestroy {
 
     getRouter() {
         return this.router;
+    }
+
+    hasActivePlan(): boolean {
+        const sub = this.subscription();
+        if (!sub) return false;
+        if (sub.status !== 'active') return false;
+        if (typeof sub.periodEnd === 'number' && sub.periodEnd > 0) {
+            return sub.periodEnd > Date.now();
+        }
+        return true;
     }
 
     private normalizeListeningHistory(raw: any): ListeningProgressModel[] {

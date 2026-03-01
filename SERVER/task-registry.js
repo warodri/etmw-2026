@@ -46,6 +46,13 @@ SubscriptionGenerateStripeUrl = require('./tasks/subscription_generate_stripe');
 SubscriptionGetMine = require('./tasks/subscription_get_mine');
 
 //
+//  NOTIFICATION SUBSCRIPTIONS
+//
+NotificationSubscriptionGet = require('./tasks/notification-subscription-get');
+NotificationSubscriptionUpsert = require('./tasks/notification-subscription-upsert');
+
+
+//
 //  CATEGORIES
 //
 const GetAllCategories = require("./tasks/category_get");
@@ -197,6 +204,10 @@ const TasksRegistry = {
     UserGetListeningHistory,
     UserFind,
     
+    //  NOTIFICATION SUBSCRIPTIONS
+    NotificationSubscriptionGet,
+    NotificationSubscriptionUpsert,
+
     //  SUBSCRIPTIONS
     SubscriptionGetConfig,
     SubscriptionGenerateStripeUrl,
