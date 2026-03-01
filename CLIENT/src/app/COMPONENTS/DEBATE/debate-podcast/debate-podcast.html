@@ -2,35 +2,35 @@
     <div class="text-center mb-4">
         <div class="mb-3" style="font-size: 3rem;">🎙️</div>
         <h5 class="fw-bold mb-2">
-            Debate Podcast
+            {{ tr('Debate Podcast', 'Podcast de Debate') }}
         </h5>
         <p class="text-gray-400 mb-3">
-            Listen to this debate as a curated podcast
+            {{ tr('Listen to this debate as a curated podcast', 'Escucha este debate como un podcast curado') }}
         </p>
 
         @if (myUser && isAdmin()) {
             <button class="btn btn-primary rounded-pill px-4 py-2" [disabled]="generating()" (click)="generatePodcast()">
                 @if (generating()) {
                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    Generating...
+                    {{ tr('Generating...', 'Generando...') }}
                 } @else {
-                    <i class="bi bi-stars"></i> Generate New Episode
+                    <i class="bi bi-stars"></i> {{ tr('Generate New Episode', 'Generar Nuevo Episodio') }}
                 }
             </button>
         }
     </div>
 
     @if (isLoading() && podcasts().length === 0) {
-        <div class="text-center text-gray-400 py-3">Loading episodes...</div>
+        <div class="text-center text-gray-400 py-3">{{ tr('Loading episodes...', 'Cargando episodios...') }}</div>
     } @else if (error() && podcasts().length === 0) {
         <div class="alert alert-secondary mb-0">
             {{ error() }}
         </div>
     } @else if (podcasts().length === 0) {
         <div class="text-center py-4 rounded-4 bg-secondary">
-            <div class="small text-gray-400">No podcast episodes yet for this audiobook.</div>
+            <div class="small text-gray-400">{{ tr('No podcast episodes yet for this audiobook.', 'Aún no hay episodios de podcast para este audiolibro.') }}</div>
             @if (myUser && isAdmin()) {
-                <div class="small text-gray-400 mt-1">Generate the first one with the button above.</div>
+                <div class="small text-gray-400 mt-1">{{ tr('Generate the first one with the button above.', 'Genera el primero con el botón de arriba.') }}</div>
             }
         </div>
     } @else {
@@ -39,7 +39,7 @@
                 <div class="episode-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="fw-semibold">
-                            Episode {{ getEpisodeNumber(i) }}
+                            {{ tr('Episode', 'Episodio') }} {{ getEpisodeNumber(i) }}
                         </div>
                         <div class="small text-gray-400">
                             {{ getGeneratedLabel(item.createdAt) }}
@@ -55,9 +55,9 @@
             <div class="text-center mt-3">
                 <button class="btn btn-secondary rounded-pill px-4" [disabled]="isLoading()" (click)="fetchMore()">
                     @if (isLoading()) {
-                        Loading...
+                        {{ tr('Loading...', 'Cargando...') }}
                     } @else {
-                        Show more episodes
+                        {{ tr('Show more episodes', 'Mostrar más episodios') }}
                     }
                 </button>
             </div>

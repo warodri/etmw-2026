@@ -1,5 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { InternetDebateService } from '../../../SERVICES/internet-debate.services';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-debate-add-comment',
@@ -15,6 +16,7 @@ export class DebateAddComment implements OnDestroy {
     @Output() commentSaved = new EventEmitter<any>();
     @Output() replyCancelled = new EventEmitter<void>();
     @ViewChild('attachmentInput') attachmentInput?: ElementRef<HTMLInputElement>;
+    language: 'en' | 'es' = LangUtils.detectLanguage();
 
     // Input state
     newCommentText = '';
@@ -78,7 +80,7 @@ export class DebateAddComment implements OnDestroy {
             this.mediaRecorder.onstop = () => this.buildAudioFileFromChunks();
             this.mediaRecorder.start();
         } catch (err) {
-            this.mediaError = 'Microphone access was denied or unavailable.';
+            this.mediaError = this.tr('Microphone access was denied or unavailable.', 'El acceso al micrófono fue denegado o no está disponible.');
             this.stopRecording();
         }
     }
@@ -154,7 +156,7 @@ export class DebateAddComment implements OnDestroy {
         if (!this.canSend() || this.submitting) return;
         const audiobookId = this.audiobookId;
         if (!audiobookId) {
-            this.mediaError = 'No audiobook selected.';
+            this.mediaError = this.tr('No audiobook selected.', 'No hay audiolibro seleccionado.');
             return;
         }
         const text = this.newCommentText.trim();
@@ -179,7 +181,7 @@ export class DebateAddComment implements OnDestroy {
                     }
                     return;
                 }
-                this.mediaError = response?.message || 'Unable to post comment.';
+                this.mediaError = response?.message || this.tr('Unable to post comment.', 'No se pudo publicar el comentario.');
             }
         );
     }
@@ -221,6 +223,10 @@ export class DebateAddComment implements OnDestroy {
     private cleanupObjectUrls() {
         if (this.recordedAudioUrl) URL.revokeObjectURL(this.recordedAudioUrl);
         if (this.attachedFileUrl) URL.revokeObjectURL(this.attachedFileUrl);
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 }

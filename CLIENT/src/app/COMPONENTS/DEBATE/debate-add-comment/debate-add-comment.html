@@ -10,10 +10,10 @@
         <div class="mb-2 px-3 py-2 rounded-4 bg-secondary d-flex justify-content-between align-items-center">
             <div class="small">
                 <i class="bi bi-reply-fill text-primary"></i>
-                Replying to {{ replyToLabel || 'comment' }}
+                {{ tr('Replying to', 'Respondiendo a') }} {{ replyToLabel || tr('comment', 'comentario') }}
             </div>
             <button class="btn btn-sm btn-secondary rounded-pill" (click)="cancelReply()">
-                Cancel
+                {{ tr('Cancel', 'Cancelar') }}
             </button>
         </div>
     }
@@ -33,7 +33,7 @@
                       #commentTextArea
                       class="form-control rounded-4 bg-secondary border-0 text-white input-light-placeholder debate-comment-textarea"
                       [(ngModel)]="newCommentText"
-                      [placeholder]="parentMessageId ? 'Write your reply...' : 'Share your thoughts...'"
+                      [placeholder]="parentMessageId ? tr('Write your reply...', 'Escribe tu respuesta...') : tr('Share your thoughts...', 'Comparte tus ideas...')"
                       rows="1"
                       (input)="onTextareaInput(commentTextArea)"></textarea>
         </div>
@@ -59,7 +59,7 @@
     @if (isRecording) {
         <div class="mt-2 d-flex align-items-center gap-2 text-danger">
             <div class="spinner-grow spinner-grow-sm"></div>
-            <span class="small">Recording... {{ recordingDuration }}</span>
+            <span class="small">{{ tr('Recording...', 'Grabando...') }} {{ recordingDuration }}</span>
         </div>
     }
 
@@ -77,7 +77,7 @@
                     {{ recordedAudioFile.name }} ({{ formatFileSize(recordedAudioFile.size) }})
                 </div>
                 <button class="btn btn-sm btn-secondary rounded-pill" (click)="removeRecordedAudio()">
-                    Remove
+                    {{ tr('Remove', 'Quitar') }}
                 </button>
             </div>
             @if (recordedAudioUrl) {
@@ -94,12 +94,12 @@
                     {{ attachedFile.name }} ({{ formatFileSize(attachedFile.size) }})
                 </div>
                 <button class="btn btn-sm btn-secondary rounded-pill" (click)="removeAttachment()">
-                    Remove
+                    {{ tr('Remove', 'Quitar') }}
                 </button>
             </div>
 
             @if (attachedFileType === 'image' && attachedFileUrl) {
-                <img [src]="attachedFileUrl" class="img-fluid rounded-3 debate-attachment-preview" alt="Attachment preview" />
+                <img [src]="attachedFileUrl" class="img-fluid rounded-3 debate-attachment-preview" [alt]="tr('Attachment preview', 'Vista previa del adjunto')" />
             }
 
             @if (attachedFileType === 'video' && attachedFileUrl) {

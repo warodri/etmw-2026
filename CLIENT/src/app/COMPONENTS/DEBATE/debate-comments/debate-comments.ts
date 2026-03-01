@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { InternetDebateService } from '../../../SERVICES/internet-debate.services';
 import { DebateCommentModel } from '../../../models/debate-comment';
 import { InternetReactionService } from '../../../SERVICES/internet-reaction.services';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-debate-comments',
@@ -10,6 +11,7 @@ import { InternetReactionService } from '../../../SERVICES/internet-reaction.ser
     styleUrl: './debate-comments.css',
 })
 export class DebateComments implements OnInit, OnChanges {
+    language: 'en' | 'es' = 'en';
 
     @Input() audiobookId: string | null = null;
     @Input() refreshToken = 0;
@@ -31,6 +33,7 @@ export class DebateComments implements OnInit, OnChanges {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         this.resetAndLoad();
     }
 
@@ -70,7 +73,7 @@ export class DebateComments implements OnInit, OnChanges {
                 this.hasMore.set(Boolean(response.hasMore ?? (next.length >= this.limit)));
                 return;
             }
-            this.error.set(response?.message || 'Unable to load comments');
+            this.error.set(response?.message || this.tr('Unable to load comments', 'No se pudieron cargar los comentarios'));
             if (this.skip === 0) {
                 this.comments.set([]);
             }
@@ -189,6 +192,10 @@ export class DebateComments implements OnInit, OnChanges {
                 );
             }
         );
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 

@@ -6,7 +6,7 @@
     @if (loading()) {
         
         <div class="p-3 text-center">
-            Loading...
+            {{ tr('Loading...', 'Cargando...') }}
         </div>
 
     } @else {
@@ -20,7 +20,7 @@
                             <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
                         </button>
                         <h4 class="fw-bold m-0 flex-grow-1 text-center">
-                            💬 &nbsp;Debates
+                            💬 &nbsp;{{ tr('Debates', 'Debates') }}
                         </h4>
                         <div style="width: 1.5rem;"></div>
                     </div>
@@ -29,27 +29,27 @@
                 <div class="px-4 pb-5">
                     <div class="debate-empty-state mt-4 p-4 p-md-5 text-center">
                         <div class="debate-empty-icon mb-3">🎙️</div>
-                        <h4 class="fw-bold mb-2">What are Debates?</h4>
+                        <h4 class="fw-bold mb-2">{{ tr('What are Debates?', '¿Qué son los Debates?') }}</h4>
                         <p class="text-gray-400 mb-4 lh-175">
-                            Debates are discussion spaces attached to each audiobook.
-                            Readers and authors can exchange ideas, react to chapters, and keep the conversation alive after listening.
+                            {{ tr('Debates are discussion spaces attached to each audiobook.', 'Los debates son espacios de discusión vinculados a cada audiolibro.') }}
+                            {{ tr('Readers and authors can exchange ideas, react to chapters, and keep the conversation alive after listening.', 'Lectores y autores pueden intercambiar ideas, reaccionar a capítulos y mantener viva la conversación después de escuchar.') }}
                         </p>
                         
                         @if(audiobooksFound().length == 0) {
                             <p class="small text-gray-400 mb-4">
-                                To start, choose a book first.
+                                {{ tr('To start, choose a book first.', 'Para empezar, elige primero un libro.') }}
                             </p>
                             <div class="d-flex gap-2 align-items-center bg-secondary rounded-pill p-2 mx-auto debate-search-box">
                                 <i class="bi bi-search text-gray-400 ps-2"></i>
                                 <input
                                     type="text"
                                     class="form-control bg-transparent border-0 text-white input-light-placeholder"
-                                    placeholder="Type a book title or author..."
+                                    [placeholder]="tr('Type a book title or author...', 'Escribe un título de libro o autor...')"
                                     [(ngModel)]="bookSearchQuery"
                                     (keydown.enter)="goToSearchBooks()"
                                 />
                                 <button class="btn btn-primary rounded-pill px-4" (click)="goToSearchBooks()">
-                                    Search
+                                    {{ tr('Search', 'Buscar') }}
                                 </button>
                             </div>
                         } @else {
@@ -61,7 +61,7 @@
 
                             <div class="mt-4 text-center">
                                 <button class="btn btn-secondary rounded-pill" (click)="searchAgain()">
-                                    Search again
+                                    {{ tr('Search again', 'Buscar de nuevo') }}
                                 </button>
                             </div>
                             
@@ -73,7 +73,7 @@
         } @else if (!myUserObj) {
             
             <div class="p-3 text-center">
-                You need logged in to access Debates.
+                {{ tr('You need logged in to access Debates.', 'Debes iniciar sesión para acceder a Debates.') }}
             </div>    
 
         } @else {
@@ -81,7 +81,7 @@
             @if (!audiobookObj) {
 
                 <div class="p-3 text-center">
-                    I'm unable to find that audiobook!
+                    {{ tr("I'm unable to find that audiobook!", '¡No puedo encontrar ese audiolibro!') }}
                 </div>
 
             } @else {
@@ -95,15 +95,15 @@
                                 <i class="bi bi-chevron-left" style="font-size: 1.5rem;"></i>
                             </button>
                             <h4 class="fw-bold m-0 flex-grow-1 text-center">
-                                💬 &nbsp;Debate
+                                💬 &nbsp;{{ tr('Debate', 'Debate') }}
                             </h4>
                             <div class="dropdown">
                                 <button class="btn btn-secondary rounded-circle" data-bs-toggle="dropdown" style="width: 40px; height: 40px;">
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" (click)="shareDebate()"><i class="bi bi-share"></i> Share Debate</a></li>
-                                    <li><a class="dropdown-item" (click)="reportDebate()"><i class="bi bi-flag"></i> Report</a></li>
+                                    <li><a class="dropdown-item" (click)="shareDebate()"><i class="bi bi-share"></i> {{ tr('Share Debate', 'Compartir Debate') }}</a></li>
+                                    <li><a class="dropdown-item" (click)="reportDebate()"><i class="bi bi-flag"></i> {{ tr('Report', 'Reportar') }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -114,13 +114,13 @@
                                 <img [src]="SERVER + '/file?id=' + audiobookObj.coverFile" class="rounded-3 flex-shrink-0 pointer"  style="width: 60px; height: 90px; object-fit: cover;" (click)="gotoBook()" />
                                 <div class="flex-grow-1 min-w-0">
                                     <div class="fw-bold text-truncate">{{ audiobookObj.title }}</div>
-                                    <div class="small text-gray-400">by {{ audiobookObj.authorName }}</div>
+                                    <div class="small text-gray-400">{{ tr('by', 'por') }} {{ audiobookObj.authorName }}</div>
                                     <div class="d-flex gap-2 mt-2">
                                         <span class="badge bg-slate-800 text-primary px-2 py-1">
                                             <i class="bi bi-chat-fill"></i> {{ debate.totalMessages }}
                                         </span>
                                         <span class="badge bg-slate-800 text-success px-2 py-1">
-                                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Active
+                                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> {{ tr('Active', 'Activo') }}
                                         </span>
                                     </div>
                                 </div>
@@ -133,19 +133,19 @@
                                     [class.btn-primary]="viewMode === 'timeline'"
                                     [class.btn-secondary]="viewMode !== 'timeline'"
                                     (click)="viewMode = 'timeline'">
-                                <i class="bi bi-list-ul"></i> Timeline
+                                <i class="bi bi-list-ul"></i> {{ tr('Timeline', 'Cronología') }}
                             </button>
                             <button class="btn btn-sm flex-grow-1 rounded-pill" 
                                     [class.btn-primary]="viewMode === 'threads'"
                                     [class.btn-secondary]="viewMode !== 'threads'"
                                     (click)="viewMode = 'threads'">
-                                <i class="bi bi-chat-left-text"></i> Threads
+                                <i class="bi bi-chat-left-text"></i> {{ tr('Threads', 'Hilos') }}
                             </button>
                             <button class="btn btn-sm flex-grow-1 rounded-pill" 
                                     [class.btn-primary]="viewMode === 'podcast'"
                                     [class.btn-secondary]="viewMode !== 'podcast'"
                                     (click)="viewMode = 'podcast'">
-                                <i class="bi bi-broadcast"></i> Podcast
+                                <i class="bi bi-broadcast"></i> {{ tr('Podcast', 'Podcast') }}
                             </button>
                         </div>
                     </div>

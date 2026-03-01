@@ -4,6 +4,7 @@ import { ToastService } from '../../../SERVICES/toast';
 import { Config } from '../../../utils/config';
 import { DebatePodcastModel } from '../../../models/debate-podcast';
 import { UserModel } from '../../../models/user';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-debate-podcast',
@@ -12,6 +13,7 @@ import { UserModel } from '../../../models/user';
     styleUrl: './debate-podcast.css',
 })
 export class DebatePodcast implements OnChanges {
+    language: 'en' | 'es' = LangUtils.detectLanguage();
 
     @Input() myUser: UserModel | null = null;
     @Input() audiobookId: string | null = null;
@@ -74,7 +76,7 @@ export class DebatePodcast implements OnChanges {
                 return;
             }
 
-            this.error.set(response?.message || 'Unable to load podcast episodes.');
+            this.error.set(response?.message || this.tr('Unable to load podcast episodes.', 'No se pudieron cargar los episodios del podcast.'));
             if (!append) this.podcasts.set([]);
         });
     }
@@ -86,7 +88,7 @@ export class DebatePodcast implements OnChanges {
         this.iDebate.debateGeneratePodcast(audiobookId, (response: any) => {
             this.generating.set(false);
             if (response?.success) {
-                this.toast.show('Podcast generated');
+                this.toast.show(this.tr('Podcast generated', 'Podcast generado'));
                 this.reload();
                 return;
             }
@@ -107,6 +109,10 @@ export class DebatePodcast implements OnChanges {
 
     getEpisodeNumber(index: number): number {
         return index + 1;
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 }

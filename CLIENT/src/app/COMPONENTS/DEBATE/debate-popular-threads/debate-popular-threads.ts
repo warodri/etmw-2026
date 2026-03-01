@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { InternetDebateService } from '../../../SERVICES/internet-debate.services';
 import { DebateCommentModel } from '../../../models/debate-comment';
 import { UserModel } from '../../../models/user';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-debate-popular-threads',
@@ -11,6 +12,7 @@ import { UserModel } from '../../../models/user';
     styleUrl: './debate-popular-threads.css',
 })
 export class DebatePopularThreads implements OnInit, OnChanges {
+    language: 'en' | 'es' = 'en';
     @Input() audiobookId: string | null = null;
     @Input() limit = 5;
     @Output() onOpen = new EventEmitter<DebateCommentModel>();
@@ -25,6 +27,7 @@ export class DebatePopularThreads implements OnInit, OnChanges {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         this.loadPopularThreads();
     }
 
@@ -48,7 +51,7 @@ export class DebatePopularThreads implements OnInit, OnChanges {
                 this.popularThreads.set((response.threads || []) as DebateCommentModel[]);
                 return;
             }
-            this.error.set(response?.message || 'Unable to load popular threads');
+            this.error.set(response?.message || this.tr('Unable to load popular threads', 'No se pudieron cargar los hilos populares'));
             this.popularThreads.set([]);
         });
     }
@@ -73,8 +76,8 @@ export class DebatePopularThreads implements OnInit, OnChanges {
 
     userName(thread: DebateCommentModel): string {
         const user = this.userObj(thread);
-        if (!user) return 'User';
-        return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'User';
+        if (!user) return this.tr('User', 'Usuario');
+        return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || this.tr('User', 'Usuario');
     }
 
     userProfile(thread: DebateCommentModel): string {
@@ -86,12 +89,15 @@ export class DebatePopularThreads implements OnInit, OnChanges {
         if (!createdAt) return '';
         const diffMs = Date.now() - createdAt;
         const minutes = Math.floor(diffMs / 60000);
-        if (minutes < 1) return 'just now';
-        if (minutes < 60) return `${minutes}m ago`;
+        if (minutes < 1) return this.tr('just now', 'justo ahora');
+        if (minutes < 60) return `${minutes}${this.tr('m ago', 'm atrás')}`;
         const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
+        if (hours < 24) return `${hours}${this.tr('h ago', 'h atrás')}`;
         const days = Math.floor(hours / 24);
-        return `${days}d ago`;
+        return `${days}${this.tr('d ago', 'd atrás')}`;
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 }
-

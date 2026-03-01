@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Config } from '../../../utils/config';
 import { DebateCommentAttachment, DebateCommentModel } from '../../../models/debate-comment';
 import { UserModel } from '../../../models/user';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-debate-comment-card',
@@ -17,6 +18,7 @@ export class DebateCommentCard {
     @Output() onReply = new EventEmitter<DebateCommentModel>();
     @Output() onOpenThread = new EventEmitter<DebateCommentModel>();
     @Output() onToggleLike = new EventEmitter<DebateCommentModel>();
+    language: 'en' | 'es' = LangUtils.detectLanguage();
 
     private SERVER = Config.SERVER.dev ? Config.SERVER.local : Config.SERVER.remote;
 
@@ -71,9 +73,9 @@ export class DebateCommentCard {
     userName(): string {
         const user = this.user();
         if (user) {
-            return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'User';
+            return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || this.tr('User', 'Usuario');
         }
-        return 'User';
+        return this.tr('User', 'Usuario');
     }
 
     userProfile(): string {
@@ -93,12 +95,12 @@ export class DebateCommentCard {
         if (!createdAt) return '';
         const diffMs = Date.now() - createdAt;
         const minutes = Math.floor(diffMs / 60000);
-        if (minutes < 1) return 'just now';
-        if (minutes < 60) return `${minutes}m ago`;
+        if (minutes < 1) return this.tr('just now', 'justo ahora');
+        if (minutes < 60) return `${minutes}${this.tr('m ago', 'm atrás')}`;
         const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h ago`;
+        if (hours < 24) return `${hours}${this.tr('h ago', 'h atrás')}`;
         const days = Math.floor(hours / 24);
-        return `${days}d ago`;
+        return `${days}${this.tr('d ago', 'd atrás')}`;
     }
 
     audioUrl(): string | null {
@@ -133,6 +135,10 @@ export class DebateCommentCard {
 
     isVideoAttachment(attachment: DebateCommentAttachment): boolean {
         return !!attachment.mimetype && attachment.mimetype.startsWith('video/');
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 

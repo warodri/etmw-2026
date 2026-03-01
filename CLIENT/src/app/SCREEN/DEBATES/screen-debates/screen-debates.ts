@@ -7,6 +7,7 @@ import { AudiobookModel } from '../../../models/audiobook';
 import { Config } from '../../../utils/config';
 import { InternetDebateService } from '../../../SERVICES/internet-debate.services';
 import { DebateCommentModel } from '../../../models/debate-comment';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-screen-debates',
@@ -15,6 +16,7 @@ import { DebateCommentModel } from '../../../models/debate-comment';
     styleUrl: './screen-debates.css',
 })
 export class ScreenDebates implements OnInit, OnDestroy {
+    language: 'en' | 'es' = 'en';
 
     myUser = signal<UserModel | null>(null);
     audiobookId = signal<string | null>(null);
@@ -49,6 +51,7 @@ export class ScreenDebates implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.language = LangUtils.detectLanguage();
         this.route.paramMap.subscribe(params => {
             this.audiobookId.set(params.get('audiobookId'));
             this.getMyUser(() => {
@@ -162,19 +165,23 @@ export class ScreenDebates implements OnInit, OnDestroy {
 
     getReplyToLabel(): string {
         const reply = this.selectedReply();
-        if (!reply) return 'comment';
+        if (!reply) return this.tr('comment', 'comentario');
         const user: any = reply.userId;
         if (user && typeof user === 'object') {
             const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-            return fullName || user.email || 'comment';
+            return fullName || user.email || this.tr('comment', 'comentario');
         }
-        return 'comment';
+        return this.tr('comment', 'comentario');
     }
 
     onOpenPopularThread(comment: DebateCommentModel) {
         this.selectedThreadFromPopular.set(comment._id);
         this.viewMode = 'timeline';
         this.commentsRefreshToken.set(this.commentsRefreshToken() + 1);
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 
 }
