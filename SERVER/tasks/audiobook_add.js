@@ -91,6 +91,10 @@ async function run(data, req, res) {
         ab.totalPrice = totalPrice;
         ab.basePrice = basePrice;
         ab.hasReferral = hasReferral;
+
+        if (totalPrice == 0) {
+            ab.paymentCompleted = true;
+        }
         
         ab.authorId = a._id;
         ab.sourceLanguage = sourceLanguage;

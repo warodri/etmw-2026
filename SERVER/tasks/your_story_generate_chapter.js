@@ -17,6 +17,7 @@ async function run(data, req, res) {
         const YourStory = require('../models/your_story');
         const YourStoryChapter = require('../models/your_story_chapter');
         const YourStoryChapterMemory = require('../models/your_story_chapter_memory');
+        const AudioBook = require('../models/audiobook');
         const OpenAiUtils = require('../workers/open-ai-utils');
 
         const story = await YourStory.findOne({
@@ -136,6 +137,56 @@ async function run(data, req, res) {
             priorCondensedMemory: condensedMemory,
             targetLanguage: chapterLanguage,
         });
+
+        const shouldRefreshBookMetadata = (
+            nextChapterNumber === 1
+            || !String(story?.blueprint?.storyTitle || '').trim()
+            || !String(story?.blueprint?.storyFoundation || '').trim()
+            || !String(story?.blueprint?.genre || '').trim()
+        );
+
+        if (shouldRefreshBookMetadata) {
+            const bookMetadata = await OpenAiUtils.openAiCreateBookMetadata({
+                blueprint: story.blueprint || {},
+                chapterTitle: chapterPayload.title,
+                chapterSummary: chapterPayload.summary,
+                chapterContent: chapterPayload.content,
+                targetLanguage: chapterLanguage,
+            });
+
+            story.blueprint = {
+                ...(story.blueprint || {}),
+                storyTitle: String(bookMetadata?.title || story?.blueprint?.storyTitle || '').trim(),
+                storyFoundation: String(bookMetadata?.description || story?.blueprint?.storyFoundation || '').trim(),
+                genre: String(bookMetadata?.category || story?.blueprint?.genre || '').trim(),
+            };
+            story.markModified('blueprint');
+            story.updatedAt = Date.now();
+            await story.save();
+
+            if (story.audiobookId) {
+                const ab = await AudioBook.findOne({
+                    _id: story.audiobookId,
+                    enabled: true
+                });
+                if (ab) {
+                    const newTitle = String(bookMetadata?.title || '').trim();
+                    const newDescription = String(bookMetadata?.description || '').trim();
+                    const newCategory = String(bookMetadata?.category || '').trim();
+                    if (newTitle) ab.title = newTitle;
+                    if (newDescription) ab.description = newDescription;
+                    if (newCategory) ab.categories = [newCategory];
+                    ab.pipelineStatus = 'published';
+                    ab.published = true;
+                    ab.paymentCompleted = true;
+                    if (!ab.publishedAt) {
+                        ab.publishedAt = Date.now();
+                    }
+                    ab.updatedAt = Date.now();
+                    await ab.save();
+                }
+            }
+        }
 
         let memoryRecord = await YourStoryChapterMemory.findOne({
             storyId: story._id,

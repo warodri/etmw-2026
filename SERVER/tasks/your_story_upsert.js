@@ -88,12 +88,12 @@ async function run(data, req, res) {
                     if (chapterLanguage) {
                         ab.sourceLanguage = chapterLanguage;
                     }
-                    const title = String(blueprint?.storyTitle || '').trim();
-                    const description = String(blueprint?.storyFoundation || '').trim();
-                    const genre = String(blueprint?.genre || '').trim();
-                    if (title) ab.title = title;
-                    if (description) ab.description = description;
-                    if (genre) ab.categories = [genre];
+                    ab.pipelineStatus = 'published';
+                    ab.published = true;
+                    ab.paymentCompleted = true;
+                    if (!ab.publishedAt) {
+                        ab.publishedAt = Date.now();
+                    }
                     ab.updatedAt = Date.now();
                     await ab.save();
                 }
@@ -132,10 +132,6 @@ async function run(data, req, res) {
         const story = await storyDoc.save();
 
         // CREATE LINKED AUDIOBOOK RECORD
-        const title = String(blueprint?.storyTitle || 'Untitled AI Story').trim() || 'Untitled AI Story';
-        const description = String(blueprint?.storyFoundation || '').trim();
-        const genre = String(blueprint?.genre || '').trim();
-
         const audiobook = new AudioBook();
         audiobook.userId = String(userId);
         audiobook.uploadMethod = 'ai_story';
@@ -150,18 +146,19 @@ async function run(data, req, res) {
         audiobook.speechRate = '1.0';
         audiobook.stability = 50;
         audiobook.clarity = 75;
-        audiobook.title = title;
+        audiobook.title = 'Generating title...';
         audiobook.authorName = String(author.penName || '').trim() || 'Author';
-        audiobook.description = description;
-        audiobook.categories = genre ? [genre] : [];
+        audiobook.description = 'Generating description...';
+        audiobook.categories = [];
         audiobook.coverFile = file.filename || '';
         audiobook.coverFileMimetype = file.mimetype || '';
-        audiobook.pipelineStatus = 'uploaded';
+        audiobook.pipelineStatus = 'published';
         audiobook.totalPages = 0;
         audiobook.totalChapters = 0;
         audiobook.totalAudioDurationSec = 0;
         audiobook.audioFiles = [];
-        audiobook.published = false;
+        audiobook.published = true;
+        audiobook.paymentCompleted = true;
         audiobook.publishedAt = Date.now();
         const savedAudiobook = await audiobook.save();
 

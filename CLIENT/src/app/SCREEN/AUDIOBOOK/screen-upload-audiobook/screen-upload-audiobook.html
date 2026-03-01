@@ -87,7 +87,7 @@
                                 style="border-color: var(--color-primary) !important; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);">
                                 <div class="text-center mb-3">
                                     <div style="font-size: 3rem;">🎉</div>
-                                    <h5 class="fw-bold mb-2">{{ tr('Upload for FREE', 'Sube GRATIS') }}</h5>
+                                    <h5 class="fw-bold mb-2">{{ tr('Upload for FREE', 'Sube tu libro GRATIS') }}</h5>
                                     <p class="text-gray-400 mb-3">
                                         {{ tr('Have a referral code from our partners?', '¿Tienes un código de referido de nuestros socios?') }} <br>
                                         {{ tr('Upload your book at no cost!', '¡Sube tu libro sin costo!') }}
@@ -119,12 +119,9 @@
                                     Partners button 
                                 -->
                                 <div class="pt-2 text-center">
-                                    <button class="btn btn-secondary rounded-pill px-4" (click)="showPartners()">
-                                        <i class="bi bi-building"></i> {{ tr('View Our Partners', 'Ver Nuestros Socios') }}
+                                    <button class="btn btn-primary rounded-pill px-4" (click)="showPartners()">
+                                        <i class="bi bi-building"></i> {{ tr('GET A CODE', 'OBTEN UN CÓDIGO') }}
                                     </button>
-                                </div>
-                                <div class="pt-2 small text-gray-400 text-center">
-                                    {{ tr('Max amount of pages: 250', 'Cantidad máxima de páginas: 250') }}
                                 </div>
                             </div>
                             <!--
@@ -962,29 +959,24 @@
                     <button type="button" class="btn-close btn-close-white" (click)="closePartners()"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-gray-400 mb-4">
-                        {{ tr('Get a referral code from any of our trusted partners to upload your book for free!', 'Obtén un código de referido de cualquiera de nuestros socios de confianza para subir tu libro gratis.') }}
-                    </p>
-                    
+                    <p class="text-light mb-3">
+                        {{ tr('Get a referral code from any of our trusted partners to upload your book for free! Max amount of pages: 250', 'Obtén un código de referido de cualquiera de nuestros socios de confianza para subir tu libro gratis. Cantidad maxima de páginas: 250') }}
+                    </p>                    
                     @for (partner of partners(); track partner.name) {
                         <div class="bg-slate-800 rounded-4 p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="fw-bold text-light mb-1">
-                                        {{ partner.name }}
-                                    </h6>
-                                    <p class="small text-gray-400 word-break" style="max-height: 100px; overflow-y: auto;">
-                                        {{ partner.description }}
-                                    </p>
-                                    <div class="mt-1 p-0 badge d-flex justify-content-start align-items-center">
-                                        <div class="bg-primary text-light rounded-3 p-2">
-                                            {{ partner.language }}
-                                        </div>
-                                    </div>
+                            <h6 class="fw-bold text-light mb-1">
+                                {{ partner.name }}
+                            </h6>
+                            <p class="small text-gray-400 word-break" style="max-height: 100px; overflow-y: auto;">
+                                {{ partner.description }}
+                            </p>
+                            <div class="d-flex justify-content-end  align-items-center gap-3">
+                                <div class="text-light">
+                                    {{ partner.language }}
                                 </div>
                                 <a [href]="partner.website" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3">
                                     <h5 class="m-0">
-                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        {{ tr('Get the code', 'Obtén el código')}} <i class="bi bi-box-arrow-up-right"></i>
                                     </h5>
                                 </a>
                             </div>

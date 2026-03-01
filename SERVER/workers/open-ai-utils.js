@@ -46,6 +46,18 @@ function normalizeChapterPayload(raw, chapterNumber, modelName) {
     };
 }
 
+function normalizeBookMetadata(raw, fallback = {}) {
+    const title = String(raw?.title || fallback.title || '').trim();
+    const description = String(raw?.description || fallback.description || '').trim();
+    const category = String(raw?.category || fallback.category || '').trim();
+
+    return {
+        title: title || 'Untitled AI Story',
+        description: description || '',
+        category: category || '',
+    };
+}
+
 function normalizeCharacters(rawCharacters) {
     if (!Array.isArray(rawCharacters)) {
         return [];
@@ -298,10 +310,53 @@ async function openAiSummarizeChapterMemory({
     return fallbackMemorySummary(chapterText, chapterNumber);
 }
 
+async function openAiCreateBookMetadata({
+    blueprint,
+    chapterTitle,
+    chapterSummary,
+    chapterContent,
+    targetLanguage,
+}) {
+    const openAiClient = getClient();
+
+    const completion = await openAiClient.chat.completions.create({
+        model: DEFAULT_MODEL,
+        temperature: 0.4,
+        response_format: { type: 'json_object' },
+        messages: [
+            {
+                role: 'system',
+                content: 'Return strict JSON only with shape {"title":"","description":"","category":""}.'
+            },
+            {
+                role: 'user',
+                content: JSON.stringify({
+                    instructions: `Create concise audiobook metadata in ${String(targetLanguage || 'en')}. Title must be catchy. Description should be 2-4 sentences. Category must be a genre label (e.g., Mystery, Sci-Fi, Fantasy, Thriller, Romance, Drama, Horror, Adventure).`,
+                    blueprint: blueprint || {},
+                    firstChapterSignals: {
+                        chapterTitle: String(chapterTitle || ''),
+                        chapterSummary: String(chapterSummary || ''),
+                        chapterContentExcerpt: String(chapterContent || '').slice(0, 3000),
+                    }
+                })
+            }
+        ],
+    });
+
+    const raw = completion?.choices?.[0]?.message?.content || '{}';
+    const parsed = safeParseJson(raw) || {};
+    return normalizeBookMetadata(parsed, {
+        title: blueprint?.storyTitle || '',
+        description: blueprint?.storyFoundation || '',
+        category: blueprint?.genre || '',
+    });
+}
+
 module.exports = {
     openAiEnrichBlueprint,
     openAiCreateChapter,
     openAiSummarizeChapterMemory,
+    openAiCreateBookMetadata,
     buildCondensedMemoryBlock,
     MAX_MEMORY_CONTEXT_CHARS,
 };

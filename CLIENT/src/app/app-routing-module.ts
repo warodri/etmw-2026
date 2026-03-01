@@ -22,6 +22,7 @@ import { ScreenCreateMessage } from './SCREEN/INBOX/screen-create-message/screen
 import { ScreenResumePayment } from './SCREEN/AUDIOBOOK/screen-resume-payment/screen-resume-payment';
 import { ScreenCreateYourStory } from './SCREEN/AUDIOBOOK/screen-create-your-story/screen-create-your-story';
 import { ScreenMyFavsAndBookmarks } from './SCREEN/AUDIOBOOK/screen-my-favs-and-bookmarks/screen-my-favs-and-bookmarks';
+import { ScreenPromoCode } from './SCREEN/SYSTEM/screen-promo-code/screen-promo-code';
 
 const routes: Routes = [
     { path: '', component: ScreenHome },
@@ -58,6 +59,9 @@ const routes: Routes = [
    
     //  My Favs and Bookmarks
     { path: 'app/my-stuff', component: ScreenMyFavsAndBookmarks },
+
+    //  Promo code
+    { path: 'promo-code', component: ScreenPromoCode },
    
     //  Audiobook Detail
     { path: 'app/audiobook/view/:id', component: ScreenItemDetail },

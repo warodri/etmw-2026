@@ -6,6 +6,7 @@ import { UtilsService } from '../../../utils/utils-service';
 import { Config } from '../../../utils/config';
 import { ProcessedVoice } from '../../../models/voices';
 import { AVAILABLE_LANGUAGES } from '../../../DATA/country-list';
+import { LangUtils } from '../../../utils/lang';
 
 type PipelineStatus = 'processing' | 'generating' | 'ready';
 type ServerStoryStatus = 'draft' | 'publishing' | 'published' | 'archived';
@@ -60,6 +61,7 @@ type StoryRequest = {
     styleUrl: './screen-create-your-story.css',
 })
 export class ScreenCreateYourStory implements OnInit, OnDestroy {
+    language: 'en' | 'es' = 'en';
 
     authorAliases = signal<AuthorAlias[]>([]);
     selectedAuthorAliasId = signal<string>('');
@@ -114,6 +116,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
         this.loadAliases(() => {
             this.loadStories();
         });
@@ -224,7 +227,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
         const requiresPicture = !this.editingAuthorId() && !form.profilePictureFile;
         if (requiresPicture) {
-            this.toast.show('Profile picture is required to create an alias.');
+            this.toast.show(this.tr('Profile picture is required to create an alias.', 'La foto de perfil es obligatoria para crear un alias.'));
             return;
         }
 
@@ -261,7 +264,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                     if (this.authorAliases().length > 0) {
                         this.aliasPanelExpanded.set(false);
                     }
-                    this.toast.show('Alias saved successfully.');
+                    this.toast.show(this.tr('Alias saved successfully.', 'Alias guardado con éxito.'));
                 });
             }
         );
@@ -389,15 +392,15 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             return;
         }
         if (!this.voiceLanguage) {
-            this.toast.show('Please select a voice language.');
+            this.toast.show(this.tr('Please select a voice language.', 'Por favor selecciona un idioma de voz.'));
             return;
         }
         if (!this.chapterLanguage) {
-            this.toast.show('Please select a chapter language.');
+            this.toast.show(this.tr('Please select a chapter language.', 'Por favor selecciona un idioma de capítulo.'));
             return;
         }
         if (!this.coverFile) {
-            this.toast.show('Please select a cover image.');
+            this.toast.show(this.tr('Please select a cover image.', 'Por favor selecciona una imagen de portada.'));
             return;
         }
 
@@ -458,7 +461,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             return;
         }
         if (!chapter.audioUrl) {
-            this.toast.show('Generate chapter audio before publishing.');
+            this.toast.show(this.tr('Generate chapter audio before publishing.', 'Genera el audio del capítulo antes de publicarlo.'));
             return;
         }
 
@@ -548,7 +551,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             return;
         }
         if (!this.canGenerateNextChapter(request, chapter)) {
-            this.toast.show('Complete this chapter (including audio) before generating the next one.');
+            this.toast.show(this.tr('Complete this chapter (including audio) before generating the next one.', 'Completa este capítulo (incluyendo el audio) antes de generar el siguiente.'));
             return;
         }
         if (chapter.published) {
@@ -586,7 +589,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         }
         const chapter = request.chapters.find(item => item.chapter === chapterNumber);
         if (chapter?.audioUrl) {
-            this.toast.show('Delete chapter audio first before regenerating text.');
+            this.toast.show(this.tr('Delete chapter audio first before regenerating text.', 'Elimina primero el audio del capítulo antes de regenerar el texto.'));
             return;
         }
 
@@ -621,7 +624,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                         const updatedChapter: StoryChapter = {
                             ...ch,
                             status: 'ready',
-                            title: String(generatedChapter?.title || ch.title || `Chapter ${generatedChapterNumber}`),
+                            title: String(generatedChapter?.title || ch.title || `${this.tr('Chapter', 'Capítulo')} ${generatedChapterNumber}`),
                             summary: String(generatedChapter?.summary || ch.summary || ''),
                             content: String(generatedChapter?.content || ch.content || ''),
                             regenerationInstructions: String(generatedChapter?.regenerationInstructions || regenerationInstructions || ''),
@@ -647,9 +650,9 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     getStatusLabel(status: PipelineStatus): string {
-        if (status === 'processing') return 'Processing';
-        if (status === 'generating') return 'Generating';
-        return 'Ready';
+        if (status === 'processing') return this.tr('Processing', 'Procesando');
+        if (status === 'generating') return this.tr('Generating', 'Generando');
+        return this.tr('Ready', 'Listo');
     }
 
     formatDateTime(epoch: number): string {
@@ -813,7 +816,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
         return {
             id: String(rawId),
-            name: String(raw?.penName || 'Untitled alias'),
+            name: String(raw?.penName || this.tr('Untitled alias', 'Alias sin título')),
             bio: String(raw?.bio || ''),
             profilePictureUrl: this.resolveServerFileUrl(raw?.profilePicture) || 'nouser.png',
             profilePictureFile: null,
@@ -842,7 +845,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             createdAt: Number(raw?.createdAt || Date.now()),
             maxChapters: Math.max(3, totalChaptersGenerated + 2),
             authorAliasId,
-            authorAliasName: authorAlias?.name || 'Unknown alias',
+            authorAliasName: authorAlias?.name || this.tr('Unknown alias', 'Alias desconocido'),
             authorAliasPicture: authorAlias?.profilePictureUrl || 'nouser.png',
             totalChaptersGenerated,
             voiceLanguage: String(raw?.voiceLanguage || ''),
@@ -916,7 +919,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                 const updatedChapter: StoryChapter = {
                     ...baseChapter,
                     status: 'ready',
-                    title: String(generatedChapter?.title || baseChapter.title || `Chapter ${generatedChapterNumber}`),
+                    title: String(generatedChapter?.title || baseChapter.title || `${this.tr('Chapter', 'Capítulo')} ${generatedChapterNumber}`),
                     summary: String(generatedChapter?.summary || baseChapter.summary || ''),
                     content: String(generatedChapter?.content || baseChapter.content || ''),
                     regenerationInstructions: String(generatedChapter?.regenerationInstructions || baseChapter.regenerationInstructions || ''),
@@ -986,7 +989,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     getVisibleVoicesSummary(): string {
         const total = this.availableVoices().length;
         const visible = this.getVisibleVoices().length;
-        return `Showing ${visible} of ${total} voices`;
+        return this.tr(`Showing ${visible} of ${total} voices`, `Mostrando ${visible} de ${total} voces`);
     }
 
     toggleShowAllVoices(): void {
@@ -997,7 +1000,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         event?.stopPropagation();
         const sampleUrl = String(voice?.previewUrl || '').trim();
         if (!sampleUrl) {
-            this.toast.show('This voice does not have a preview sample.');
+            this.toast.show(this.tr('This voice does not have a preview sample.', 'Esta voz no tiene una muestra de prueba.'));
             return;
         }
 
@@ -1013,7 +1016,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         this.voicePreviewAudio.onerror = () => this.playingVoiceId.set('');
         this.voicePreviewAudio.play().catch(() => {
             this.playingVoiceId.set('');
-            this.toast.show('Could not play this voice preview.');
+            this.toast.show(this.tr('Could not play this voice preview.', 'No se pudo reproducir esta muestra de voz.'));
         });
     }
 
@@ -1073,23 +1076,23 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         const chapter = request.chapters.find(item => item.chapter === chapterNumber);
         if (!chapter || chapter.status !== 'ready') return;
         if (chapter.audioUrl) {
-            this.toast.show('This chapter already has generated audio.');
+            this.toast.show(this.tr('This chapter already has generated audio.', 'Este capítulo ya tiene audio generado.'));
             return;
         }
 
         const selectedVoice = this.getEffectiveVoice(request);
         if (!selectedVoice) {
-            this.toast.show('Please select a voice before converting chapter audio.');
+            this.toast.show(this.tr('Please select a voice before converting chapter audio.', 'Por favor selecciona una voz antes de convertir el audio del capítulo.'));
             return;
         }
         if (!String(selectedVoice.voiceUrl || '').trim()) {
-            this.toast.show('The selected voice has no preview URL to use as reference audio.');
+            this.toast.show(this.tr('The selected voice has no preview URL to use as reference audio.', 'La voz seleccionada no tiene una URL de muestra para usar como audio de referencia.'));
             return;
         }
 
         const voiceLanguage = request.voiceLanguage || this.voiceLanguage;
         if (!voiceLanguage) {
-            this.toast.show('Please select voice language first.');
+            this.toast.show(this.tr('Please select voice language first.', 'Por favor selecciona primero el idioma de voz.'));
             return;
         }
 
@@ -1326,7 +1329,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             || ''
         ).trim();
 
-        return prompt || 'Untitled story idea';
+        return prompt || this.tr('Untitled story idea', 'Idea de historia sin título');
     }
 
     private buildBlueprint(prompt: string, author: AuthorAlias): any {
@@ -1400,8 +1403,9 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     private generateCoverSvg(prompt: string, chapterNumber: number): string {
-        const safePrompt = this.escapeXml(prompt.slice(0, 48) || 'Your Story');
-        const chapterText = this.escapeXml(`Chapter ${chapterNumber}`);
+        const safePrompt = this.escapeXml(prompt.slice(0, 48) || this.tr('Your Story', 'Tu Historia'));
+        const chapterText = this.escapeXml(`${this.tr('Chapter', 'Capítulo')} ${chapterNumber}`);
+        const generatedCoverText = this.escapeXml(this.tr('AI Generated Cover', 'Portada generada por IA'));
         const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='440'>
             <defs>
                 <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
@@ -1413,7 +1417,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
             <rect x='20' y='20' width='320' height='400' fill='none' stroke='#60a5fa' stroke-width='2'/>
             <text x='50%' y='44%' text-anchor='middle' fill='#dbeafe' font-family='Arial' font-size='20'>${safePrompt}</text>
             <text x='50%' y='56%' text-anchor='middle' fill='#93c5fd' font-family='Arial' font-size='16'>${chapterText}</text>
-            <text x='50%' y='86%' text-anchor='middle' fill='#bfdbfe' font-family='Arial' font-size='14'>AI Generated Cover</text>
+            <text x='50%' y='86%' text-anchor='middle' fill='#bfdbfe' font-family='Arial' font-size='14'>${generatedCoverText}</text>
         </svg>`;
 
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -1463,7 +1467,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     formatFileSize(bytes: number): string {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return this.tr('0 Bytes', '0 Bytes');
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -1478,5 +1482,9 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     removeCoverFile() {
         this.coverFile = null;
+    }
+
+    tr(enText: string, esText: string) {
+        return this.language === 'es' ? esText : enText;
     }
 }

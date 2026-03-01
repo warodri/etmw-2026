@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LANGUAGE_MAP, REGION_MAP } from '../../../DATA/country-list';
+import { LangUtils } from '../../../utils/lang';
 
 export const availableLocales = [
     { code: 'ar-EG', name: 'ar-EG' },
@@ -93,7 +94,7 @@ export function getLocaleLabel(code: string): string {
   templateUrl: './audiobook-select-country-voice.html',
   styleUrl: './audiobook-select-country-voice.css',
 })
-export class AudiobookSelectCountryVoice {
+export class AudiobookSelectCountryVoice implements OnInit {
 
     @Input() labelEn = 'Same as source';
     @Input() labelEs = 'Igual que origen';
@@ -105,6 +106,10 @@ export class AudiobookSelectCountryVoice {
     GET_LOCALE_LABELS = getLocaleLabel
 
     language: 'en' | 'es' = 'en';
+
+    ngOnInit(): void {
+        this.language = LangUtils.detectLanguage();
+    }
     
     informChange() {
         this.onValueChanged.emit(this.targetLanguage);

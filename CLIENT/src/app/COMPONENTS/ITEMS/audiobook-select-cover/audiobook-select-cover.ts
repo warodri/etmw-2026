@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { LangUtils } from '../../../utils/lang';
 
 @Component({
     selector: 'app-audiobook-select-cover',
@@ -15,7 +16,7 @@ export class AudiobookSelectCover implements OnInit {
     constructor() {}
 
     ngOnInit(): void {
-        
+        this.language = LangUtils.detectLanguage();
     }
 
     tr(enText: string, esText: string) {

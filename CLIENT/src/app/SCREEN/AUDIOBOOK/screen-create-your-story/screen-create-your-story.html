@@ -5,51 +5,51 @@
         <app-mobile-header></app-mobile-header>
 
         <section class="story-hero text-center px-3">
-            <h1 class="story-title">Create Your Story</h1>
-            <p class="story-subtitle mb-0">Shape the audiobook you want to hear, chapter by chapter.</p>
+            <h1 class="story-title">{{ tr('Create Your Story', 'Crea Tu Historia') }}</h1>
+            <p class="story-subtitle mb-0">{{ tr('Shape the audiobook you want to hear, chapter by chapter.', 'Da forma al audiolibro que quieres escuchar, capítulo por capítulo.') }}</p>
         </section>
 
         <section class="story-panel rounded-4 p-4 mb-4">
             <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-                <h5 class="fw-bold m-0">1. Author aliases</h5>
+                <h5 class="fw-bold m-0">{{ tr('1. Author aliases', '1. Alias de autor') }}</h5>
                 @if (aliasPanelExpanded()) {
                     @if (authorAliases().length > 0) {
-                        <button class="btn btn-sm btn-outline-light rounded-pill" (click)="closeAliasPanel()">Hide</button>
+                        <button class="btn btn-sm btn-outline-light rounded-pill" (click)="closeAliasPanel()">{{ tr('Hide', 'Ocultar') }}</button>
                     }
                 } @else {
-                    <button class="btn btn-sm btn-outline-light rounded-pill" (click)="openAliasPanel()">Manage aliases</button>
+                    <button class="btn btn-sm btn-outline-light rounded-pill" (click)="openAliasPanel()">{{ tr('Manage aliases', 'Administrar alias') }}</button>
                 }
             </div>
 
             @if (!aliasPanelExpanded() && authorAliases().length > 0) {
-                <p class="text-gray-400 mb-2">Alias panel hidden. Reopen when you want to create/edit aliases.</p>
+                <p class="text-gray-400 mb-2">{{ tr('Alias panel hidden. Reopen when you want to create/edit aliases.', 'Panel de alias oculto. Ábrelo nuevamente cuando quieras crear/editar alias.') }}</p>
                 <div class="alias-collapsed-summary" *ngIf="getSelectedAuthorAlias() as selectedAlias">
                     <div class="d-flex align-items-center gap-2">
                         <img class="author-avatar" [src]="selectedAlias.profilePictureUrl" [alt]="selectedAlias.name" />
                         <div>
-                            <div class="small text-gray-400">Current alias</div>
+                            <div class="small text-gray-400">{{ tr('Current alias', 'Alias actual') }}</div>
                             <div class="fw-semibold">{{ selectedAlias.name }}</div>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-primary rounded-pill" (click)="startNewAlias()">Create new alias</button>
+                    <button class="btn btn-sm btn-primary rounded-pill" (click)="startNewAlias()">{{ tr('Create new alias', 'Crear nuevo alias') }}</button>
                 </div>
             } @else {
-                <p class="text-gray-400 mb-3">Create and manage pen names to publish your audiobook.</p>
+                <p class="text-gray-400 mb-3">{{ tr('Create and manage pen names to publish your audiobook.', 'Crea y administra seudónimos para publicar tu audiolibro.') }}</p>
 
                 <div class="author-form-grid">
                     <div>
-                        <label class="small text-gray-400 mb-2 d-block">Alias name</label>
+                        <label class="small text-gray-400 mb-2 d-block">{{ tr('Alias name', 'Nombre del alias') }}</label>
                         <input
                             class="story-input"
                             type="text"
-                            placeholder="Example: M. Raven"
+                            [placeholder]="tr('Example: M. Raven', 'Ejemplo: M. Raven')"
                             [value]="authorForm().name"
                             (input)="onAuthorNameInput($any($event.target).value)"
                         />
                     </div>
 
                     <div>
-                        <label class="small text-gray-400 mb-2 d-block">Profile picture</label>
+                        <label class="small text-gray-400 mb-2 d-block">{{ tr('Profile picture', 'Foto de perfil') }}</label>
                         <input
                             class="story-input"
                             type="file"
@@ -59,29 +59,29 @@
                     </div>
 
                     <div class="author-form-bio">
-                        <label class="small text-gray-400 mb-2 d-block">Bio</label>
+                        <label class="small text-gray-400 mb-2 d-block">{{ tr('Bio', 'Biografía') }}</label>
                         <textarea
                             class="story-textarea"
                             rows="3"
-                            placeholder="Short author biography"
+                            [placeholder]="tr('Short author biography', 'Biografía corta del autor')"
                             [value]="authorForm().bio"
                             (input)="onAuthorBioInput($any($event.target).value)"
                         ></textarea>
                     </div>
 
                     <div class="author-form-bio">
-                        <label class="small text-gray-400 mb-2 d-block">Book taste for this alias</label>
+                        <label class="small text-gray-400 mb-2 d-block">{{ tr('Book taste for this alias', 'Preferencias de libros para este alias') }}</label>
                         <div class="d-flex gap-2 mb-2">
                             <input
                                 class="story-input flex-grow-1"
                                 type="text"
-                                placeholder="Example: Ursula K. Le Guin, sci-fi, magical realism"
+                                [placeholder]="tr('Example: Ursula K. Le Guin, sci-fi, magical realism', 'Ejemplo: Ursula K. Le Guin, ciencia ficción, realismo mágico')"
                                 [value]="authorTasteInput()"
                                 (input)="onAuthorTasteInput($any($event.target).value)"
                                 (keydown)="onAuthorTasteKeydown($event)"
                                 (blur)="addAuthorTasteFromInput()"
                             />
-                            <button class="btn btn-secondary rounded-3 px-3" (click)="addAuthorTasteFromInput()">Add</button>
+                            <button class="btn btn-secondary rounded-3 px-3" (click)="addAuthorTasteFromInput()">{{ tr('Add', 'Agregar') }}</button>
                         </div>
                         <div class="d-flex flex-wrap gap-2" *ngIf="authorForm().tasteTags.length > 0; else noAuthorTasteTags">
                             @for (tag of authorForm().tasteTags; track tag) {
@@ -94,12 +94,12 @@
                             }
                         </div>
                         <ng-template #noAuthorTasteTags>
-                            <div class="small text-gray-400">Add at least one taste tag for this alias.</div>
+                            <div class="small text-gray-400">{{ tr('Add at least one taste tag for this alias.', 'Agrega al menos una etiqueta de gusto para este alias.') }}</div>
                         </ng-template>
                     </div>
 
                     <div class="author-preview" *ngIf="authorForm().profilePicturePreview">
-                        <img [src]="authorForm().profilePicturePreview" alt="Alias profile picture preview" />
+                        <img [src]="authorForm().profilePicturePreview" [alt]="tr('Alias profile picture preview', 'Vista previa de la foto de perfil del alias')" />
                     </div>
                 </div>
 
@@ -108,18 +108,18 @@
                         class="btn btn-primary rounded-pill px-4"
                         (click)="saveAuthorAlias()"
                         [disabled]="!canSaveAuthorAlias() || savingAlias()">
-                        {{ editingAuthorId() ? 'Update alias' : 'Create alias' }}
+                        {{ editingAuthorId() ? tr('Update alias', 'Actualizar alias') : tr('Create alias', 'Crear alias') }}
                     </button>
                     <button
                         class="btn btn-outline-light rounded-pill px-4"
                         (click)="cancelAuthorEdit()"
                         [disabled]="!hasDirtyAuthorForm()">
-                        Clear
+                        {{ tr('Clear', 'Limpiar') }}
                     </button>
                 </div>
 
                 @if (authorAliases().length === 0) {
-                    <div class="small text-gray-400 mt-3">No author aliases yet. Create one to continue.</div>
+                    <div class="small text-gray-400 mt-3">{{ tr('No author aliases yet. Create one to continue.', 'Aún no hay alias de autor. Crea uno para continuar.') }}</div>
                 } @else {
                     <div class="d-flex flex-column gap-2 mt-3">
                         @for (author of authorAliases(); track author.id) {
@@ -131,7 +131,7 @@
                                         <div class="small text-gray-400 word-break">{{ getAuthorBioPreview(author) }}</div>
                                         @if (isBioExpandable(author)) {
                                             <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleBioExpanded(author.id)">
-                                                {{ isBioExpanded(author.id) ? 'Show less bio' : 'Show full bio' }}
+                                                {{ isBioExpanded(author.id) ? tr('Show less bio', 'Mostrar menos biografía') : tr('Show full bio', 'Mostrar biografía completa') }}
                                             </button>
                                         }
 
@@ -142,7 +142,7 @@
                                         </div>
                                         @if (isTasteExpandable(author)) {
                                             <button class="btn btn-link btn-sm p-0 mt-1 story-inline-btn" type="button" (click)="toggleTasteExpanded(author.id)">
-                                                {{ isTasteExpanded(author.id) ? 'Show less tastes' : ('Show all tastes (' + author.tasteTags.length + ')') }}
+                                                {{ isTasteExpanded(author.id) ? tr('Show less tastes', 'Mostrar menos gustos') : (tr('Show all tastes', 'Mostrar todos los gustos') + ' (' + author.tasteTags.length + ')') }}
                                             </button>
                                         }
                                     </div>
@@ -154,9 +154,9 @@
                                         [class.btn-secondary]="selectedAuthorAliasId() !== author.id"
                                         (click)="assignAuthorAlias(author.id)"
                                     >
-                                        {{ selectedAuthorAliasId() === author.id ? 'Assigned' : 'Assign' }}
+                                        {{ selectedAuthorAliasId() === author.id ? tr('Assigned', 'Asignado') : tr('Assign', 'Asignar') }}
                                     </button>
-                                    <button class="btn btn-sm btn-secondary rounded-pill" (click)="editAuthorAlias(author.id)">Edit</button>
+                                    <button class="btn btn-sm btn-secondary rounded-pill" (click)="editAuthorAlias(author.id)">{{ tr('Edit', 'Editar') }}</button>
                                 </div>
                             </div>
                         }
@@ -166,31 +166,31 @@
         </section>
 
         <section class="story-panel rounded-4 p-4 mb-4">
-            <h5 class="fw-bold mb-3">2. Tell us your story idea</h5>
-            <p class="text-gray-400 mb-3">Enter a text prompt for your audiobook idea.</p>
+            <h5 class="fw-bold mb-3">{{ tr('2. Tell us your story idea', '2. Cuéntanos tu idea de historia') }}</h5>
+            <p class="text-gray-400 mb-3">{{ tr('Enter a text prompt for your audiobook idea.', 'Ingresa un prompt de texto para tu idea de audiolibro.') }}</p>
 
             <div class="selected-alias" *ngIf="getSelectedAuthorAlias() as selectedAlias; else noAuthorAssigned">
                 <img class="author-avatar" [src]="selectedAlias.profilePictureUrl" [alt]="selectedAlias.name" />
                 <div>
-                    <div class="small text-gray-400">Publishing as</div>
+                    <div class="small text-gray-400">{{ tr('Publishing as', 'Publicando como') }}</div>
                     <div class="fw-semibold">{{ selectedAlias.name }}</div>
                 </div>
             </div>
             <ng-template #noAuthorAssigned>
-                <div class="small text-warning mb-3">Create and assign an author alias before sending a story request.</div>
+                <div class="small text-warning mb-3">{{ tr('Create and assign an author alias before sending a story request.', 'Crea y asigna un alias de autor antes de enviar una solicitud de historia.') }}</div>
             </ng-template>
 
             <!-- Type your idea-->
             <textarea
                 class="story-textarea mb-3"
                 rows="4"
-                placeholder="Example: A mystery set in an underwater city where memories are traded as currency..."
+                [placeholder]="tr('Example: A mystery set in an underwater city where memories are traded as currency...', 'Ejemplo: Un misterio ambientado en una ciudad submarina donde los recuerdos se intercambian como moneda...')"
                 [value]="storyPrompt()"
                 (input)="onStoryPromptInput($any($event.target).value)"
             ></textarea>
 
             <div class="mb-3">
-                <label class="small text-gray-400 mb-2 d-block">Chapter language</label>
+                <label class="small text-gray-400 mb-2 d-block">{{ tr('Chapter language', 'Idioma del capítulo') }}</label>
                 <select
                     class="story-input"
                     [value]="chapterLanguage"
@@ -211,11 +211,11 @@
             </div>
             @if (voiceLanguage) {
                 <div class="mt-3 voice-selection-box">
-                    <div class="small text-gray-400 mb-2">Choose a voice</div>
+                    <div class="small text-gray-400 mb-2">{{ tr('Choose a voice', 'Elige una voz') }}</div>
                     @if (loadingVoices()) {
-                        <div class="small text-gray-400">Loading voices...</div>
+                        <div class="small text-gray-400">{{ tr('Loading voices...', 'Cargando voces...') }}</div>
                     } @else if (availableVoices().length === 0) {
-                        <div class="small text-gray-400">No voices found for the selected language yet.</div>
+                        <div class="small text-gray-400">{{ tr('No voices found for the selected language yet.', 'Aún no se encontraron voces para el idioma seleccionado.') }}</div>
                     } @else {
                         <div class="voice-grid">
                             @for (voice of getVisibleVoices(); track voice.id) {
@@ -225,15 +225,15 @@
                                     (click)="selectVoice(voice)">
                                     <div class="fw-semibold">{{ voice.name }}</div>
                                     <div class="small text-gray-400">
-                                        {{ voice.labels?.gender || 'N/A' }} · {{ voice.labels?.accent || 'N/A' }}
+                                        {{ voice.labels?.gender || tr('N/A', 'N/D') }} · {{ voice.labels?.accent || tr('N/A', 'N/D') }}
                                     </div>
-                                    <div class="small text-gray-400 mb-2">{{ voice.labels?.['locale'] || voice.labels?.language || 'N/A' }}</div>
+                                    <div class="small text-gray-400 mb-2">{{ voice.labels?.['locale'] || voice.labels?.language || tr('N/A', 'N/D') }}</div>
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-outline-light rounded-pill"
                                         (click)="playVoicePreview(voice, $event)"
                                         [disabled]="!voice.previewUrl">
-                                        {{ playingVoiceId() === voice.id ? 'Playing...' : 'Play sample' }}
+                                        {{ playingVoiceId() === voice.id ? tr('Playing...', 'Reproduciendo...') : tr('Play sample', 'Reproducir muestra') }}
                                     </button>
                                 </div>
                             }
@@ -242,7 +242,7 @@
                         @if (canShowAllVoices()) {
                             <div class="mt-2">
                                 <button class="btn btn-sm btn-secondary rounded-pill" (click)="toggleShowAllVoices()">
-                                    {{ showAllVoices() ? 'Show first 4 voices' : 'Show all voices' }}
+                                    {{ showAllVoices() ? tr('Show first 4 voices', 'Mostrar las primeras 4 voces') : tr('Show all voices', 'Mostrar todas las voces') }}
                                 </button>
                             </div>
                         }
@@ -282,27 +282,27 @@
                     class="btn btn-primary rounded-pill px-4"
                     (click)="submitStoryRequest()"
                     [disabled]="!canSubmitStoryRequest()">
-                    Send to server
+                    {{ tr('Send to server', 'Enviar al servidor') }}
                 </button>
             </div>
         </section>
 
         <section class="mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold m-0">3. Stories in progress</h5>
-                <span class="small text-gray-400">{{ submissions().length }} request(s)</span>
+                <h5 class="fw-bold m-0">{{ tr('3. Stories in progress', '3. Historias en progreso') }}</h5>
+                <span class="small text-gray-400">{{ submissions().length }} {{ tr('request(s)', 'solicitud(es)') }}</span>
             </div>
 
             @if (isAnyChapterAudioConverting()) {
                 <div class="audio-converting-warning mb-3">
-                    <div class="fw-semibold mb-1">Audio is being generated. Please keep this window open.</div>
-                    <div class="small">If the process is interrupted, tap <strong>Convert To Audio</strong> again to resume.</div>
+                    <div class="fw-semibold mb-1">{{ tr('Audio is being generated. Please keep this window open.', 'Se está generando el audio. Mantén esta ventana abierta.') }}</div>
+                    <div class="small">{{ tr('If the process is interrupted, tap', 'Si el proceso se interrumpe, toca') }} <strong>{{ tr('Convert To Audio', 'Convertir a Audio') }}</strong> {{ tr('again to resume.', 'de nuevo para reanudar.') }}</div>
                 </div>
             }
 
             @if (submissions().length === 0) {
                 <div class="story-panel rounded-4 p-4 text-gray-400 text-center">
-                    Your story requests will appear here once sent.
+                    {{ tr('Your story requests will appear here once sent.', 'Tus solicitudes de historia aparecerán aquí una vez enviadas.') }}
                 </div>
             } @else {
                 <div class="d-flex flex-column gap-3">
@@ -323,7 +323,7 @@
                             <div class="request-author mb-2">
                                 <img class="author-avatar" [src]="request.authorAliasPicture" [alt]="request.authorAliasName" />
                                 <div>
-                                    <div class="small text-gray-400">Publishing as</div>
+                                    <div class="small text-gray-400">{{ tr('Publishing as', 'Publicando como') }}</div>
                                     <div class="fw-semibold">{{ request.authorAliasName }}</div>
                 </div>
                             </div>
@@ -332,19 +332,19 @@
 
                             @if (hasBlueprintContext(request)) {
                                 <div class="bg-secondary rounded-3 p-4 mb-3 request-blueprint-box">
-                                    <div class="small text-gray-400 mb-2">Blueprint context generated by AI</div>
+                                    <div class="small text-gray-400 mb-2">{{ tr('Blueprint context generated by AI', 'Contexto de blueprint generado por IA') }}</div>
                                     @if (request.blueprint?.mainConflict) {
-                                        <div class="small mb-2"><span class="text-gray-400">Main conflict:</span> <span class="word-break">{{ request.blueprint.mainConflict }}</span></div>
+                                        <div class="small mb-2"><span class="text-gray-400">{{ tr('Main conflict:', 'Conflicto principal:') }}</span> <span class="word-break">{{ request.blueprint.mainConflict }}</span></div>
                                     }
                                     @if (request.blueprint?.longTermArc) {
-                                        <div class="small mb-2"><span class="text-gray-400">Long-term arc:</span> <span class="word-break">{{ request.blueprint.longTermArc }}</span></div>
+                                        <div class="small mb-2"><span class="text-gray-400">{{ tr('Long-term arc:', 'Arco a largo plazo:') }}</span> <span class="word-break">{{ request.blueprint.longTermArc }}</span></div>
                                     }
                                     @if (request.blueprint?.worldRules) {
-                                        <div class="small mb-2"><span class="text-gray-400">World rules:</span> <span class="word-break">{{ request.blueprint.worldRules }}</span></div>
+                                        <div class="small mb-2"><span class="text-gray-400">{{ tr('World rules:', 'Reglas del mundo:') }}</span> <span class="word-break">{{ request.blueprint.worldRules }}</span></div>
                                     }
                                     @if (getBlueprintCharacters(request).length > 0) {
                                         <div class="small">
-                                            <span class="text-gray-400">Characters:</span>
+                                            <span class="text-gray-400">{{ tr('Characters:', 'Personajes:') }}</span>
                                             <div class="d-flex flex-wrap gap-1 mt-1">
                                                 @for (name of getBlueprintCharacters(request); track name) {
                                                     <span class="taste-tag small">{{ name }}</span>
@@ -359,7 +359,7 @@
                                 @for (chapter of request.chapters; track chapter.chapter) {
                                     <div class="chapter-row rounded-4 p-3">
                                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                                            <div class="fw-semibold">Chapter #{{ chapter.chapter }}</div>
+                                            <div class="fw-semibold">{{ tr('Chapter', 'Capítulo') }} #{{ chapter.chapter }}</div>
                                             <span
                                                 class="status-pill"
                                                 [class.status-processing]="chapter.status === 'processing'"
@@ -372,17 +372,17 @@
 
                                         @if (chapter.status === 'ready') {
                                             <div class="chapter-ready-content">
-                                                <div class="small text-gray-400 mb-1">{{ chapter.title || ('Chapter ' + chapter.chapter) }}</div>
+                                                <div class="small text-gray-400 mb-1">{{ chapter.title || (tr('Chapter', 'Capítulo') + ' ' + chapter.chapter) }}</div>
                                                 <div class="small text-gray-300 word-break mb-2" *ngIf="chapter.summary">{{ chapter.summary }}</div>
-                                                <div class="word-break chapter-content mb-3">{{ chapter.content || 'Loading generated text...' }}</div>
+                                                <div class="word-break chapter-content mb-3">{{ chapter.content || tr('Loading generated text...', 'Cargando texto generado...') }}</div>
                                                 <div class="mb-2">
-                                                    <label class="small text-gray-400 mb-1 d-block">Regeneration instructions (optional)</label>
+                                                    <label class="small text-gray-400 mb-1 d-block">{{ tr('Regeneration instructions (optional)', 'Instrucciones de regeneración (opcional)') }}</label>
                                                     <textarea
                                                         class="story-textarea"
                                                         rows="2"
                                                         [value]="getChapterRegenerateInput(request.id, chapter.chapter)"
                                                         (input)="onChapterRegenerateInput(request.id, chapter.chapter, $any($event.target).value)"
-                                                        placeholder="Example: Make this chapter darker, with more dialogue and slower pacing."
+                                                        [placeholder]="tr('Example: Make this chapter darker, with more dialogue and slower pacing.', 'Ejemplo: Haz este capítulo más oscuro, con más diálogo y ritmo más lento.')"
                                                     ></textarea>
                                                 </div>
                                                 <div class="d-flex flex-wrap align-items-center gap-2">
@@ -391,46 +391,46 @@
                                                         (click)="publishChapter(request.id, chapter.chapter)"
                                                         [disabled]="!canPublish(request, chapter)"
                                                     >
-                                                        {{ chapter.published ? 'Published' : 'Publish' }}
+                                                        {{ chapter.published ? tr('Published', 'Publicado') : tr('Publish', 'Publicar') }}
                                                     </button>
                                                     <button
                                                         class="btn btn-outline-primary rounded-pill px-3"
                                                         (click)="convertChapterAudio(request.id, chapter.chapter)"
                                                         [disabled]="!canConvertChapterAudio(request, chapter)"
                                                     >
-                                                        {{ isChapterAudioConverting(request.id, chapter.chapter) ? 'Converting audio...' : 'Convert To Audio' }}
+                                                        {{ isChapterAudioConverting(request.id, chapter.chapter) ? tr('Converting audio...', 'Convirtiendo audio...') : tr('Convert To Audio', 'Convertir a Audio') }}
                                                     </button>
                                                     <button
                                                         class="btn btn-outline-danger rounded-pill px-3"
                                                         (click)="deleteChapterAudio(request.id, chapter.chapter)"
                                                         [disabled]="!chapter.audioUrl || isChapterAudioConverting(request.id, chapter.chapter)"
                                                     >
-                                                        Delete Audio
+                                                        {{ tr('Delete Audio', 'Eliminar Audio') }}
                                                     </button>
                                                     <button
                                                         class="btn btn-secondary rounded-pill px-3"
                                                         (click)="regenerateChapter(request.id, chapter.chapter)"
                                                         [disabled]="!!chapter.audioUrl || isChapterAudioConverting(request.id, chapter.chapter)"
                                                     >
-                                                        Regenerate
+                                                        {{ tr('Regenerate', 'Regenerar') }}
                                                     </button>
-                                                    <span class="small text-gray-400" *ngIf="chapter.published">Chapter published. Tap <strong>Generate Next Chapter</strong> below when you are ready.</span>
+                                                    <span class="small text-gray-400" *ngIf="chapter.published">{{ tr('Chapter published. Tap', 'Capítulo publicado. Toca') }} <strong>{{ tr('Generate Next Chapter', 'Generar Siguiente Capítulo') }}</strong> {{ tr('below when you are ready.', 'abajo cuando estés listo.') }}</span>
                                                 </div>
                                                 @if (isChapterAudioConverting(request.id, chapter.chapter)) {
                                                     <div class="audio-converting-warning mt-2">
-                                                        <div class="fw-semibold mb-1">Generating audio for this chapter. Do not close this window.</div>
-                                                        <div class="small">If conversion stops, tap <strong>Convert To Audio</strong> again to resume.</div>
+                                                        <div class="fw-semibold mb-1">{{ tr('Generating audio for this chapter. Do not close this window.', 'Generando audio para este capítulo. No cierres esta ventana.') }}</div>
+                                                        <div class="small">{{ tr('If conversion stops, tap', 'Si la conversión se detiene, toca') }} <strong>{{ tr('Convert To Audio', 'Convertir a Audio') }}</strong> {{ tr('again to resume.', 'de nuevo para reanudar.') }}</div>
                                                     </div>
                                                 }
                                                 @if (isChapterAudioInterrupted(request.id, chapter.chapter)) {
                                                     <div class="audio-converting-warning mt-2">
-                                                        <div class="small">The audio generation was interrupted. Please tap on <strong>Convert To Audio</strong> to resume.</div>
+                                                        <div class="small">{{ tr('The audio generation was interrupted. Please tap on', 'La generación de audio fue interrumpida. Por favor toca') }} <strong>{{ tr('Convert To Audio', 'Convertir a Audio') }}</strong> {{ tr('to resume.', 'para reanudar.') }}</div>
                                                     </div>
                                                 }
                                                 @if (chapter.audioUrl) {
                                                     <div class="mt-3 p-3 rounded-3 bg-secondary chapter-audio-box">
                                                         <div class="small text-gray-400 mb-1">
-                                                            Chapter audio {{ chapter.audioDurationSec ? ('(' + (chapter.audioDurationSec / 60 | number:'1.0-0') + ' min)') : '' }}
+                                                            {{ tr('Chapter audio', 'Audio del capítulo') }} {{ chapter.audioDurationSec ? ('(' + (chapter.audioDurationSec / 60 | number:'1.0-0') + ' min)') : '' }}
                                                         </div>
                                                         <audio controls class="w-100" [src]="getChapterAudioUrl(chapter.audioUrl)"></audio>
                                                     </div>
@@ -440,15 +440,15 @@
                                                             (click)="generateNextChapter(request.id, chapter.chapter)"
                                                             [disabled]="!canGenerateNextChapter(request, chapter)"
                                                         >
-                                                            Generate Next Chapter
+                                                            {{ tr('Generate Next Chapter', 'Generar Siguiente Capítulo') }}
                                                         </button>
                                                     </div>
                                                 } @else {
-                                                    <div class="small text-gray-400 mt-2">No chapter audio generated yet.</div>
+                                                    <div class="small text-gray-400 mt-2">{{ tr('No chapter audio generated yet.', 'Aún no se generó audio para este capítulo.') }}</div>
                                                 }
                                             </div>
                                         } @else {
-                                            <div class="small text-gray-400">AI is preparing this chapter. Status updates will appear automatically.</div>
+                                            <div class="small text-gray-400">{{ tr('AI is preparing this chapter. Status updates will appear automatically.', 'La IA está preparando este capítulo. Las actualizaciones de estado aparecerán automáticamente.') }}</div>
                                         }
                                     </div>
                                 }
