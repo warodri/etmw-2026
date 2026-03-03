@@ -34,6 +34,8 @@ type PromoForm = {
 export class ScreenAdminComponent implements OnInit, OnDestroy {
 
     SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
+    private readonly ttsDestinationStorageKey = 'etmw-admin-tts-destination-server';
+    private readonly defaultTtsDestinationServer = 'https://amir-tubby-ivey.ngrok-free.dev';
     
     activeSection = signal<'promo' | 'audiobooks'>('audiobooks');
 
@@ -54,10 +56,12 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     audiobooksLoading = signal(false);
     currentAudiobook = signal<AudiobookModel | null>(null);
     detailsOpen = signal(false);
+    chaptersExpanded = signal(false);
 
     conversionStatusVisible = signal(false);
     conversionStatusText = signal('');
     conversionStatusType = signal<'info' | 'success' | 'danger'>('info');
+    conversionSubmitting = signal(false);
 
     pdfStatus = signal('');
     pdfTextForConversion = signal('');
@@ -72,6 +76,8 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     totalChaptersInput = signal('');
     totalPagesInput = signal('');
     chapterNumberInput = signal('');
+    destinationTtsServer = signal(this.defaultTtsDestinationServer);
+    translateBeforeTts = signal(false);
     popularLanguages = [
         { code: 'en', label: 'English' },
         { code: 'es', label: 'Español' },
@@ -123,6 +129,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.loadDestinationTtsServerFromStorage();
         this.loadAudiobooks();
     }
 
@@ -278,6 +285,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     viewAudiobook(audiobook: any) {
         this.currentAudiobook.set(audiobook);
         this.detailsOpen.set(false);
+        this.chaptersExpanded.set(false);
         this.totalPagesInput.set(String(audiobook.totalPages || ''));
         this.totalChaptersInput.set(String(audiobook.totalChapters || ''));
         this.chapterNumberInput.set('');
@@ -292,6 +300,12 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.storyEditId.set(null);
         this.storyEditError.set('');
         this.storyLanguageInput.set(audiobook.targetLanguage || audiobook.sourceLanguage || '');
+        this.translateBeforeTts.set(
+            this.shouldTranslateByBase(
+                audiobook.sourceLanguage || '',
+                audiobook.targetLanguage || audiobook.sourceLanguage || ''
+            )
+        );
         this.revokeAudioUrls();
         this.loadStoriesForCurrentAudiobook();
     }
@@ -299,12 +313,14 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
     backToList() {
         this.currentAudiobook.set(null);
         this.detailsOpen.set(false);
+        this.chaptersExpanded.set(false);
         this.stories.set([]);
         this.storiesError.set('');
         this.storyExpanded.set({});
         this.storyEditId.set(null);
         this.storyEditError.set('');
         this.storyLanguageInput.set('');
+        this.translateBeforeTts.set(false);
         this.revokeAudioUrls();
     }
 
@@ -413,6 +429,35 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.convertPdfToMp3WithLanguage();
     }
 
+    setDestinationTtsServer(value: string) {
+        const normalized = this.normalizeDestinationTtsServer(value);
+        this.destinationTtsServer.set(normalized);
+        window.localStorage.setItem(this.ttsDestinationStorageKey, normalized);
+    }
+
+    private loadDestinationTtsServerFromStorage() {
+        const stored = window.localStorage.getItem(this.ttsDestinationStorageKey);
+        this.destinationTtsServer.set(
+            this.normalizeDestinationTtsServer(stored || this.defaultTtsDestinationServer)
+        );
+    }
+
+    private normalizeDestinationTtsServer(value?: string): string {
+        const clean = String(value || '').trim().replace(/\/+$/, '');
+        return clean || this.defaultTtsDestinationServer;
+    }
+
+    private getBaseLanguageCode(code?: string): string {
+        return String(code || '').trim().toLowerCase().split('-')[0];
+    }
+
+    private shouldTranslateByBase(sourceLanguage?: string, targetLanguage?: string): boolean {
+        const sourceBase = this.getBaseLanguageCode(sourceLanguage);
+        const targetBase = this.getBaseLanguageCode(targetLanguage);
+        if (!sourceBase || !targetBase) return false;
+        return sourceBase !== targetBase;
+    }
+
     private convertPdfToMp3WithLanguage(languageOverride?: string) {
         const current = this.currentAudiobook();
         if (!current) return;
@@ -444,12 +489,17 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         const sourceLanguage = current.sourceLanguage;
         const targetLanguage = languageOverride || current.targetLanguage || current.sourceLanguage;
         const ttsLanguage = (targetLanguage || 'en').split('-')[0];
+        const destinationTtsServer = this.normalizeDestinationTtsServer(this.destinationTtsServer());
+        this.destinationTtsServer.set(destinationTtsServer);
+        const translateBeforeTts = Boolean(this.translateBeforeTts());
 
         this.conversionDebug.set({
             request: {
                 sourceLanguage: sourceLanguage || '',
                 targetLanguage: targetLanguage || '',
                 ttsLanguage,
+                destinationTtsServer,
+                translateBeforeTts,
                 chapterNumber,
                 totalChapters,
                 totalPages,
@@ -462,6 +512,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.conversionStatusVisible.set(true);
         this.conversionStatusType.set('info');
         this.conversionStatusText.set('Convirtiendo texto a audio...');
+        this.conversionSubmitting.set(true);
 
         this.internetAdmin.convertToMP3(
             current._id,
@@ -473,26 +524,27 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
                 totalChapters,
                 totalPages,
                 sourceLanguage,
-                targetLanguage
+                targetLanguage,
+                destinationTtsServer,
+                translateBeforeTts
             },
             sampleVoiceFile,
             (result: any) => {
+                this.conversionSubmitting.set(false);
                 if (result && result.success) {
                     this.conversionDebug.update((state) => ({
                         ...(state || {}),
                         response: {
                             diagnostics: result?.diagnostics || null,
-                            chapter: result?.chapter || null
+                            queue: result?.queue || null,
+                            message: result?.message || ''
                         }
                     }));
-                    this.conversionStatusText.set('¡Conversión exitosa!');
+                    this.conversionStatusText.set(
+                        result?.message || 'Text sent for conversion. An email will arrive to you when the conversion is processed.'
+                    );
                     this.conversionStatusType.set('success');
                     this.chapterNumberInput.set('');
-                    setTimeout(() => {
-                        this.conversionStatusVisible.set(false);
-                        this.loadAudiobooks();
-                        this.loadStoriesForCurrentAudiobook();
-                    }, 1500);
                 } else {
                     this.conversionDebug.update((state) => ({
                         ...(state || {}),
@@ -705,6 +757,10 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
             ...map,
             [storyId]: !map[storyId]
         }));
+    }
+
+    toggleChaptersExpanded() {
+        this.chaptersExpanded.update((value) => !value);
     }
 
     openStoryEditor(story: any) {

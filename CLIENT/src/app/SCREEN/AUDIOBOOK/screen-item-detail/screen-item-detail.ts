@@ -22,6 +22,8 @@ export class ScreenItemDetail implements OnInit {
     audiobook = signal<AudiobookModel | null>(null);
     listeningProgress = signal<ListeningProgressModel[]>([]);
     selectedChapterIndex = signal<number>(0);
+    chapterAvailability = signal<Record<number, boolean | null>>({});
+    chapterAvailabilityReason = signal<Record<number, string | null>>({});
 
     //  Flags 
     loading = signal<boolean>(true);
@@ -57,6 +59,7 @@ export class ScreenItemDetail implements OnInit {
                     const book = response.audiobook || (response.audiobooks && response.audiobooks[0]) || null;
                     this.audiobook.set(book);
                     this.selectedChapterIndex.set(0);
+                    this.loadChapterAvailability(book);
                     callback()
                 } else {
                     this.toast.show(this.toast.getMessageErrorUnexpected());
@@ -142,6 +145,18 @@ export class ScreenItemDetail implements OnInit {
         }));
     }
 
+    getChapterAvailability(chapter: number): boolean | null {
+        const status = this.chapterAvailability()[Number(chapter)];
+        if (typeof status === 'boolean') return status;
+        return null;
+    }
+
+    getChapterAvailabilityReason(chapter: number): string | null {
+        const reason = this.chapterAvailabilityReason()[Number(chapter)];
+        if (!reason) return null;
+        return reason;
+    }
+
     selectChapter(index: number) {
         this.selectedChapterIndex.set(index);
     }
@@ -214,6 +229,88 @@ export class ScreenItemDetail implements OnInit {
         const item = history.find((h) => Number(h.chapterNumber) === Number(chapter));
         if (!item || typeof item.progressPercent !== 'number') return 0;
         return Math.max(0, Math.min(100, Math.round(item.progressPercent)));
+    }
+
+    private loadChapterAvailability(book: AudiobookModel | null) {
+        const audiobookId = this.audiobookId();
+        if (!audiobookId || !book || !Array.isArray(book.audioFiles)) {
+            this.chapterAvailability.set({});
+            this.chapterAvailabilityReason.set({});
+            return;
+        }
+
+        const chapterNumbers = Array.from(
+            new Set(
+                book.audioFiles
+                    .map((item: any) => Number(item?.chapter))
+                    .filter((n: number) => Number.isFinite(n))
+            )
+        );
+
+        if (!chapterNumbers.length) {
+            this.chapterAvailability.set({});
+            this.chapterAvailabilityReason.set({});
+            return;
+        }
+
+        const initialMap: Record<number, boolean | null> = {};
+        const initialReasonMap: Record<number, string | null> = {};
+        for (const chapter of chapterNumbers) {
+            initialMap[chapter] = null;
+            initialReasonMap[chapter] = null;
+        }
+        this.chapterAvailability.set(initialMap);
+        this.chapterAvailabilityReason.set(initialReasonMap);
+
+        for (const chapter of chapterNumbers) {
+            this.iAudiobook.audiobookGetChapterAudioIsAvailable(audiobookId, chapter, (response: any) => {
+                const available = this.parseChapterAvailability(response);
+                const reason = this.parseChapterAvailabilityReason(response);
+                this.chapterAvailability.update((map) => ({
+                    ...map,
+                    [chapter]: available
+                }));
+                this.chapterAvailabilityReason.update((map) => ({
+                    ...map,
+                    [chapter]: reason
+                }));
+            }, { grantAccess: false });
+        }
+    }
+
+    private parseChapterAvailability(response: any): boolean {
+        if (typeof response?.isAvailable === 'boolean') return response.isAvailable;
+        if (typeof response?.available === 'boolean') return response.available;
+        if (typeof response?.data?.isAvailable === 'boolean') return response.data.isAvailable;
+        if (typeof response?.data?.available === 'boolean') return response.data.available;
+        if (typeof response?.result?.isAvailable === 'boolean') return response.result.isAvailable;
+        return !!response?.success;
+    }
+
+    private parseChapterAvailabilityReason(response: any): string | null {
+        const code =
+            response?.reasonCode ||
+            response?.data?.reasonCode ||
+            response?.result?.reasonCode ||
+            null;
+        const fallback = response?.message || null;
+
+        if (code === 'monthly-book-limit') {
+            return 'Monthly book limit reached for your plan.';
+        }
+        if (code === 'daily-chapter-limit') {
+            return 'Only one new chapter per day is available on your plan.';
+        }
+        if (code === 'no-active-plan') {
+            return 'You need an active subscription plan.';
+        }
+        if (code === 'invalid-chapter') {
+            return 'This chapter is not available yet.';
+        }
+        if (typeof fallback === 'string' && fallback.trim()) {
+            return fallback;
+        }
+        return null;
     }
 
     toggleBookmark() {

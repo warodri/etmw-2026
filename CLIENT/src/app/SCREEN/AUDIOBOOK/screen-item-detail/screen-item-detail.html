@@ -73,6 +73,8 @@
                         <div class="chapter-list">
                             @for (ch of getChapters(); track ch.chapter; let idx = $index) {
                                 @let pct = getChapterProgressPercent(ch.chapter);
+                                @let available = getChapterAvailability(ch.chapter);
+                                @let availabilityReason = getChapterAvailabilityReason(ch.chapter);
                                 <div class="chapter-item"
                                      [class.active]="selectedChapterIndex() === idx"
                                      (click)="selectChapter(idx)">
@@ -80,11 +82,25 @@
                                         {{ ch.chapter }}
                                     </div>
                                     <div class="chapter-body">
-                                        <div class="chapter-title">Chapter {{ ch.chapter }}</div>
+                                        <div class="chapter-title-row">
+                                            <div class="chapter-title">Chapter {{ ch.chapter }}</div>
+                                            <span
+                                                class="chapter-availability-pill"
+                                                [class.available]="available === true"
+                                                [class.unavailable]="available === false"
+                                                [class.checking]="available === null">
+                                                {{ available === null ? 'Checking...' : (available ? 'Available' : 'Not available') }}
+                                            </span>
+                                        </div>
                                         <div class="chapter-meta d-flex align-items-center gap-2">
                                             <span>{{ formatDuration(ch.durationSec) }}</span>
                                             <span class="chapter-progress-pill">{{ pct }}%</span>
                                         </div>
+                                        @if (available === false && availabilityReason) {
+                                            <div class="chapter-unavailable-reason mt-2">
+                                                {{ availabilityReason }}
+                                            </div>
+                                        }
                                         <div class="chapter-progress-track mt-2">
                                             <div class="chapter-progress-fill" [style.width.%]="pct"></div>
                                         </div>

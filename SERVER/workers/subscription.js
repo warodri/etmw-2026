@@ -1,8 +1,14 @@
-async function isChapterAvailable(userId, audiobookId, chapterNumber) {
+async function getChapterAvailabilityDecision(userId, audiobookId, chapterNumber, options = {}) {
+
+    const grantIfPossible = options.grantIfPossible !== false;
 
     //  Validate
     if (!userId || !audiobookId || !Number.isInteger(chapterNumber) || chapterNumber <= 0) {
-        return false;
+        return {
+            isAvailable: false,
+            reasonCode: 'invalid-data',
+            message: 'Invalid data'
+        };
     }
 
     //  Validate audiobook and ownership
@@ -10,14 +16,34 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
     const ab = await Audiobook.findOne({
         _id: audiobookId,
         enabled: true,
-        published: true
+        published: true,
+        pipelineStatus: 'published'
     });
-    if (!ab) return false;
-    if (String(ab.userId) === String(userId)) return true;
+    if (!ab) {
+        return {
+            isAvailable: false,
+            reasonCode: 'invalid-audiobook',
+            message: 'Invalid audiobook'
+        };
+    }
+    if (String(ab.userId) === String(userId)) {
+        return {
+            isAvailable: true,
+            reasonCode: 'owner',
+            message: 'Owner access'
+        };
+    }
 
     //  Chapter must exist in audiobook audio list
-    const hasChapter = Array.isArray(ab.audioFiles) && ab.audioFiles.some((c) => Number(c.chapter) === Number(chapterNumber));
-    if (!hasChapter) return false;
+    const hasChapter = Array.isArray(ab.audioFiles) &&
+        ab.audioFiles.some((c) => Number(c.chapter) === Number(chapterNumber) && !!c.url);
+    if (!hasChapter) {
+        return {
+            isAvailable: false,
+            reasonCode: 'invalid-chapter',
+            message: 'Invalid chapter'
+        };
+    }
 
     //  Get active subscription
     const Subscription = require('../models/subscription');
@@ -26,15 +52,33 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
         status: 'active',
         enabled: true
     });
-    if (!sub) return false;
+    if (!sub) {
+        return {
+            isAvailable: false,
+            reasonCode: 'no-active-plan',
+            message: 'You need an active subscription plan'
+        };
+    }
 
     //  UNLIMITED: any book, any chapter
-    if (sub.plan === 'unlimited') return true;
+    if (sub.plan === 'unlimited') {
+        return {
+            isAvailable: true,
+            reasonCode: 'unlimited',
+            message: 'Available'
+        };
+    }
 
     //  EXPLORER / READER:
     //  - monthly books cap (explorer=3, reader=6)
     //  - one new chapter per day is managed via user_chapter_available (cron grants next chapters)
-    if (sub.plan !== 'explorer' && sub.plan !== 'reader') return false;
+    if (sub.plan !== 'explorer' && sub.plan !== 'reader') {
+        return {
+            isAvailable: false,
+            reasonCode: 'invalid-plan',
+            message: 'Invalid subscription plan'
+        };
+    }
 
     const UserChapterAvailable = require('../models/user_chapter_available');
 
@@ -45,25 +89,33 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
         chapterNumber,
         enabled: true
     });
-    if (available) return true;
+    if (available) {
+        return {
+            isAvailable: true,
+            reasonCode: 'already-unlocked',
+            message: 'Available'
+        };
+    }
 
     //  If chapter not unlocked yet:
     //  - only chapter 1 can be granted immediately
     //  - chapters > 1 should be unlocked by cron, one per day
-    if (chapterNumber !== 1) return false;
-
-    //  Global daily gate for explorer/reader:
-    //  only one new chapter unlock per user per day.
-    const day = getDayBounds(Date.now());
-    const unlockedToday = await UserChapterAvailable.findOne({
-        userId,
-        enabled: true,
-        createdAt: { $gte: day.start, $lt: day.end }
-    });
-    if (unlockedToday) return false;
+    if (chapterNumber !== 1) {
+        return {
+            isAvailable: false,
+            reasonCode: 'daily-chapter-limit',
+            message: 'Next chapter unlocks daily for this plan'
+        };
+    }
 
     const booksPerMonth = getBooksPerMonthLimit(sub.plan);
-    if (booksPerMonth <= 0) return false;
+    if (booksPerMonth <= 0) {
+        return {
+            isAvailable: false,
+            reasonCode: 'invalid-books-per-month',
+            message: 'Invalid plan configuration'
+        };
+    }
 
     //  Current month bounds
     const now = new Date();
@@ -80,32 +132,63 @@ async function isChapterAvailable(userId, audiobookId, chapterNumber) {
 
     //  Monthly cap only applies when starting a new audiobook
     if (!alreadyStartedThisBook && distinctBooks.length >= booksPerMonth) {
-        return false;
+        return {
+            isAvailable: false,
+            reasonCode: 'monthly-book-limit',
+            message: `You reached your monthly book limit (${booksPerMonth}) for this plan`
+        };
+    }
+
+    //  Global daily gate for explorer/reader:
+    //  only one new chapter unlock per user per day.
+    const day = getDayBounds(Date.now());
+    const unlockedToday = await UserChapterAvailable.findOne({
+        userId,
+        enabled: true,
+        createdAt: { $gte: day.start, $lt: day.end }
+    });
+    if (unlockedToday) {
+        return {
+            isAvailable: false,
+            reasonCode: 'daily-chapter-limit',
+            message: 'You can unlock one new chapter per day with this plan'
+        };
     }
 
     //  Grant and persist first chapter availability
-    await UserChapterAvailable.updateOne(
-        {
-            userId,
-            audiobookId,
-            chapterNumber
-        },
-        {
-            $setOnInsert: {
+    if (grantIfPossible) {
+        await UserChapterAvailable.updateOne(
+            {
                 userId,
                 audiobookId,
-                chapterNumber,
-                createdAt: Date.now()
+                chapterNumber
             },
-            $set: {
-                enabled: true,
-                updatedAt: Date.now()
-            }
-        },
-        { upsert: true }
-    );
+            {
+                $setOnInsert: {
+                    userId,
+                    audiobookId,
+                    chapterNumber,
+                    createdAt: Date.now()
+                },
+                $set: {
+                    enabled: true,
+                    updatedAt: Date.now()
+                }
+            },
+            { upsert: true }
+        );
+    }
 
-    return true;
+    return {
+        isAvailable: true,
+        reasonCode: grantIfPossible ? 'first-chapter-granted' : 'first-chapter-available',
+        message: 'Available'
+    };
+}
+
+async function isChapterAvailable(userId, audiobookId, chapterNumber) {
+    const result = await getChapterAvailabilityDecision(userId, audiobookId, chapterNumber, { grantIfPossible: true });
+    return result.isAvailable === true;
 }
 
 async function logAccessToChapter(userId, audiobookId, audioUrl, chapterNumber) {
@@ -143,6 +226,7 @@ function getDayBounds(ts) {
 }
 
 module.exports = {
+    getChapterAvailabilityDecision,
     isChapterAvailable,
     logAccessToChapter
 };

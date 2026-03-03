@@ -577,15 +577,27 @@ async function getOrCreateFallbackReferenceAudio() {
     }
 }
 
-async function textToSpeech(params) {
+function resolvePollEndpoint(baseUrl, pollUrl, queueId) {
+    const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
+    const rawPollUrl = String(pollUrl || '').trim();
+    if (rawPollUrl) {
+        if (rawPollUrl.startsWith('http')) return rawPollUrl;
+        return `${normalizedBaseUrl}${rawPollUrl.startsWith('/') ? '' : '/'}${rawPollUrl}`;
+    }
+    return `${normalizedBaseUrl}/api/tts/${queueId}`;
+}
+
+async function queueTtsJob(params) {
     const {
         text,
         referenceAudioPath,
         language = 'en',
         narrationStyle = 'Essay',
         baseUrl = TTS_SERVICE_BASE,
-        pollIntervalMs = TTS_POLL_INTERVAL_MS,
-        timeoutMs = TTS_TIMEOUT_MS,
+        audiobookId,
+        chapterNumber,
+        chapterVersion,
+        webhookUrl
     } = params || {};
 
     const cleanText = String(text || '').trim();
@@ -612,8 +624,21 @@ async function textToSpeech(params) {
     form.append('text', cleanText);
     form.append('language', String(normalizedLanguage || 'en'));
     form.append('narration_style', String(narrationStyle || 'Essay'));
+    if (audiobookId !== undefined && audiobookId !== null && String(audiobookId).trim()) {
+        form.append('audiobookId', String(audiobookId));
+    }
+    if (chapterNumber !== undefined && chapterNumber !== null && String(chapterNumber).trim()) {
+        form.append('chapterNumber', String(chapterNumber));
+    }
+    if (chapterVersion !== undefined && chapterVersion !== null && String(chapterVersion).trim()) {
+        form.append('chapterVersion', String(chapterVersion));
+    }
+    if (webhookUrl !== undefined && webhookUrl !== null && String(webhookUrl).trim()) {
+        form.append('webhookUrl', String(webhookUrl).trim());
+    }
 
-    const queueResponse = await axios.post(`${baseUrl}/api/tts`, form, {
+    const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
+    const queueResponse = await axios.post(`${normalizedBaseUrl}/api/tts`, form, {
         headers: form.getHeaders(),
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
@@ -629,11 +654,30 @@ async function textToSpeech(params) {
         throw new Error(`TTS queue failed: missing queueId ${JSON.stringify(queueResponse.data || {})}`);
     }
 
-    const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
-    const rawPollUrl = String(pollUrl || '').trim();
-    const pollEndpoint = rawPollUrl
-        ? (rawPollUrl.startsWith('http') ? rawPollUrl : `${normalizedBaseUrl}${rawPollUrl.startsWith('/') ? '' : '/'}${rawPollUrl}`)
-        : `${normalizedBaseUrl}/api/tts/${queueId}`;
+    return {
+        ...(queueResponse.data || {}),
+        queueId,
+        pollUrl: pollUrl || `/api/tts/${queueId}`,
+        statusCode: queueResponse.status,
+        baseUrl: normalizedBaseUrl,
+        pollEndpoint: resolvePollEndpoint(normalizedBaseUrl, pollUrl, queueId)
+    };
+}
+
+async function pollTtsAudioUntilReady(params) {
+    const {
+        queueId,
+        pollUrl,
+        baseUrl = TTS_SERVICE_BASE,
+        pollIntervalMs = TTS_POLL_INTERVAL_MS,
+        timeoutMs = TTS_TIMEOUT_MS,
+    } = params || {};
+
+    if (!queueId && !pollUrl) {
+        throw new Error('Missing queueId/pollUrl for TTS polling');
+    }
+
+    const pollEndpoint = resolvePollEndpoint(baseUrl, pollUrl, queueId);
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < timeoutMs) {
@@ -667,6 +711,22 @@ async function textToSpeech(params) {
     }
 
     throw new Error('TTS polling timeout');
+}
+
+async function textToSpeech(params) {
+    const {
+        pollIntervalMs = TTS_POLL_INTERVAL_MS,
+        timeoutMs = TTS_TIMEOUT_MS,
+    } = params || {};
+
+    const queued = await queueTtsJob(params);
+    return pollTtsAudioUntilReady({
+        queueId: queued.queueId,
+        pollUrl: queued.pollUrl,
+        baseUrl: queued.baseUrl,
+        pollIntervalMs,
+        timeoutMs
+    });
 }
 
 /**
@@ -997,6 +1057,8 @@ module.exports = {
     getModels,
     getVoicesWithExpression,
     textToSpeechElevenLabs,
+    queueTtsJob,
+    pollTtsAudioUntilReady,
     textToSpeech,
     getVoicePricingTier,
     supportsExpression,

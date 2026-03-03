@@ -29,6 +29,10 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
         });
     }
 
+    override startPlayback() {
+        this.playChapter(this.chapterNumber());
+    }
+
     playChapter(chapterNumber: number) {
         if (!this.hasActivePlan()) {
             this.loadingAudio.set(false);
@@ -38,7 +42,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
             return;
         }
         this.loadingAudio.set(true);
-        this.isChapterAllowed(chapterNumber, (success: boolean) => {
+        this.isChapterAllowed(chapterNumber, (success: boolean, reasonMessage: string | null) => {
             if (success) {
                 this.audiobookNotAvailableForThisUser.set(true);
                 this.errorMessage.set(null)
@@ -55,7 +59,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
             } else {
                 this.loadingAudio.set(false);
                 this.audiobookNotAvailableForThisUser.set(success);
-                this.errorMessage.set(this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
+                this.errorMessage.set(reasonMessage || this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo'));
             }
         })
     }
@@ -89,15 +93,15 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
     isChapterAllowed(chapterNumber: number, callback: any) {
         const audiobookId = this.audiobookId();
         if (!audiobookId) {
-            callback(false);
+            callback(false, this.tr('Invalid audiobook.', 'Audiolibro inválido.'));
             return;
         }
         this.getInternetAudiobook().audiobookGetChapterAudioIsAvailable(audiobookId, chapterNumber, (response: any) => {
             console.log('audiobookGetChapterAudioIsAvailable', response)
             if (response && response.success) {
-                callback(true);
+                callback(true, null);
             } else {
-                callback(false);
+                callback(false, this.resolveAvailabilityMessage(response));
             }
         })
     }
@@ -139,6 +143,33 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
 
     tr(enText: string, esText: string) {
         return this.language === 'es' ? esText : enText;
+    }
+
+    private resolveAvailabilityMessage(response: any): string {
+        const reasonCode = response?.reasonCode || response?.data?.reasonCode || null;
+        const message = response?.message || '';
+        if (reasonCode === 'monthly-book-limit') {
+            return this.tr(
+                'Chapter not available: you reached your monthly book limit for this plan.',
+                'Capítulo no disponible: alcanzaste tu límite mensual de libros para este plan.'
+            );
+        }
+        if (reasonCode === 'daily-chapter-limit') {
+            return this.tr(
+                'Chapter not available yet: your plan unlocks one new chapter per day.',
+                'Capítulo no disponible aún: tu plan desbloquea un nuevo capítulo por día.'
+            );
+        }
+        if (reasonCode === 'no-active-plan') {
+            return this.tr(
+                'You need an active plan to listen.',
+                'Necesitas un plan activo para escuchar.'
+            );
+        }
+        if (typeof message === 'string' && message.trim().length > 0) {
+            return message;
+        }
+        return this.tr('Unable to load this chapter', 'No se pudo cargar este capítulo');
     }
     
 }

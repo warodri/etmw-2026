@@ -15,6 +15,7 @@ const DeviceTokenModel = require('./models/device-token');
 const ios = require('./tasks/ios-apn');
 const android = require('./tasks/android');
 const seedCategories = require('./scripts/seedCategories');
+const SERVER_VERSION = '1.0.5';
 
 const app = express();
 const PORT = config.SERVER.port;
@@ -27,7 +28,12 @@ app.use((req, res, next) => {
 });
 
 //  For larger payloads in POSTs
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+    limit: '50mb',
+    verify: (req, res, buf) => {
+        req.rawBody = Buffer.from(buf);
+    }
+}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const corsOptions = {
@@ -36,7 +42,7 @@ const corsOptions = {
     },
     credentials: true, // Allow credentials (cookies, authorization headers)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow common methods
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-TTS-Webhook-Timestamp', 'X-TTS-Signature'],
     exposedHeaders: ['Set-Cookie'],
     optionsSuccessStatus: 204,
 };
@@ -97,6 +103,10 @@ SharedMongoose.initMongoose( async () => {
         http = https.createServer(options, app);
     }
 
+    app.get('/', async (req, res) => {
+        res.send('Enter To My World - Version: ' + SERVER_VERSION);
+    })
+
     //  STRIPE RESULT
     //  For both: When paying for an audiobook or a subscription
     app.get('/api/stripe-success', apiLimiter, async (req, res) => {
@@ -124,6 +134,12 @@ SharedMongoose.initMongoose( async () => {
         GetFile.run(req, res);
     })
 
+    // TTS webhook callback (raw body signed)
+    app.post('/api/tts-webhook', async (req, res) => {
+        const ConvertToMP3Webhook = require('./tasks/audiobook_convert_to_mp3_webhook');
+        await ConvertToMP3Webhook.handleWebhookRequest(req, res);
+    })
+
     //  All requests must arrive here
     app.post('/api/v1', apiLimiter, upload.single('file'), async (req, res) => {
         const { action, data } = req.body;
@@ -134,6 +150,18 @@ SharedMongoose.initMongoose( async () => {
         const { action, data } = req.body;
         await runTask(action, data, req, res);
     })
+    /**
+     * ALL GET COME HERE
+     */
+    app.get('/api/v1/:action', apiLimiter, async (req, res) => {
+        const { action } = req.params;
+        await runTask(action, {}, req, res);
+    })
+    app.get('/api/v1/:action/:data', apiLimiter, async (req, res) => {
+        const { action, data } = req.params;
+        await runTask(action, data, req, res);
+    })
+    
 
     // Run cleanup of old tokens on startup (tokens inactive for 90+ days)
     DeviceTokenModel.cleanupInactiveTokens(90);
@@ -148,7 +176,6 @@ SharedMongoose.initMongoose( async () => {
 
     http.listen(PORT, '0.0.0.0', () => {
         console.log(`Enter To My World server listening on port ${PORT}`);
-
         //  Test send email
         const test = require('./tasks/email_send');
         // test.newChapterAvailable('en', '69939fa60adfca90a24a7f71', '69a36a8ffd95ac15641024e3', 2)

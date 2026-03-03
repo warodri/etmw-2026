@@ -89,14 +89,20 @@ export class InternetAudiobookService extends InternetService {
         }, callback);
     }
 
-    audiobookGetChapterAudioIsAvailable(audiobookId: string, chapterNumber: number, callback: any) {
+    audiobookGetChapterAudioIsAvailable(
+        audiobookId: string,
+        chapterNumber: number,
+        callback: any,
+        options?: { grantAccess?: boolean }
+    ) {
         const lang: string = LangUtils.detectLanguage();
         this.internetCommon?.doPost(this.SERVER + '/' + this.APP_SECURE, {
             action: 'AudiobookGetChapterAudioIsAvailable',
             lang,
             data: {
                 audiobookId,
-                chapterNumber
+                chapterNumber,
+                grantAccess: options?.grantAccess !== false
             }
         }, callback);
     }

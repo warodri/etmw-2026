@@ -67,6 +67,7 @@ const AudiobooksGetAdmin = require("./tasks/audiobook_get_admin");
 const UpdateAudiobookTotalPages = require("./tasks/audiobook_update_total_pages");
 const UpdateAudiobookTotalChapters = require("./tasks/audiobook_update_total_chapters");
 const ConvertToMP3 = require("./tasks/audiobook_convert_to_mp3");
+const ConvertToMP3Webhook = require("./tasks/audiobook_convert_to_mp3_webhook");
 const AudiobookTranslate = require("./tasks/audiobook_translate");
 const AudiobookUploadCover = require("./tasks/auidobook_upload_cover");
 

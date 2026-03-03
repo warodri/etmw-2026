@@ -1,5 +1,6 @@
 const fs = require("fs").promises;
 const path = require("path");
+const crypto = require("crypto");
 const { setTimeout: sleep } = require("timers/promises");
 
 const DEFAULT_BASE_URL = "https://amir-tubby-ivey.ngrok-free.dev";
@@ -32,6 +33,7 @@ function getAudioExtensionFromUrlOrType(audioUrl, contentType) {
  * @param {Object} params - Request parameters.
  * @param {string} params.referenceAudioUrl - Remote URL to the reference voice sample (.wav or .mp3).
  * @param {string} params.text - Chapter text to convert.
+ * @param {string} [params.chapterVersion] - Idempotency chapter version (hash fallback if omitted).
  * @param {string} [params.language='en'] - Language code.
  * @param {string} [params.narrationStyle='Essay'] - Narration style: Documentary|Essay|Fiction|Thriller|Calm|Dramatic
  * @param {string} [params.baseUrl] - TTS API base url.
@@ -43,6 +45,7 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
     const {
         referenceAudioUrl,
         text,
+        chapterVersion,
         language = "en",
         narrationStyle = "Essay",
         baseUrl = DEFAULT_BASE_URL,
@@ -65,6 +68,10 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
     if (!VALID_STYLES.has(narrationStyle)) {
         throw new Error(`Invalid narrationStyle "${narrationStyle}"`);
     }
+
+    const resolvedChapterVersion = String(
+        chapterVersion || crypto.createHash("sha256").update(String(text)).digest("hex")
+    );
 
     // 1) Download remote reference audio first.
     const referenceResponse = await fetch(referenceAudioUrl);
@@ -92,6 +99,9 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
         `reference${referenceExt}`
     );
     queueForm.append("text", String(text));
+    queueForm.append("audiobookId", String(audiobookId));
+    queueForm.append("chapterNumber", String(chapterNumber));
+    queueForm.append("chapterVersion", resolvedChapterVersion);
     queueForm.append("language", String(language || "en"));
     queueForm.append("narration_style", String(narrationStyle));
 
@@ -102,7 +112,7 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
         body: queueForm
     });
 
-    if (queueResponse.status !== 202) {
+    if (![200, 202].includes(queueResponse.status)) {
         const errText = await queueResponse.text().catch(() => "");
         throw new Error(`TTS queue failed (${queueResponse.status}): ${errText}`);
     }
@@ -125,7 +135,9 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
         const contentType = String(pollResponse.headers.get("content-type") || "").toLowerCase();
 
         if (pollResponse.status === 202) {
-            await sleep(pollIntervalMs);
+            const retryAfterRaw = Number.parseInt(String(pollResponse.headers.get("retry-after") || ""), 10);
+            const retryAfterMs = Number.isFinite(retryAfterRaw) ? retryAfterRaw * 1000 : pollIntervalMs;
+            await sleep(retryAfterMs);
             continue;
         }
 
@@ -159,6 +171,9 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
     return {
         queueId,
         status: "completed",
+        apiStatus: queueData?.status || "unknown",
+        reused: Boolean(queueData?.reused),
+        jobKey: queueData?.jobKey || null,
         contentType: "audio/wav",
         bytes: outputBuffer.length,
         localPath,

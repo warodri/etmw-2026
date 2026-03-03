@@ -98,6 +98,8 @@ async function AddChapterToUser() {
             const elapsedMsNoProgress = Date.now() - processStartedAt;
             console.log('AddChapterToUser - No active listening progress', `(${elapsedMsNoProgress} ms)`);
             return;
+        } else {
+            console.log('AddChapterToUser - Found ' + progressRows.length +' active listening progress');
         }
 
         //  Group progress by subscribed user, keep most recently updated rows first

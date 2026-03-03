@@ -306,10 +306,13 @@
                                     }
 
                                     <div class="card shadow">
-                                        <div class="card-header bg-primary text-white">
+                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                                             <h5 class="mb-0"><i class="bi bi-music-note-list"></i> Capítulos completados ({{ current.audioFiles.length || 0 }})</h5>
+                                            <button class="btn btn-sm btn-outline-light" (click)="toggleChaptersExpanded()">
+                                                {{ chaptersExpanded() ? 'Contraer' : 'Expandir' }}
+                                            </button>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body" [class.chapters-collapsed]="!chaptersExpanded()">
                                             @if (!current.audioFiles.length) {
                                                 <div class="text-muted">Aún no hay capítulos convertidos</div>
                                             } @else {
@@ -433,10 +436,32 @@
                                                 <div class="fw-bold" style="width: 180px;">Total de páginas:</div>
                                                 <input type="number" class="form-control" [ngModel]="totalPagesInput()" (ngModelChange)="totalPagesInput.set($any($event))" placeholder="ej: 100, 240, etc..." min="1" style="max-width: 220px;">
                                             </div>
+                                            <div class="d-flex align-items-center gap-2 mt-3">
+                                                <div class="fw-bold" style="width: 180px;">Servidor TTS destino:</div>
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    [ngModel]="destinationTtsServer()"
+                                                    (ngModelChange)="setDestinationTtsServer($any($event))"
+                                                    placeholder="https://amir-tubby-ivey.ngrok-free.dev">
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2 mt-3">
+                                                <div class="fw-bold" style="width: 180px;">Traducir:</div>
+                                                <div class="form-check m-0">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        [ngModel]="translateBeforeTts()"
+                                                        (ngModelChange)="translateBeforeTts.set(!!$any($event))"
+                                                        id="translateBeforeTts">
+                                                    <label class="form-check-label" for="translateBeforeTts">Traducir</label>
+                                                </div>
+                                            </div>
                                             <!-- Botton para convertir -->
                                             <div class="text-center mt-4">
-                                                <button class="btn btn-lg btn-primary" (click)="convertPdfToMp3()">
-                                                    <i class="bi bi-file-earmark-music"></i> Convertir PDF a audio
+                                                <button class="btn btn-lg btn-primary" (click)="convertPdfToMp3()" [disabled]="conversionSubmitting()">
+                                                    <i class="bi bi-file-earmark-music"></i>
+                                                    {{ conversionSubmitting() ? ' Processing...' : ' Convertir PDF a audio' }}
                                                 </button>
                                             </div>
                                             <div class="small text-muted mt-2">{{ pdfStatus() }}</div>
@@ -456,10 +481,20 @@
                                                     <div class="small"><strong>Source language:</strong> {{ debug?.request?.sourceLanguage || 'N/D' }}</div>
                                                     <div class="small"><strong>Target language:</strong> {{ debug?.request?.targetLanguage || 'N/D' }}</div>
                                                     <div class="small"><strong>TTS language (enviado):</strong> {{ debug?.request?.ttsLanguage || 'N/D' }}</div>
+                                                    <div class="small"><strong>TTS destination server:</strong> {{ debug?.request?.destinationTtsServer || 'N/D' }}</div>
+                                                    <div class="small"><strong>Traducir:</strong> {{ debug?.request?.translateBeforeTts }}</div>
                                                     <div class="small"><strong>Capítulo:</strong> {{ debug?.request?.chapterNumber || 'N/D' }}</div>
                                                     <div class="small"><strong>Total capítulos:</strong> {{ debug?.request?.totalChapters || 'N/D' }}</div>
                                                     <div class="small"><strong>Total páginas:</strong> {{ debug?.request?.totalPages || 'N/D' }}</div>
                                                     <div class="small"><strong>Texto enviado (chars):</strong> {{ debug?.request?.textLength || 0 }}</div>
+
+                                                    @if (debug?.response?.queue) {
+                                                        <hr class="my-2">
+                                                        <div class="small fw-semibold">Queue</div>
+                                                        <div class="small"><strong>queueId:</strong> {{ debug.response.queue.queueId || 'N/D' }}</div>
+                                                        <div class="small"><strong>status:</strong> {{ debug.response.queue.status || 'N/D' }}</div>
+                                                        <div class="small"><strong>reused:</strong> {{ debug.response.queue.reused }}</div>
+                                                    }
 
                                                     @if (debug?.response?.diagnostics) {
                                                         <hr class="my-2">

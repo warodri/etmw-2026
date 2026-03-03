@@ -1,4 +1,4 @@
-const { isChapterAvailable, logAccessToChapter } = require('../workers/subscription');
+const { getChapterAvailabilityDecision, logAccessToChapter } = require('../workers/subscription');
 
 /**
  * THIS IS FOR USERS ONLY
@@ -40,11 +40,14 @@ async function run(data, req, res) {
         const number = chapterNumber && chapterNumber > 0 ? chapterNumber : 1;
 
         //  Is chapter available for this user?
-        const isAvailable = await isChapterAvailable(userId, audiobookId, number);
-        if (!isAvailable) {
+        const decision = await getChapterAvailabilityDecision(userId, audiobookId, number, {
+            grantIfPossible: true
+        });
+        if (!decision.isAvailable) {
             return res.status(200).json({
                 success: false,
-                message: 'Chapter not available'
+                reasonCode: decision.reasonCode,
+                message: decision.message || 'Chapter not available'
             })
         }
 

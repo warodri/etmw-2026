@@ -1,7 +1,9 @@
 const fs = require('fs').promises;
 const path = require('path');
+const crypto = require('crypto');
 const mm = require('music-metadata');
 const elevenLabsUtils = require('../workers/eleven_labs_utils');
+const { registerPendingTtsJob } = require('../workers/tts-webhook-jobs');
 const config = require('../config');
 const OpenAI = require("openai");
 const client = new OpenAI({ apiKey: config.OPEN_AI.API_KEY });
@@ -107,9 +109,18 @@ async function run(data, req, res) {
         params.language = getBaseLanguageCode(params.language || targetLanguage) || 'en';
         params.referenceAudioPath = req.file.path;
         params.narrationStyle = params.narrationStyle || params.narration_style || 'Essay';
-        const translated = shouldTranslate(sourceLanguage, targetLanguage);
+        const rawDestinationServer = String(params.destinationTtsServer || params.baseUrl || '').trim();
+        if (rawDestinationServer) {
+            params.baseUrl = rawDestinationServer.replace(/\/+$/, '');
+        }
+        const languagesDiffer = shouldTranslate(sourceLanguage, targetLanguage);
+        const translationRequested = (
+            params.translateBeforeTts === true ||
+            String(params.translateBeforeTts || '').toLowerCase() === 'true'
+        );
+        const translated = languagesDiffer && translationRequested;
 
-        // Translate only when base language really changes (en -> es, not es-ES -> es-AR)
+        // Translate only when explicitly requested and base language differs.
         if (translated) {
             params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
         }
@@ -119,113 +130,85 @@ async function run(data, req, res) {
         //  The user uploded a book in one language but he wants another now.
         //////////////////////////////////////////////////////////////////////
 
-        // Convert to audio (ElevenLabs max text length per request: 30000 chars)
-        const audioBuffer = await convertTextToSpeechChunked(params);
-
-        // Create directory for audiobook if it doesn't exist
-        const audiobookDir = path.join(__dirname, '../audiobooks', audiobookId);
-        await fs.mkdir(audiobookDir, { recursive: true });
-
-        // Generate filename
-        const filename = `chapter_${chapterNumber}_${Date.now()}.wav`;
-        const filepath = path.join(audiobookDir, filename);
-
-        // Save WAV file
-        await fs.writeFile(filepath, audioBuffer);
-
-        // Get audio duration
-        let durationSec = 0;
-        try {
-            const metadata = await mm.parseFile(filepath);
-            durationSec = metadata.format.duration || 0;
-        } catch (err) {
-            console.warn('Could not get audio duration:', err);
-        }
-
-        // Update audiobook record
-        const relativeUrl = `audiobooks/${audiobookId}/${filename}`;
-            
-        // Check if chapter already exists
-        const audioFiles = Array.isArray(audiobook.audioFiles) ? audiobook.audioFiles : [];
-        const existingChapterIndex = audioFiles.findIndex(
-            file => file.chapter === chapterNumber
+        const queueBaseServer = config.dev ? config.SERVER.local : config.SERVER.remote;
+        const webhookBase = String(queueBaseServer || '').replace(/\/+$/, '');
+        const webhookUrl = `${webhookBase}/api/tts-webhook`;
+        const chapterVersion = String(
+            params.chapterVersion ||
+            crypto.createHash('sha256').update(String(params.text || '')).digest('hex')
         );
 
-        if (existingChapterIndex >= 0) {
-            // Update existing chapter
-            audioFiles[existingChapterIndex] = {
-                chapter: chapterNumber,
-                url: relativeUrl,
-                durationSec: durationSec
-            };
-        } else {
-            // Add new chapter
-            audioFiles.push({
-                chapter: chapterNumber,
-                url: relativeUrl,
-                durationSec: durationSec
-            });
-        }
+        const queueResult = await queueTextToSpeechJob({
+            ...params,
+            audiobookId: String(audiobook._id),
+            chapterNumber,
+            chapterVersion,
+            webhookUrl
+        });
 
-        // Sort chapters by chapter number
-        audioFiles.sort((a, b) => a.chapter - b.chapter);
-        audiobook.audioFiles = audioFiles;
+        await registerPendingTtsJob({
+            queueId: queueResult.queueId,
+            pollUrl: queueResult.pollUrl,
+            status: queueResult.status,
+            statusCode: queueResult.statusCode,
+            reused: Boolean(queueResult.reused),
+            jobKey: queueResult.jobKey || null,
+            destinationTtsServer: params.baseUrl || '',
+            audiobookId: String(audiobook._id),
+            chapterNumber,
+            originalInputText,
+            translated,
+            params: {
+                text: String(params.text || ''),
+                chapterNumber,
+                language: params.language || 'en',
+                narrationStyle: params.narrationStyle || 'Essay',
+                translateBeforeTts: translationRequested,
+                sourceLanguage,
+                targetLanguage,
+                totalPages: params.totalPages,
+                totalChapters: params.totalChapters
+            }
+        });
 
-        // Calculate total duration
-        audiobook.totalAudioDurationSec = audiobook.audioFiles.reduce(
-            (sum, file) => sum + (file.durationSec || 0), 
-            0
-        );
-
-        // Update pipeline status
-        if (audiobook.pipelineStatus === 'uploaded') {
-            audiobook.pipelineStatus = 'published';
-            audiobook.published = true;
-        }
-
-        //  Update last time modified
+        audiobook.pipelineStatus = 'tts_processing';
         audiobook.updatedAt = Date.now();
         await audiobook.save();
-
-        //  Get the author
-        const Author = require('../models/author');        
-        const author = await Author.findOne({ 
-            _id: audiobook.authorId,
-            enabled: true 
-        })
-        if (!author) {
-            throw new Error('Author does not exist!')
-        }
-        // Generate the story for this chapter
-        await generateStory(audiobook, author, params);
 
         //  Respond to our UI "app/admin"
         res.json({
             success: true,
-            message: 'Conversion successful',
-            chapter: {
-                chapter: chapterNumber,
-                url: relativeUrl,
-                durationSec: durationSec
+            message: 'Text sent for conversion. An email will arrive to you when the conversion is processed.',
+            queue: {
+                queueId: queueResult.queueId,
+                status: queueResult.status,
+                reused: Boolean(queueResult.reused),
+                jobKey: queueResult.jobKey || null
             },
             diagnostics: {
                 sourceLanguage: params.sourceLanguage,
                 targetLanguage: params.targetLanguage,
                 ttsLanguage: params.language,
+                translationRequested,
+                languagesDiffer,
                 translationApplied: translated,
                 inputTextLength: originalInputText.length,
                 finalTextLength: String(params.text || '').length,
                 inputTextPreview: buildDebugPreview(originalInputText),
-                finalTextPreview: buildDebugPreview(String(params.text || ''))
+                finalTextPreview: buildDebugPreview(String(params.text || '')),
+                destinationTtsServer: params.baseUrl || '',
+                webhookUrl
             },
         });
 
     } catch (ex) {
         console.log('UNEXPECTED ERROR IN FILE: ' + __filename)
         console.log(ex.message)
+        const uiError = resolveUiError(ex);
         res.status(200).json({
             success: false,
-            message: 'Unexpected error'
+            message: uiError.message,
+            errorCode: uiError.code
         })
     }
 }
@@ -249,6 +232,110 @@ async function generateStory(audiobook, author, params) {
     chapterPieces = await generate10MinuteAudios(audiobook, params, chapterPieces);
     //  "chapterPieces" is ready to store in mongodb
     return await upsertStoryDocument(audiobook, author, params, chapterPieces);
+}
+
+async function finalizeQueuedChapterAudio({
+    audiobookId,
+    chapterNumber,
+    params,
+    audioBuffer,
+    originalInputText = '',
+    translated = false
+}) {
+    if (!audiobookId) throw new Error('Missing audiobookId');
+    if (!Number.isFinite(Number(chapterNumber)) || Number(chapterNumber) <= 0) {
+        throw new Error('Invalid chapterNumber');
+    }
+    if (!Buffer.isBuffer(audioBuffer) || !audioBuffer.length) {
+        throw new Error('Invalid audioBuffer');
+    }
+    if (!params || !String(params.text || '').trim()) {
+        throw new Error('Missing params.text');
+    }
+    params.chapterNumber = Number(params.chapterNumber || chapterNumber);
+
+    const AudioBook = require('../models/audiobook');
+    const audiobook = await AudioBook.findOne({
+        _id: audiobookId,
+        enabled: true
+    });
+    if (!audiobook) {
+        throw new Error('No Audiobook!');
+    }
+
+    if (params.totalPages) audiobook.totalPages = params.totalPages;
+    if (params.totalChapters) audiobook.totalChapters = params.totalChapters;
+
+    const audiobookDir = path.join(__dirname, '../audiobooks', String(audiobookId));
+    await fs.mkdir(audiobookDir, { recursive: true });
+
+    const filename = `chapter_${chapterNumber}_${Date.now()}.wav`;
+    const filepath = path.join(audiobookDir, filename);
+    await fs.writeFile(filepath, audioBuffer);
+
+    let durationSec = 0;
+    try {
+        const metadata = await mm.parseFile(filepath);
+        durationSec = metadata.format.duration || 0;
+    } catch (err) {
+        console.warn('Could not get audio duration:', err);
+    }
+
+    const relativeUrl = `audiobooks/${audiobookId}/${filename}`;
+    const audioFiles = Array.isArray(audiobook.audioFiles) ? audiobook.audioFiles : [];
+    const existingChapterIndex = audioFiles.findIndex(
+        file => Number(file.chapter) === Number(chapterNumber)
+    );
+    const chapterData = {
+        chapter: Number(chapterNumber),
+        url: relativeUrl,
+        durationSec
+    };
+    if (existingChapterIndex >= 0) {
+        audioFiles[existingChapterIndex] = chapterData;
+    } else {
+        audioFiles.push(chapterData);
+    }
+
+    audioFiles.sort((a, b) => Number(a.chapter) - Number(b.chapter));
+    audiobook.audioFiles = audioFiles;
+    audiobook.totalAudioDurationSec = audiobook.audioFiles.reduce(
+        (sum, file) => sum + Number(file.durationSec || 0),
+        0
+    );
+
+    if (audiobook.pipelineStatus === 'uploaded' || audiobook.pipelineStatus === 'tts_processing') {
+        audiobook.pipelineStatus = 'published';
+        audiobook.published = true;
+    }
+
+    audiobook.updatedAt = Date.now();
+    await audiobook.save();
+
+    const Author = require('../models/author');
+    const author = await Author.findOne({
+        _id: audiobook.authorId,
+        enabled: true
+    });
+    if (!author) {
+        throw new Error('Author does not exist!');
+    }
+
+    await generateStory(audiobook, author, params);
+
+    return {
+        chapter: chapterData,
+        diagnostics: {
+            sourceLanguage: params.sourceLanguage,
+            targetLanguage: params.targetLanguage,
+            ttsLanguage: params.language,
+            translationApplied: translated,
+            inputTextLength: String(originalInputText || '').length,
+            finalTextLength: String(params.text || '').length,
+            inputTextPreview: buildDebugPreview(String(originalInputText || '')),
+            finalTextPreview: buildDebugPreview(String(params.text || ''))
+        }
+    };
 }
 
 /**
@@ -673,13 +760,55 @@ function shouldTranslate(sourceLanguage, targetLanguage) {
     return sourceBase !== targetBase;
 }
 
-async function convertTextToSpeechChunked(params) {
+function tryParseJson(value) {
+    try {
+        return JSON.parse(value);
+    } catch {
+        return null;
+    }
+}
+
+function resolveUiError(ex) {
+    const rawMessage = String(ex?.message || '').trim();
+    const fallback = {
+        message: 'Unexpected error',
+        code: 'UNEXPECTED_ERROR'
+    };
+
+    if (!rawMessage) return fallback;
+
+    // Example:
+    // TTS queue failed: 400 {"error":"Text is too long. Estimated duration is 7.4 minutes, max allowed is 5 minutes."}
+    const queueMatch = rawMessage.match(/^TTS queue failed:\s*(\d{3})\s*(.*)$/i);
+    if (queueMatch) {
+        const statusCode = Number(queueMatch[1]);
+        const payload = tryParseJson(queueMatch[2] || '');
+        const payloadError = String(payload?.error || '').trim();
+
+        if (statusCode === 400 && payloadError) {
+            return { message: payloadError, code: 'TTS_VALIDATION_ERROR' };
+        }
+        if (statusCode === 429) {
+            return {
+                message: payloadError || 'TTS queue is full. Please try again in a moment.',
+                code: 'TTS_QUEUE_FULL'
+            };
+        }
+    }
+
+    if (rawMessage.toLowerCase().includes('text is too long')) {
+        return { message: rawMessage, code: 'TTS_VALIDATION_ERROR' };
+    }
+
+    return fallback;
+}
+
+async function queueTextToSpeechJob(params) {
     const text = String(params?.text || '').trim();
     if (!text) {
         throw new Error('Empty text for TTS');
     }
-    // New TTS service handles sentence-safe chunking internally.
-    return elevenLabsUtils.textToSpeech({ ...params, text });
+    return elevenLabsUtils.queueTtsJob({ ...params, text });
 }
 
 async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
@@ -719,6 +848,7 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
 
 module.exports = {
     run,
+    finalizeQueuedChapterAudio,
     generateStory,
     translateWithOpenAiChunked,
     shouldTranslate,
