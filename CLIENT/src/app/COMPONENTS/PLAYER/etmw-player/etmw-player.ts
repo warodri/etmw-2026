@@ -93,7 +93,7 @@ export class EtmwPlayer extends ScreenPlayer implements OnInit {
     isChapterAllowed(chapterNumber: number, callback: any) {
         const audiobookId = this.audiobookId();
         if (!audiobookId) {
-            callback(false, this.tr('Invalid audiobook.', 'Audiolibro inválido.'));
+            callback(false, this.tr('Invalid story.', 'Historia inválida.'));
             return;
         }
         this.getInternetAudiobook().audiobookGetChapterAudioIsAvailable(audiobookId, chapterNumber, (response: any) => {

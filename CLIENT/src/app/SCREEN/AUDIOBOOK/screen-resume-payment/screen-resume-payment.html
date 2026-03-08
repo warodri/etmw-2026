@@ -35,12 +35,12 @@
                             <div class="mb-2" style="font-size: 2rem;">✅</div>
                             <h5 class="fw-bold mb-2">No pending payments</h5>
                             <div class="text-gray-400 small">
-                                You don’t have pending audiobook payments right now.
+                                You don’t have pending payments right now.
                             </div>
                         </div>
                     } @else {
                         <div class="small text-gray-400 mb-3">
-                            Select an audiobook to continue with payment.
+                            Select a story to continue with payment.
                         </div>
                         <div class="d-flex flex-column gap-4">
                             @for (audiobook of pendingAudiobooks; track audiobook._id) {

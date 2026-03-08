@@ -47,12 +47,11 @@ function normalizeChapterPayload(raw, chapterNumber, modelName) {
 }
 
 function normalizeBookMetadata(raw, fallback = {}) {
-    const title = String(raw?.title || fallback.title || '').trim();
     const description = String(raw?.description || fallback.description || '').trim();
     const category = String(raw?.category || fallback.category || '').trim();
 
     return {
-        title: title || 'Untitled AI Story',
+        title: String(fallback.title || '').trim(),
         description: description || '',
         category: category || '',
     };
@@ -326,12 +325,12 @@ async function openAiCreateBookMetadata({
         messages: [
             {
                 role: 'system',
-                content: 'Return strict JSON only with shape {"title":"","description":"","category":""}.'
+                content: 'Return strict JSON only with shape {"description":"","category":""}.'
             },
             {
                 role: 'user',
                 content: JSON.stringify({
-                    instructions: `Create concise audiobook metadata in ${String(targetLanguage || 'en')}. Title must be catchy. Description should be 2-4 sentences. Category must be a genre label (e.g., Mystery, Sci-Fi, Fantasy, Thriller, Romance, Drama, Horror, Adventure).`,
+                    instructions: `Create concise audiobook metadata in ${String(targetLanguage || 'en')}. Description should be 2-4 sentences. Category must be a genre label (e.g., Mystery, Sci-Fi, Fantasy, Thriller, Romance, Drama, Horror, Adventure). Do not generate a title.`,
                     blueprint: blueprint || {},
                     firstChapterSignals: {
                         chapterTitle: String(chapterTitle || ''),

@@ -88,6 +88,10 @@ async function run(data, req, res) {
                     if (chapterLanguage) {
                         ab.sourceLanguage = chapterLanguage;
                     }
+                    const updatedTitle = String(blueprint?.storyTitle || '').trim();
+                    if (updatedTitle) {
+                        ab.title = updatedTitle;
+                    }
                     ab.pipelineStatus = 'published';
                     ab.published = true;
                     ab.paymentCompleted = true;
@@ -118,6 +122,13 @@ async function run(data, req, res) {
                 message: 'voiceLanguage is required'
             });
         }
+        const authorTitle = String(blueprint?.storyTitle || '').trim();
+        if (!authorTitle) {
+            return res.status(200).json({
+                success: false,
+                message: 'storyTitle is required'
+            });
+        }
 
         const storyDoc = new YourStory();
         storyDoc.userId = userId;
@@ -146,7 +157,7 @@ async function run(data, req, res) {
         audiobook.speechRate = '1.0';
         audiobook.stability = 50;
         audiobook.clarity = 75;
-        audiobook.title = 'Generating title...';
+        audiobook.title = authorTitle;
         audiobook.authorName = String(author.penName || '').trim() || 'Author';
         audiobook.description = 'Generating description...';
         audiobook.categories = [];

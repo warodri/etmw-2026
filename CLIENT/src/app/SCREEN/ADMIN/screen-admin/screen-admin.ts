@@ -35,7 +35,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
 
     SERVER = Config.dev ? Config.SERVER.local : Config.SERVER.remote;
     private readonly ttsDestinationStorageKey = 'etmw-admin-tts-destination-server';
-    private readonly defaultTtsDestinationServer = 'https://amir-tubby-ivey.ngrok-free.dev';
+    private readonly defaultTtsDestinationServer = 'https://entertomyworld.com/tunnel/tts';
     
     activeSection = signal<'promo' | 'audiobooks'>('audiobooks');
 
@@ -72,6 +72,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
 
     audioUrls = signal<Record<number, string>>({});
     audioLoading = signal<Record<number, boolean>>({});
+    chapterStoryLoading = signal<Record<number, boolean>>({});
 
     totalChaptersInput = signal('');
     totalPagesInput = signal('');
@@ -300,6 +301,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.storyEditId.set(null);
         this.storyEditError.set('');
         this.storyLanguageInput.set(audiobook.targetLanguage || audiobook.sourceLanguage || '');
+        this.chapterStoryLoading.set({});
         this.translateBeforeTts.set(
             this.shouldTranslateByBase(
                 audiobook.sourceLanguage || '',
@@ -320,6 +322,7 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
         this.storyEditId.set(null);
         this.storyEditError.set('');
         this.storyLanguageInput.set('');
+        this.chapterStoryLoading.set({});
         this.translateBeforeTts.set(false);
         this.revokeAudioUrls();
     }
@@ -662,6 +665,39 @@ export class ScreenAdminComponent implements OnInit, OnDestroy {
                 }));
             }
         );
+    }
+
+    generateStoryForChapter(chapterNumber: number) {
+        const current = this.currentAudiobook();
+        if (!current?._id) {
+            alert('No hay audiolibro seleccionado.');
+            return;
+        }
+        if (!chapterNumber || chapterNumber <= 0) {
+            alert('Capítulo inválido.');
+            return;
+        }
+        if (this.chapterStoryLoading()[chapterNumber]) return;
+
+        this.chapterStoryLoading.update((map) => ({
+            ...map,
+            [chapterNumber]: true
+        }));
+
+        this.internetAdmin.adminGenerateStoryByChapter(current._id, chapterNumber, (result: any) => {
+            this.chapterStoryLoading.update((map) => ({
+                ...map,
+                [chapterNumber]: false
+            }));
+
+            if (!result?.success) {
+                alert(result?.message || 'No se pudo generar la historia para este capítulo.');
+                return;
+            }
+
+            this.loadStoriesForCurrentAudiobook();
+            alert(`Historia generada para el capítulo ${chapterNumber}.`);
+        });
     }
 
     getChapterAudioDirectUrl(file: any): string | null {

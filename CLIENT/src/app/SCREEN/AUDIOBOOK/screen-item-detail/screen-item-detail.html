@@ -13,7 +13,7 @@
                         </button>
                         <div class="text-center d-flex justify-content-center align-items-center gap-3">
                             <div class="small text-gray-400"></div>
-                            <div class="fw-bold">Audiobook Details</div>
+                            <div class="fw-bold">Story Details</div>
                         </div>
                         @if (isBookmarked()) {
                             <button class="btn btn-light rounded-circle" (click)="toggleBookmark()">
@@ -31,7 +31,7 @@
 
                     <div class="detail-main">
                         <div class="detail-cover-wrap">
-                            <img [src]="getCoverUrl()" [alt]="audiobook()?.title" class="detail-cover">
+                            <img [src]="getCoverUrl()" [alt]="audiobook()?.title" class="detail-cover mt-5">
                         </div>
                         <div class="detail-info">
                             <div class="detail-title">{{ audiobook()?.title }}</div>
@@ -118,7 +118,7 @@
                     }
                 </div>
             } @else {
-                <div class="p-3 text-center text-gray-400">Audiobook not found.</div>
+                <div class="p-3 text-center text-gray-400">Story not found.</div>
             }
         }
     </div>

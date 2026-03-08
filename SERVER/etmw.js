@@ -15,7 +15,7 @@ const DeviceTokenModel = require('./models/device-token');
 const ios = require('./tasks/ios-apn');
 const android = require('./tasks/android');
 const seedCategories = require('./scripts/seedCategories');
-const SERVER_VERSION = '1.0.5';
+const SERVER_VERSION = '1.0.11';
 
 const app = express();
 const PORT = config.SERVER.port;

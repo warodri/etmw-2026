@@ -6,7 +6,7 @@
 
         <section class="story-hero text-center px-3">
             <h1 class="story-title">{{ tr('Create Your Story', 'Crea Tu Historia') }}</h1>
-            <p class="story-subtitle mb-0">{{ tr('Shape the audiobook you want to hear, chapter by chapter.', 'Da forma al audiolibro que quieres escuchar, capítulo por capítulo.') }}</p>
+            <p class="story-subtitle mb-0">{{ tr('Shape the story you want to hear, chapter by chapter.', 'Da forma a la historia que quieres escuchar, capítulo por capítulo.') }}</p>
         </section>
 
         <section class="story-panel rounded-4 p-4 mb-4">
@@ -34,7 +34,7 @@
                     <button class="btn btn-sm btn-primary rounded-pill" (click)="startNewAlias()">{{ tr('Create new alias', 'Crear nuevo alias') }}</button>
                 </div>
             } @else {
-                <p class="text-gray-400 mb-3">{{ tr('Create and manage pen names to publish your audiobook.', 'Crea y administra seudónimos para publicar tu audiolibro.') }}</p>
+                <p class="text-gray-400 mb-3">{{ tr('Create and manage pen names to publish your audio story.', 'Crea y administra seudónimos para publicar tu historia.') }}</p>
 
                 <div class="author-form-grid">
                     <div>
@@ -167,7 +167,7 @@
 
         <section class="story-panel rounded-4 p-4 mb-4">
             <h5 class="fw-bold mb-3">{{ tr('2. Tell us your story idea', '2. Cuéntanos tu idea de historia') }}</h5>
-            <p class="text-gray-400 mb-3">{{ tr('Enter a text prompt for your audiobook idea.', 'Ingresa un prompt de texto para tu idea de audiolibro.') }}</p>
+            <p class="text-gray-400 mb-3">{{ tr('Enter a text prompt for your story idea.', 'Ingresa un prompt de texto para tu idea de historia.') }}</p>
 
             <div class="selected-alias" *ngIf="getSelectedAuthorAlias() as selectedAlias; else noAuthorAssigned">
                 <img class="author-avatar" [src]="selectedAlias.profilePictureUrl" [alt]="selectedAlias.name" />
@@ -179,6 +179,14 @@
             <ng-template #noAuthorAssigned>
                 <div class="small text-warning mb-3">{{ tr('Create and assign an author alias before sending a story request.', 'Crea y asigna un alias de autor antes de enviar una solicitud de historia.') }}</div>
             </ng-template>
+
+            <input
+                class="story-input mb-3"
+                type="text"
+                [placeholder]="tr('Story title', 'Título de la historia')"
+                [value]="storyTitle()"
+                (input)="onStoryTitleInput($any($event.target).value)"
+            />
 
             <!-- Type your idea-->
             <textarea
@@ -325,7 +333,7 @@
                                 <div>
                                     <div class="small text-gray-400">{{ tr('Publishing as', 'Publicando como') }}</div>
                                     <div class="fw-semibold">{{ request.authorAliasName }}</div>
-                </div>
+                                </div>
                             </div>
 
                             <div class="mb-2 fw-semibold">{{ request.prompt }}</div>

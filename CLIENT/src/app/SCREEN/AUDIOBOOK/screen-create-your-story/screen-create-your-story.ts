@@ -77,6 +77,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     authorTasteInput = signal('');
 
     storyPrompt = signal('');
+    storyTitle = signal('');
     submissions = signal<StoryRequest[]>([]);
 
     loadingAliases = signal(false);
@@ -164,6 +165,10 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
     onStoryPromptInput(value: string): void {
         this.storyPrompt.set(value);
+    }
+
+    onStoryTitleInput(value: string): void {
+        this.storyTitle.set(value);
     }
 
     onAuthorTasteKeydown(event: KeyboardEvent): void {
@@ -385,10 +390,14 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     submitStoryRequest(): void {
+        const title = this.storyTitle().trim();
         const prompt = this.storyPrompt().trim();
         const selectedAuthor = this.getSelectedAuthorAlias();
 
-        if (!prompt || !selectedAuthor) {
+        if (!title || !prompt || !selectedAuthor) {
+            if (!title) {
+                this.toast.show(this.tr('Please enter an audiobook title.', 'Por favor ingresa un título para el audiolibro.'));
+            }
             return;
         }
         if (!this.voiceLanguage) {
@@ -406,7 +415,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
 
         this.sendingStory.set(true);
 
-        const blueprint = this.buildBlueprint(prompt, selectedAuthor);
+        const blueprint = this.buildBlueprint(title, prompt, selectedAuthor);
 
         this.iAuthor.yourStoryUpsert(
             null,
@@ -435,6 +444,7 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
                     this.scheduleChapterPipeline(request.id, 1);
                 }
 
+                this.storyTitle.set('');
                 this.storyPrompt.set('');
                 this.coverFile = null;
             }
@@ -442,7 +452,8 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
     }
 
     canSubmitStoryRequest(): boolean {
-        return !!this.storyPrompt().trim()
+        return !!this.storyTitle().trim()
+            && !!this.storyPrompt().trim()
             && !!this.selectedAuthorAliasId()
             && !!this.voiceLanguage
             && !!this.chapterLanguage
@@ -1332,10 +1343,10 @@ export class ScreenCreateYourStory implements OnInit, OnDestroy {
         return prompt || this.tr('Untitled story idea', 'Idea de historia sin título');
     }
 
-    private buildBlueprint(prompt: string, author: AuthorAlias): any {
+    private buildBlueprint(title: string, prompt: string, author: AuthorAlias): any {
         const selectedLanguageName = this.availableLanguages.find((item) => String(item.code) === String(this.chapterLanguage || ''))?.name || this.chapterLanguage || 'English';
         return {
-            storyTitle: prompt.slice(0, 72),
+            storyTitle: String(title || '').trim(),
             genre: author.tasteTags[0] || 'General',
             tone: 'immersive',
             inspirationalStyleNotes: `Written as ${author.name}`,

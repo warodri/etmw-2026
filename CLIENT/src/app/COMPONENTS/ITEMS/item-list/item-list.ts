@@ -224,7 +224,7 @@ export class ItemList implements OnInit, OnChanges {
             skip: 0
         };
         this.searchResultPrefix = this.tr('Results for', 'Resultados para');
-        this.searchResultLabel = q.length >= 2 ? `"${q}"` : this.tr('all audiobooks', 'todos los audiolibros');
+        this.searchResultLabel = q.length >= 2 ? `"${q}"` : this.tr('all stories', 'todas las historias');
         this.forceShowSearchResults = true;
 
         this.fetchSearchResults(payload);
@@ -234,7 +234,7 @@ export class ItemList implements OnInit, OnChanges {
         const filters: string[] = [];
         if (this.filterCategory) filters.push(this.filterCategory);
         if (this.filterPipelineStatus) filters.push(`${this.tr('Status', 'Estado')}: ${this.filterPipelineStatus}`);
-        if (this.filterMyAudiobooks) filters.push(this.tr('My Audiobooks', 'Mis Audiolibros'));
+        if (this.filterMyAudiobooks) filters.push(this.tr('My Stories', 'Mis Historias'));
         if (this.filterPublished === true) filters.push(this.tr('Published', 'Publicado'));
         if (this.filterPublished === false) filters.push(this.tr('Unpublished', 'Sin publicar'));
         const languageNames = this.selectedLanguages().map((code) => this.getLanguageLabel(code));

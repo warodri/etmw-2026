@@ -1,7 +1,7 @@
 
 export class Config {
 
-    public static VERSION = '1.0.5';   
+    public static VERSION = '1.0.8';   
     public static dev = true;
 
     public static ASSETS_BASE_URL = 'https://entertomyworld.com/images/never-delete'

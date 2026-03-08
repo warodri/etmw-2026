@@ -156,7 +156,7 @@ export class DebateAddComment implements OnDestroy {
         if (!this.canSend() || this.submitting) return;
         const audiobookId = this.audiobookId;
         if (!audiobookId) {
-            this.mediaError = this.tr('No audiobook selected.', 'No hay audiolibro seleccionado.');
+            this.mediaError = this.tr('No story selected.', 'No hay una historia seleccionada.');
             return;
         }
         const text = this.newCommentText.trim();

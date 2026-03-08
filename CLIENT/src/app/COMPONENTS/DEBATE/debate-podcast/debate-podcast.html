@@ -28,7 +28,7 @@
         </div>
     } @else if (podcasts().length === 0) {
         <div class="text-center py-4 rounded-4 bg-secondary">
-            <div class="small text-gray-400">{{ tr('No podcast episodes yet for this audiobook.', 'Aún no hay episodios de podcast para este audiolibro.') }}</div>
+            <div class="small text-gray-400">{{ tr('No podcast episodes yet for this story.', 'Aún no hay episodios de podcast para esta historia.') }}</div>
             @if (myUser && isAdmin()) {
                 <div class="small text-gray-400 mt-1">{{ tr('Generate the first one with the button above.', 'Genera el primero con el botón de arriba.') }}</div>
             }

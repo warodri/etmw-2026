@@ -67,7 +67,7 @@
                             <i class="bi bi-x-lg"></i>
                         </div>
                         {{ tr('Upload your book, essay, or paper.', 'Sube tu libro, ensayo o artículo.') }}
-                        {{ tr('We turn it into an audiobook and publish it on Enter To My World.', 'Lo convertimos en audiolibro y lo publicamos en Enter To My World.') }}
+                        {{ tr('We turn it into spoken story and publish it on Enter To My World.', 'Lo convertimos en una historia para escuchar y lo publicamos en Enter To My World.') }}
                         {{ tr('Subscribers listen to your work, and you get paid every month.', 'Los suscriptores escuchan tu obra y tú cobras cada mes.') }}
                     </div>
                 </div>
@@ -391,7 +391,7 @@
                 @if (currentStep() === 4) {
                     <div class="mt-4 fade-in-up">                
                         <h3 class="fw-bold mb-4">
-                            {{ tr('Configure Your Audiobook', 'Configura Tu Audiolibro') }}
+                            {{ tr('Configure Your Story', 'Configura Tu Historia') }}
                         </h3>
                         <!-- 
                             Source Language 
@@ -440,7 +440,7 @@
                                 {{ tr('Voices', 'Voces') }}
                             </h3>
                             <p class="text-gray-400 mb-3">
-                                {{ tr('Pick a voice for your audiobook', 'Elige una voz para tu audiolibro') }}
+                                {{ tr('Pick a voice for your story', 'Elige una voz para tu historia') }}
                             </p>
                             <div class="row g-3" [class.included-voices-limit]="!includedVoicesShowMore()">
                                 @for (voice of availableVoices(); track voice.id) {
@@ -889,7 +889,7 @@
                         <div class="mb-4" style="font-size: 5rem;">✅</div>
                         <h3 class="fw-bold mb-3">{{ tr('Thank You!', '¡Gracias!') }}</h3>
                         <p class="text-gray-400 mb-4" style="max-width: 500px; margin: 0 auto;">
-                            {{ tr('Your book has been submitted successfully. Our team of expert humans will personally review and process your audiobook to ensure the highest quality output.', 'Tu libro se envió con éxito. Nuestro equipo de expertos revisará y procesará tu audiolibro para asegurar la mejor calidad posible.') }}
+                            {{ tr('Your book has been submitted successfully. Our team of expert humans will personally review and process your story to ensure the highest quality output.', 'Tu libro se envió con éxito. Nuestro equipo de expertos revisará y procesará tu historia para asegurar la mejor calidad posible.') }}
                         </p>
                         
                         <div class="bg-slate-800 rounded-4 p-4 mb-4" style="max-width: 500px; margin: 0 auto;">

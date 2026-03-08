@@ -124,6 +124,20 @@ async function run(data, req, res) {
         if (translated) {
             params.text = await translateWithOpenAiChunked(params.text, params.sourceLanguage, params.targetLanguage);
         }
+
+        await upsertChapterSourceText({
+            audiobookId: String(audiobook._id),
+            chapterNumber,
+            sourceLanguage: params.sourceLanguage,
+            targetLanguage: params.targetLanguage,
+            ttsLanguage: params.language || 'en',
+            narrationStyle: params.narrationStyle || 'Essay',
+            totalChapters: Number(params.totalChapters || audiobook.totalChapters || chapterNumber || 1),
+            totalPages: Number(params.totalPages || audiobook.totalPages || 0),
+            inputText: originalInputText,
+            finalText: String(params.text || ''),
+            translated
+        });
         
         //////////////////////////////////////////////////////////////////////
         //  Must continue with the translated text from here on.
@@ -224,14 +238,73 @@ async function generateStory(audiobook, author, params) {
     if (!params.text || typeof params.text !== 'string' || !params.text.trim()) {
         throw new Error('No chapter text for story generation')
     }
-    //  1) Con el texto original y con el idioma original
-    //  2) Le digo al AI que tome el texto de input y que genere todo
-    let chapterPieces = generate10MinuteText(params.text, audiobook, params, author);
+    console.log('[STORY_GEN] start', {
+        audiobookId: audiobook?._id ? String(audiobook._id) : '',
+        chapterNumber: Number(params?.chapterNumber || 0),
+        language: String(params?.language || ''),
+        sourceLanguage: String(params?.sourceLanguage || ''),
+        targetLanguage: String(params?.targetLanguage || ''),
+        textLength: String(params?.text || '').length
+    });
+    // Simplified flow:
+    // 1) Create a single chapter piece
+    // 2) Use AI only for title/subtitle/quote
+    // 3) Reuse existing chapter audio from audiobook.audioFiles
+    let chapterPieces = [{
+        readingText: String(params.text || '').trim(),
+        slideIndex: 0
+    }];
+    console.log('[STORY_GEN] chunking done', {
+        chapterNumber: Number(params?.chapterNumber || 0),
+        pieces: Array.isArray(chapterPieces) ? chapterPieces.length : 0
+    });
     chapterPieces = await generateStoryTitleAndQuote(audiobook, params, chapterPieces);
+    console.log('[STORY_GEN] title+quote done', {
+        chapterNumber: Number(params?.chapterNumber || 0),
+        pieces: Array.isArray(chapterPieces) ? chapterPieces.length : 0
+    });
     chapterPieces = await generateStoryImages(audiobook, params, chapterPieces);
-    chapterPieces = await generate10MinuteAudios(audiobook, params, chapterPieces);
+    console.log('[STORY_GEN] images done', {
+        chapterNumber: Number(params?.chapterNumber || 0),
+        pieces: Array.isArray(chapterPieces) ? chapterPieces.length : 0,
+        image: chapterPieces?.[0]?.audioImage || ''
+    });
+    chapterPieces = reuseChapterAudioForStory(audiobook, params, chapterPieces);
+    console.log('[STORY_GEN] chapter audio reused', {
+        chapterNumber: Number(params?.chapterNumber || 0),
+        audioUrl: chapterPieces?.[0]?.audioUrl || '',
+        audioDuration: Number(chapterPieces?.[0]?.audioDuration || 0)
+    });
     //  "chapterPieces" is ready to store in mongodb
-    return await upsertStoryDocument(audiobook, author, params, chapterPieces);
+    const saved = await upsertStoryDocument(audiobook, author, params, chapterPieces);
+    console.log('[STORY_GEN] upsert done', {
+        storyId: saved?._id ? String(saved._id) : '',
+        chapterNumber: saved?.chapterNumber,
+        language: saved?.language
+    });
+    return saved;
+}
+
+function reuseChapterAudioForStory(audiobook, params, chapterPieces) {
+    const chapterNumber = Number(params?.chapterNumber || 0);
+    const files = Array.isArray(audiobook?.audioFiles) ? audiobook.audioFiles : [];
+    const chapter = files.find((item) => Number(item?.chapter) === chapterNumber) || null;
+    const chapterAudioUrl = chapter?.url ? String(chapter.url) : '';
+    const chapterAudioDuration = Number(chapter?.durationSec || 0);
+
+    return (chapterPieces || []).map((piece, index) => ({
+        ...piece,
+        slideIndex: Number.isFinite(Number(piece?.slideIndex)) ? Number(piece.slideIndex) : index,
+        audioImage: piece?.audioImage || '',
+        audioUrl: chapterAudioUrl,
+        audioDuration: chapterAudioDuration,
+        isPlaying: false,
+        isMuted: false,
+        progress: 0,
+        expanded: false,
+        hasResume: false,
+        resumeTime: 0
+    }));
 }
 
 async function finalizeQueuedChapterAudio({
@@ -240,7 +313,8 @@ async function finalizeQueuedChapterAudio({
     params,
     audioBuffer,
     originalInputText = '',
-    translated = false
+    translated = false,
+    shouldGenerateStory = true
 }) {
     if (!audiobookId) throw new Error('Missing audiobookId');
     if (!Number.isFinite(Number(chapterNumber)) || Number(chapterNumber) <= 0) {
@@ -312,16 +386,18 @@ async function finalizeQueuedChapterAudio({
     audiobook.updatedAt = Date.now();
     await audiobook.save();
 
-    const Author = require('../models/author');
-    const author = await Author.findOne({
-        _id: audiobook.authorId,
-        enabled: true
-    });
-    if (!author) {
-        throw new Error('Author does not exist!');
-    }
+    if (shouldGenerateStory) {
+        const Author = require('../models/author');
+        const author = await Author.findOne({
+            _id: audiobook.authorId,
+            enabled: true
+        });
+        if (!author) {
+            throw new Error('Author does not exist!');
+        }
 
-    await generateStory(audiobook, author, params);
+        await generateStory(audiobook, author, params);
+    }
 
     return {
         chapter: chapterData,
@@ -329,6 +405,7 @@ async function finalizeQueuedChapterAudio({
             sourceLanguage: params.sourceLanguage,
             targetLanguage: params.targetLanguage,
             ttsLanguage: params.language,
+            storyGenerated: Boolean(shouldGenerateStory),
             translationApplied: translated,
             inputTextLength: String(originalInputText || '').length,
             finalTextLength: String(params.text || '').length,
@@ -336,82 +413,6 @@ async function finalizeQueuedChapterAudio({
             finalTextPreview: buildDebugPreview(String(params.text || ''))
         }
     };
-}
-
-/**
- *  - Separe todo el capitulo en textos de approximadamente 10 minutos.  
- * - Genere un titulo llamativo, conflictivo, misterioro.
- * - Le digo que genere un subtitulo.
- * - Le digo que genere un quote.
- * - Le doy ejemplos para todo. 
- */
-function generate10MinuteText(text, audiobook, params, author) {
-    const chapterPieces = []
-    /*
-        TODO: The input parameter "text" is the full PDF text of 1 chapter of a book.
-
-        - I need to separate the whole text into 10 minute texts (approx)
-
-        - Return a an array, as follows: 
-            chapterPieces: [{ 
-                readingText: '....'
-            }, { 
-                readingText: '...'
-            }]
-    */
-    const minutes = 10;
-    const wordsPerMinute = 200;
-    const targetWordCount = minutes * wordsPerMinute;
-    
-    // Normalize spaces
-    const cleanText = text.replace(/\s+/g, ' ').trim();
-    
-    // Split into sentences (keeps the period)
-    const sentences = cleanText.match(/[^.?!]+[.?!]+/g) || [];
-    let currentChunk = '';
-    let currentWordCount = 0;
-
-    for (const sentence of sentences) {
-        const sentenceWordCount = sentence.trim().split(/\s+/).length;
-
-        if (currentWordCount + sentenceWordCount > targetWordCount) {
-            // Push current chunk if not empty
-            if (currentChunk.trim().length > 0) {
-                chapterPieces.push({
-                    readingText: currentChunk.trim(),
-                    slideIndex: chapterPieces.length
-                });
-            }
-            // Start new chunk
-            currentChunk = sentence + ' ';
-            currentWordCount = sentenceWordCount;
-        } else {
-            currentChunk += sentence + ' ';
-            currentWordCount += sentenceWordCount;
-        }
-    }
-
-    // Push remaining text
-    if (currentChunk.trim().length > 0) {
-        chapterPieces.push({
-            readingText: currentChunk.trim(),
-            slideIndex: chapterPieces.length
-        });
-    }
-
-    // Fallback: no punctuation detected
-    if (chapterPieces.length === 0 && cleanText.length > 0) {
-        const words = cleanText.split(/\s+/);
-        for (let i = 0; i < words.length; i += targetWordCount) {
-            const chunk = words.slice(i, i + targetWordCount).join(' ');
-            chapterPieces.push({
-                readingText: chunk.trim(),
-                slideIndex: chapterPieces.length
-            });
-        }
-    }
-
-    return chapterPieces;
 }
 
 /**
@@ -453,24 +454,19 @@ async function generateStoryTitleAndQuote(audiobook, params, chapterPieces) {
 }
 
 /**
- * Use Open AI to generate an image or each o the chapters
- * And populate "audioImage"
+ * Use Open AI to generate an image for each chapter piece
+ * and populate "audioImage".
  */
 async function generateStoryImages(audiobook, params, chapterPieces) {
     for (let item of chapterPieces) {
-        //  TODO: Call Open AI and generate a catchy captivating phone-size image based on:
-        //  - title: 'Most people don’t want freedom. They want safety',
-        //  - quote: 'He left the house barefoot. That was the moment everything changed.',
         item.audioImage = await openAiGenerateimage(
             audiobook, params, item.slideIndex, item.title, item.quote
         );
     }
     return chapterPieces;
 }
+
 async function openAiGenerateimage(audiobook, params, slideIndex, title, quote) {
-    //  Call open AI to generate the image.
-    //  Use "client" instantiated above.
-    //  Store the image
     const storyDir = path.join(__dirname, '../audiobooks', 'story', 'images', audiobook._id.toString());
     await fs.mkdir(storyDir, { recursive: true });
     const filename = `story_${params.chapterNumber}_${slideIndex}.png`;
@@ -484,7 +480,6 @@ async function openAiGenerateimage(audiobook, params, slideIndex, title, quote) 
     });
 
     const imageData = extractImageBase64(response);
-
     if (!imageData) {
         throw new Error('Open AI did not return an image');
     }
@@ -520,57 +515,6 @@ function extractImageBase64(response) {
     return null;
 }
 
-/**
- * Use TTS service to generate the 10-minute audio
- * And populate "audioUrl"
- */
-async function generate10MinuteAudios(audiobook, params, chapterPieces) {
-    if (!audiobook) {
-        throw new Error('No Audiobook!')
-    }
-    for (let item of chapterPieces) {
-
-        //  This is the 10 minute text to convert to audio
-        const readingText = item.readingText;
-        if (!readingText) {
-            throw new Error('No readingText!')
-        }
-        const newParams = {
-            text: readingText,
-            language: params.language || audiobook.targetLanguage || audiobook.sourceLanguage,
-            narrationStyle: params.narrationStyle || params.narration_style || 'Essay',
-            referenceAudioPath: params.referenceAudioPath
-        };
-        const audioBuffer = await elevenLabsUtils.textToSpeech(newParams);
-
-        // Create directory for audiobook if it doesn't exist
-        const storyDir = path.join(__dirname, '../audiobooks', 'story', audiobook._id.toString());
-        await fs.mkdir(storyDir, { recursive: true });
-        
-        // Generate filename
-        const filename = `story_${params.chapterNumber}_${item.slideIndex}.wav`;
-        const filepath = path.join(storyDir, filename);
-        
-        // Save WAV file
-        await fs.writeFile(filepath, audioBuffer);
-
-        //  Add to the returning array
-        item.audioUrl = `audiobooks/story/${audiobook._id.toString()}/${filename}`;
-
-        // Get audio duration
-        let durationSec = 0;
-        try {
-            const metadata = await mm.parseFile(filepath);
-            durationSec = metadata.format.duration || 0;
-        } catch (err) {
-            console.warn('Could not get audio duration:', err);
-        }
-        item.audioDuration = durationSec;
-
-    }
-    return chapterPieces;
-}
-
 async function openAiGenerateTextandQuote(readingText, audiobook, params) {
     
     const sourceLanguage = params.sourceLanguage || audiobook.sourceLanguage || 'en';
@@ -601,6 +545,12 @@ async function openAiGenerateTextandQuote(readingText, audiobook, params) {
     return { title, subtitle, quote };
 }
 
+function trimPromptText(text, maxChars) {
+    if (!text) return '';
+    if (text.length <= maxChars) return text;
+    return text.slice(0, maxChars) + '...';
+}
+
 function buildImagePrompt(audiobook, params, title, quote) {
     const bookTitle = audiobook?.title || 'Untitled';
     const authorName = audiobook?.authorName || '';
@@ -609,12 +559,6 @@ function buildImagePrompt(audiobook, params, title, quote) {
 Book title: "${bookTitle}". Author: "${authorName}". Chapter: ${chapterNumber}.
 Inspiration title: "${title}". Quote: "${quote}".
 Style: Hyperrealism, high-detail, evocative, no text or lettering, no logos, no watermarks, no borders.`;
-}
-
-function trimPromptText(text, maxChars) {
-    if (!text) return '';
-    if (text.length <= maxChars) return text;
-    return text.slice(0, maxChars) + '...';
 }
 
 function safeJsonParse(text) {
@@ -817,7 +761,7 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
     if (!Number.isFinite(chapterNumber) || chapterNumber <= 0) {
         throw new Error('Invalid chapterNumber for story upsert');
     }
-    const totalChapters = Number(params.totalChapters || audiobook.totalPages || chapterNumber || 1);
+    const totalChapters = Number(params.totalChapters || audiobook.totalChapters || chapterNumber || 1);
     const language = params.language || audiobook.targetLanguage || audiobook.sourceLanguage || 'en';
     const firstPiece = chapterPieces[0] || {};
 
@@ -839,10 +783,47 @@ async function upsertStoryDocument(audiobook, author, params, chapterPieces) {
     const saved = await Story.findOneAndUpdate(
         { audiobookId: String(audiobook._id), chapterNumber: chapterNumber, language: language },
         doc,
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     return saved;
+}
+
+async function upsertChapterSourceText(payload) {
+    const ChapterSource = require('../models/audiobook_chapter_source');
+    const audiobookId = String(payload?.audiobookId || '').trim();
+    const chapterNumber = Number(payload?.chapterNumber || 0);
+    if (!audiobookId || !Number.isFinite(chapterNumber) || chapterNumber <= 0) {
+        return;
+    }
+
+    const sourceLanguage = String(payload?.sourceLanguage || '').trim();
+    const targetLanguage = String(payload?.targetLanguage || '').trim();
+    const ttsLanguage = String(payload?.ttsLanguage || '').trim();
+    const narrationStyle = String(payload?.narrationStyle || 'Essay').trim() || 'Essay';
+    const totalChapters = Number(payload?.totalChapters || 0);
+    const totalPages = Number(payload?.totalPages || 0);
+    const inputText = String(payload?.inputText || '');
+    const finalText = String(payload?.finalText || '');
+
+    await ChapterSource.findOneAndUpdate(
+        { audiobookId, chapterNumber, targetLanguage, enabled: true },
+        {
+            audiobookId,
+            chapterNumber,
+            sourceLanguage,
+            targetLanguage,
+            ttsLanguage,
+            narrationStyle,
+            totalChapters: Number.isFinite(totalChapters) && totalChapters > 0 ? totalChapters : undefined,
+            totalPages: Number.isFinite(totalPages) && totalPages > 0 ? totalPages : undefined,
+            inputText,
+            finalText,
+            translated: Boolean(payload?.translated),
+            updatedAt: Date.now()
+        },
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+    );
 }
 
 

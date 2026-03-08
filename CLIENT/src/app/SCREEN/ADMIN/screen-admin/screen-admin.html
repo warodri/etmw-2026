@@ -318,9 +318,19 @@
                                             } @else {
                                                 @for (file of current.audioFiles; track file.chapter) {
                                                     <div class="mb-3">
-                                                        <div class="mb-2">
-                                                            <strong>Capítulo {{ file.chapter }}</strong>
-                                                            <small class="text-muted ms-2">{{ file.durationSec ? (file.durationSec / 60 | number:'1.0-0') + ' min' : 'N/D' }}</small>
+                                                        <div class="mb-2 d-flex justify-content-between align-items-center gap-2">
+                                                            <div>
+                                                                <strong>Capítulo {{ file.chapter }}</strong>
+                                                                <small class="text-muted ms-2">{{ file.durationSec ? (file.durationSec / 60 | number:'1.0-0') + ' min' : 'N/D' }}</small>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                    [disabled]="chapterStoryLoading()[file.chapter]"
+                                                                    (click)="generateStoryForChapter(file.chapter)">
+                                                                @if (chapterStoryLoading()[file.chapter]) {
+                                                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                                                }
+                                                                Generar Story
+                                                            </button>
                                                         </div>
                                                         @if (getChapterAudioDirectUrl(file); as directUrl) {
                                                             <div class="mt-2 p-2 rounded border border-secondary-subtle">
@@ -443,7 +453,7 @@
                                                     class="form-control"
                                                     [ngModel]="destinationTtsServer()"
                                                     (ngModelChange)="setDestinationTtsServer($any($event))"
-                                                    placeholder="https://amir-tubby-ivey.ngrok-free.dev">
+                                                    placeholder="https://entertomyworld.com/tunnel/tts">
                                             </div>
                                             <div class="d-flex align-items-center gap-2 mt-3">
                                                 <div class="fw-bold" style="width: 180px;">Traducir:</div>

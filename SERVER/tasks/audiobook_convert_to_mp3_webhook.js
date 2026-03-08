@@ -15,7 +15,7 @@ const WEBHOOK_SECRET = String(
     config.SECRET_KEY ||
     ''
 ).trim();
-const DEFAULT_TTS_BASE = 'https://amir-tubby-ivey.ngrok-free.dev';
+const DEFAULT_TTS_BASE = 'https://entertomyworld.com/tunnel/tts';
 
 function getHeader(req, key) {
     const value = req.headers?.[key.toLowerCase()];
@@ -158,13 +158,18 @@ async function processWebhookPayload(payload, pendingJob) {
         pendingJob.destinationTtsServer || payload?.destinationTtsServer || payload?.baseUrl || DEFAULT_TTS_BASE
     ).replace(/\/+$/, '');
     const pollUrl = payload?.pollUrl || pendingJob?.pollUrl || `/api/tts/${queueId}`;
+    console.log('[TTS_WEBHOOK] polling audio', {
+        queueId,
+        destinationTtsServer,
+        pollUrl
+    });
 
     const audioBuffer = await elevenLabsUtils.pollTtsAudioUntilReady({
         queueId,
         pollUrl,
         baseUrl: destinationTtsServer,
         pollIntervalMs: 3000,
-        timeoutMs: 2 * 60 * 1000
+        timeoutMs: 10 * 60 * 1000
     });
 
     const finalized = await AudioBookConvertTask.finalizeQueuedChapterAudio({
@@ -173,7 +178,8 @@ async function processWebhookPayload(payload, pendingJob) {
         params: pendingJob.params,
         audioBuffer,
         originalInputText: pendingJob.originalInputText || '',
-        translated: Boolean(pendingJob.translated)
+        translated: Boolean(pendingJob.translated),
+        shouldGenerateStory: false
     });
 
     await removePendingTtsJob(queueId);

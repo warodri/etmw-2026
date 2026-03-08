@@ -522,7 +522,7 @@ async function textToSpeechElevenLabs(params) {
     }
 }
 
-const TTS_SERVICE_BASE = 'https://amir-tubby-ivey.ngrok-free.dev';
+const TTS_SERVICE_BASE = 'https://entertomyworld.com/tunnel/tts';
 const TTS_POLL_INTERVAL_MS = 3000;
 const TTS_TIMEOUT_MS = 15 * 60 * 1000;
 const FALLBACK_REFERENCE_PATH = path.join(__dirname, 'tts-fallback-reference.wav');
@@ -727,6 +727,70 @@ async function textToSpeech(params) {
         pollIntervalMs,
         timeoutMs
     });
+}
+
+/**
+ * Synchronous TTS conversion for debate flows.
+ * Calls /api/tts-sync and waits for the WAV response immediately.
+ * This does NOT use queue/polling, so existing chapter queue flow stays unchanged.
+ */
+async function convertTTSFromDebate(params) {
+    const {
+        text,
+        referenceAudioPath,
+        language = 'en',
+        narrationStyle = 'Essay',
+        baseUrl = TTS_SERVICE_BASE,
+        timeoutMs = TTS_TIMEOUT_MS
+    } = params || {};
+
+    const cleanText = String(text || '').trim();
+    if (!cleanText) {
+        throw new Error('No text for TTS');
+    }
+
+    let filePath = referenceAudioPath;
+    if (!filePath) {
+        filePath = await getOrCreateFallbackReferenceAudio();
+    }
+
+    const ext = String(path.extname(filePath || '')).toLowerCase();
+    if (!['.wav', '.mp3'].includes(ext)) {
+        throw new Error('referenceAudioPath must point to .wav or .mp3');
+    }
+    if (!fsSync.existsSync(filePath)) {
+        throw new Error(`Reference audio does not exist: ${filePath}`);
+    }
+
+    const form = new FormData();
+    const normalizedLanguage = getLanguageCode(String(language || 'en'));
+    form.append('file', fsSync.createReadStream(filePath));
+    form.append('text', cleanText);
+    form.append('language', String(normalizedLanguage || 'en'));
+    form.append('narration_style', String(narrationStyle || 'Essay'));
+
+    const normalizedBaseUrl = String(baseUrl || '').replace(/\/+$/, '');
+    const response = await axios.post(`${normalizedBaseUrl}/api/tts-sync`, form, {
+        headers: form.getHeaders(),
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        responseType: 'arraybuffer',
+        timeout: timeoutMs,
+        validateStatus: () => true
+    });
+
+    const contentType = String(response.headers?.['content-type'] || '');
+    if (response.status !== 200 || !contentType.includes('audio/wav')) {
+        let details = '';
+        try {
+            details = Buffer.from(response.data).toString('utf-8');
+        } catch (_e) {
+            details = String(response.status);
+        }
+        throw new Error(`TTS sync failed: ${response.status} ${details}`);
+    }
+
+    return Buffer.from(response.data);
 }
 
 /**
@@ -1060,6 +1124,7 @@ module.exports = {
     queueTtsJob,
     pollTtsAudioUntilReady,
     textToSpeech,
+    convertTTSFromDebate,
     getVoicePricingTier,
     supportsExpression,
     getAvailableLanguages,

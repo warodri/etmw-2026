@@ -140,7 +140,6 @@ async function run(data, req, res) {
 
         const shouldRefreshBookMetadata = (
             nextChapterNumber === 1
-            || !String(story?.blueprint?.storyTitle || '').trim()
             || !String(story?.blueprint?.storyFoundation || '').trim()
             || !String(story?.blueprint?.genre || '').trim()
         );
@@ -156,7 +155,7 @@ async function run(data, req, res) {
 
             story.blueprint = {
                 ...(story.blueprint || {}),
-                storyTitle: String(bookMetadata?.title || story?.blueprint?.storyTitle || '').trim(),
+                storyTitle: String(story?.blueprint?.storyTitle || '').trim(),
                 storyFoundation: String(bookMetadata?.description || story?.blueprint?.storyFoundation || '').trim(),
                 genre: String(bookMetadata?.category || story?.blueprint?.genre || '').trim(),
             };
@@ -170,10 +169,10 @@ async function run(data, req, res) {
                     enabled: true
                 });
                 if (ab) {
-                    const newTitle = String(bookMetadata?.title || '').trim();
+                    const authorTitle = String(story?.blueprint?.storyTitle || '').trim();
                     const newDescription = String(bookMetadata?.description || '').trim();
                     const newCategory = String(bookMetadata?.category || '').trim();
-                    if (newTitle) ab.title = newTitle;
+                    if (authorTitle) ab.title = authorTitle;
                     if (newDescription) ab.description = newDescription;
                     if (newCategory) ab.categories = [newCategory];
                     ab.pipelineStatus = 'published';

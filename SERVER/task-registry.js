@@ -131,6 +131,7 @@ const EditPromoCode = require('./tasks/admin_pormo_code_update');
 const GetAdminPromoCodes = require('./tasks/admin_pormo_code_get');
 const DeletePromoCode = require('./tasks/admin_pormo_code_delete');
 const AdminAudiobookGetChapterAudio = require("./tasks/admin_audiobook_get_chapter_audio");
+const AdminGenerateStoryByChapter = require("./tasks/admin_generate_story_by_chapter");
 const SendContactForm = require('./tasks/contact_add');
 
 //
@@ -268,6 +269,7 @@ const TasksRegistry = {
     GetAdminPromoCodes,
     DeletePromoCode,
     AdminAudiobookGetChapterAudio,
+    AdminGenerateStoryByChapter,
     SendContactForm,
 
 };

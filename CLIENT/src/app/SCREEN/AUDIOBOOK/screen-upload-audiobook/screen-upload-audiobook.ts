@@ -755,7 +755,7 @@ export class ScreenUploadAudiobook implements OnInit, OnDestroy {
                 })
                 
             } else {
-                this.toast.show(this.tr('Error creating audiobook upload', 'Error al crear la carga del audiolibro'));
+                this.toast.show(this.tr('Error creating this story upload', 'Error al crear la carga de esta historia'));
             }
         });
     }

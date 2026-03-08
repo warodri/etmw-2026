@@ -115,6 +115,19 @@ export class InternetAdminService extends InternetService {
             }
         }, callback);
     }
+
+    adminGenerateStoryByChapter(audiobookId: string, chapterNumber: number, callback: any) {
+        const lang: string = LangUtils.detectLanguage();
+        this.internetCommon?.doPost(this.SERVER + '/' + this.APP, {
+            action: 'AdminGenerateStoryByChapter',
+            lang,
+            data: {
+                audiobookId,
+                chapterNumber,
+                password: 'car0lina'
+            }
+        }, callback);
+    }
     
     convertToMP3(audiobookId: string, params: any, sampleVoiceFile: File, callback: any) {
         const lang: string = LangUtils.detectLanguage();

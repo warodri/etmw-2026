@@ -3,7 +3,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { setTimeout: sleep } = require("timers/promises");
 
-const DEFAULT_BASE_URL = "https://amir-tubby-ivey.ngrok-free.dev";
+const DEFAULT_BASE_URL = "https://entertomyworld.com/tunnel/tts";
 const DEFAULT_POLL_INTERVAL_MS = 3000;
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000;
 const VALID_STYLES = new Set([
@@ -24,6 +24,13 @@ function getAudioExtensionFromUrlOrType(audioUrl, contentType) {
     if (ct.includes("audio/wav") || ct.includes("audio/x-wav")) return ".wav";
     if (ct.includes("audio/mpeg") || ct.includes("audio/mp3")) return ".mp3";
     return ".wav";
+}
+
+function formatTextForTts(text) {
+    const input = String(text || "");
+    if (!input.trim()) return "";
+    // Insert one space before main punctuation marks for TTS pronunciation.
+    return input.replace(/\s*([,.;:!?])/g, " $1").trim();
 }
 
 /**
@@ -98,7 +105,7 @@ async function ttsEnterToMyWorld(audiobookId, chapterNumber, params = {}) {
         new Blob([referenceBuffer], { type: referenceContentType || "application/octet-stream" }),
         `reference${referenceExt}`
     );
-    queueForm.append("text", String(text));
+    queueForm.append("text", formatTextForTts(String(text)));
     queueForm.append("audiobookId", String(audiobookId));
     queueForm.append("chapterNumber", String(chapterNumber));
     queueForm.append("chapterVersion", resolvedChapterVersion);

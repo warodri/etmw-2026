@@ -88,7 +88,7 @@ async function convertTextToSpeechChunked(params) {
     const buffers = [];
     for (let i = 0; i < chunks.length; i++) {
         const chunkText = chunks[i];
-        const chunkAudio = await elevenLabsUtils.textToSpeech({
+        const chunkAudio = await elevenLabsUtils.convertTTSFromDebate({
             ...params,
             text: chunkText
         });

@@ -672,7 +672,17 @@ export class ScreenPlayer implements OnInit, OnDestroy {
         this.lastHistorySyncedProgress = clamped;
         const completed = clamped >= 99;
         this.upsertListeningProgressLocal(chapterNumber, clamped, completed);
-        this.iUser.userSetListeningHistory(audiobookId, chapterNumber, clamped, completed, () => {});
+        this.iUser.userSetListeningHistory(audiobookId, chapterNumber, clamped, completed, (response: any) => {
+            if (!response || !response.success) {
+                console.warn('UserSetListeningHistory failed', {
+                    audiobookId,
+                    chapterNumber,
+                    clamped,
+                    completed,
+                    response
+                });
+            }
+        });
     }
     
 }

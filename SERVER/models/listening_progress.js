@@ -38,6 +38,8 @@ const model = new Schema({
 
 });
 
-model.index({ userId: 1, audiobookId: 1 }, { unique: true });
+// One progress row per user + audiobook + chapter.
+model.index({ userId: 1, audiobookId: 1, chapterNumber: 1 }, { unique: true });
+model.index({ userId: 1, audiobookId: 1, updatedAt: -1 });
 
 module.exports = mongoose.model("etmw2026_listening_progress", model);
